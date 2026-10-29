@@ -137,7 +137,9 @@ function requestCameraPermission() {
   });
 }
 
-export function useArExperience(config: ArExperienceConfig) {
+export function useArExperience(config: ArExperienceConfig, onRecognized?: (index: number) => void) {
+  const recognizedRef = useRef(onRecognized);
+  useEffect(() => { recognizedRef.current = onRecognized; }, [onRecognized]);
   const sessionRef = useRef<ArSession | null>(null);
   const startInFlightRef = useRef(false);
   const runtimePromiseRef = useRef<Promise<void> | null>(null);
@@ -190,7 +192,10 @@ export function useArExperience(config: ArExperienceConfig) {
 
         await session.start(container, config, {
           onScanning: () => setStatus("scanning"),
-          onTargetFound: () => setStatus("found"),
+          onTargetFound: (index) => {
+          setStatus("found");
+          recognizedRef.current?.(index);
+        },
           onTargetLost: () => setStatus("scanning"),
           onError: (arError) => {
             setError(arError.message);

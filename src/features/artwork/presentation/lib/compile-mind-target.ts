@@ -197,3 +197,36 @@ export async function compileMindTarget(
     URL.revokeObjectURL(imageUrl);
   }
 }
+
+/**
+ * Compile a bounded gallery target bundle in the exact order supplied.
+ * Cross-origin artwork images must allow CORS; failures are reported rather
+ * than silently changing targetIndex mappings.
+ */
+export async function compileMindTargetImages(
+  urls: readonly string[],
+  onProgress: (progress: number) => void,
+): Promise<Blob> {
+  if (urls.length === 0) throw new Error("No artwork targets are available to scan.");
+
+  const images = await Promise.all(urls.map((url) => new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to load an artwork target. Check the artwork image or storage CORS settings."));
+    image.src = url;
+  })));
+
+  const Compiler = await loadMindArCompiler();
+  const compiler = new Compiler();
+  await compiler.compileImageTargets(images, (progress) => {
+    onProgress(Math.max(0, Math.min(100, Math.round(progress))));
+  });
+  const output = await compiler.exportData();
+  const bytes = output instanceof Uint8Array ? output : new Uint8Array(output);
+  // Copy into a plain ArrayBuffer to avoid retaining compiler internals.
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  onProgress(100);
+  return new Blob([buffer], { type: "application/octet-stream" });
+}

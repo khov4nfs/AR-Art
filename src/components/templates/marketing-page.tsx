@@ -43,9 +43,9 @@ const EXPERIENCE_STEPS = [
   },
   {
     number: "03",
-    title: "Put the QR beside the work",
-    text: "Publishing creates an AR entry link and QR that opens the camera directly in the browser.",
-    outcome: "No app install between the visitor and the exhibition.",
+    title: "Scan the exhibition",
+    text: "Open the Everie scanner to recognize works directly, or use each artwork’s QR for a direct AR entry.",
+    outcome: "One browser camera, with or without a QR code.",
     icon: QrCode,
   },
   {
@@ -112,9 +112,12 @@ export async function MarketingPage() {
 
             <div className="mt-8 flex flex-wrap gap-2.5">
               <Link
-                href="#works"
+                href="/ar"
                 className="inline-flex h-12 items-center gap-3 rounded-[4px] bg-white px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-violet-100"
               >
+                <ScanLine className="size-4" /> Scan AR
+              </Link>
+              <Link href="#works" className="inline-flex h-12 items-center gap-3 rounded-[4px] bg-white/[0.045] px-5 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-white/68 ring-1 ring-inset ring-white/10 transition hover:bg-white/[0.08] hover:text-white">
                 Explore works <ArrowDownRight className="size-4" />
               </Link>
               <Link

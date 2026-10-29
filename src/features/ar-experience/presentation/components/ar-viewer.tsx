@@ -7,7 +7,7 @@ import { CheckCircle2, RotateCcw, Settings, TriangleAlert, X } from "lucide-reac
 
 import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
-import type { ArExperienceConfig } from "@/features/ar-experience/domain/ar-experience";
+import type { SingleArExperienceConfig } from "@/features/ar-experience/domain/ar-experience";
 import { useArExperience } from "@/features/ar-experience/presentation/hooks/use-ar-experience";
 import {
   collectArtwork,
@@ -15,7 +15,7 @@ import {
 } from "@/features/collection/infrastructure/supabase/collection-repository";
 
 interface ArViewerProps {
-  config: ArExperienceConfig;
+  config: SingleArExperienceConfig;
   backHref?: string;
   artwork?: {
     id: string;

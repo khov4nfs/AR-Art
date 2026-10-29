@@ -110,10 +110,11 @@ export function SiteHeader() {
           >
             Artists
           </a>
-          <Link href="/collection" className="text-white/46 transition hover:text-white">
+          <Link href="/ar" className="text-cyan-100/80 transition hover:text-cyan-100">Scan AR</Link>
+          <Link href="/collection" className="hidden text-white/46 transition hover:text-white sm:inline">
             Collection
           </Link>
-          <span className="inline-flex min-w-[3.8rem] justify-end">
+          <span className="inline-flex justify-end sm:min-w-[3.8rem]">
             {authenticated === true ? (
               <Link href="/studio" className="text-white/46 transition-opacity duration-300 hover:text-white">
                 Studio
@@ -128,7 +129,7 @@ export function SiteHeader() {
           </span>
           <Link
             href={authenticated === false ? "/login?next=%2Fcreate" : "/create"}
-            className="inline-flex h-10 items-center gap-2 border-b border-white/55 px-0 text-white/78 transition-[border-color,color] duration-300 hover:border-white hover:text-white"
+            className="hidden h-10 items-center gap-2 border-b border-white/55 sm:inline-flex px-0 text-white/78 transition-[border-color,color] duration-300 hover:border-white hover:text-white"
           >
             Publish <ArrowUpRight className="size-3.5" />
           </Link>

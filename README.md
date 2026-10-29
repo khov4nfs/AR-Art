@@ -11,17 +11,23 @@ Creator
   → browser compiles target.mind
   → signed direct upload to Supabase Storage
   → metadata saved in Postgres
-  → QR generated for /art/[slug]
+  → QR generated for /ar/[slug]
 
 Visitor
-  → scans QR
-  → /art/[slug]
-  → reads artwork information
-  → Start AR
-  → /ar/[slug]
+  → opens /ar to discover published artworks OR scans a QR
+  → /ar/[slug] for a single artwork
   → camera recognizes physical artwork
   → AR video locks onto it
 ```
+
+## Universal AR scanner (MVP)
+
+- Open `/ar` on a phone and tap **Open camera** after target preparation completes.
+- The public scanner loads **up to 6 distinct, published artwork images**, compiles a temporary multi-target MindAR bundle in the browser, and uses `targetIndex` to choose the correct artwork overlay. Published records with the same target-image storage path are deduplicated.
+- Only the recognized artwork's motion or 3D scene is loaded. MindAR tracks one target at a time to limit mobile GPU load.
+- Recognition by MindAR's actual `targetFound` event is the sole Collection trigger. Anonymous visitors can scan but need to sign in to save a work; owners do not auto-collect their own work.
+- Individual QR links continue to open `/ar/[slug]`. The original MindAR sample is available at `/ar/demo` using `/demo-target`.
+- The compiler downloads published images cross-origin: Supabase Storage must allow CORS. Preparation can take time on a phone; for larger exhibitions, build/cache image-target bundles in advance rather than raising the six-target limit.
 
 ## Implemented
 

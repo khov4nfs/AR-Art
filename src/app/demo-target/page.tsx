@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 import { BackLink } from "@/components/atoms/back-link";
 import { EverieBrand } from "@/components/atoms/everie-brand";
@@ -26,6 +27,7 @@ export default function DemoTargetPage() {
             <img src={arConfig.targetImageUrl} alt="MindAR demo image target" className="mx-auto h-auto w-full bg-white" />
           </div>
 
+          <div className="mt-5"><Link href="/ar/demo" className="inline-flex h-10 items-center rounded-[4px] bg-white px-5 text-xs font-semibold uppercase tracking-wider text-black">Open demo AR</Link></div>
           <a
             href={arConfig.targetImageUrl}
             target="_blank"
