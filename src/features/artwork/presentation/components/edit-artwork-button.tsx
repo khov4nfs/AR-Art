@@ -112,7 +112,7 @@ export function EditArtworkButton({
         size="lg"
         variant="outline"
         onClick={() => setOpen(true)}
-        className="h-12 rounded-none border-white/18 bg-transparent px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 hover:border-white/45 hover:bg-transparent hover:text-white"
+        className="h-12 border-white/12 bg-white/[0.025] px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 hover:border-white/25 hover:bg-white/[0.045] hover:text-white"
       >
         <Pencil className="size-4" aria-hidden="true" />
         Edit
@@ -121,9 +121,7 @@ export function EditArtworkButton({
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        eyebrow="Manage product"
         title={title}
-        icon={<Pencil className="size-4" />}
         maxWidthClassName="max-w-2xl"
         footer={
           <div className="flex justify-end gap-2">
@@ -131,7 +129,7 @@ export function EditArtworkButton({
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="rounded-none border-white/10 bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
+              className="border-white/10 bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
             >
               Cancel
             </Button>
@@ -139,7 +137,7 @@ export function EditArtworkButton({
               type="submit"
               form="product-editor-form"
               disabled={!isValid || isSubmitting}
-              className="rounded-none bg-white text-black hover:bg-violet-100"
+              className="bg-white text-black hover:bg-violet-100"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -156,7 +154,7 @@ export function EditArtworkButton({
             <Label htmlFor="edit-product-title" className="text-white/68">Product name</Label>
             <Input
               id="edit-product-title"
-              className="h-11 rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("title")}
             />
             {errors.title ? <p className="text-xs text-rose-300">{errors.title.message}</p> : null}
@@ -166,7 +164,7 @@ export function EditArtworkButton({
             <Label htmlFor="edit-product-artist" className="text-white/68">Creator</Label>
             <Input
               id="edit-product-artist"
-              className="h-11 rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("artistName")}
             />
             {errors.artistName ? <p className="text-xs text-rose-300">{errors.artistName.message}</p> : null}
@@ -176,7 +174,7 @@ export function EditArtworkButton({
             <Label htmlFor="edit-product-description" className="text-white/68">Description</Label>
             <Textarea
               id="edit-product-description"
-              className="rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("description")}
             />
             {errors.description ? <p className="text-xs text-rose-300">{errors.description.message}</p> : null}
@@ -184,14 +182,14 @@ export function EditArtworkButton({
 
           <div>
             <Label className="text-white/68">Visibility</Label>
-            <div className="mt-2 grid grid-cols-2 gap-px border border-white/10 bg-white/10 p-px">
+            <div className="mt-2 flex gap-6">
               <button
                 type="button"
                 onClick={() => setValue("status", "draft", { shouldValidate: true, shouldDirty: true })}
-                className={`px-4 py-2.5 text-sm transition ${
+                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
                   currentStatus === "draft"
-                    ? "bg-white text-black"
-                    : "bg-[#09090d] text-white/45 hover:bg-white/[0.05] hover:text-white"
+                    ? "text-white after:scale-x-100 after:bg-white"
+                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
                 Draft
@@ -199,10 +197,10 @@ export function EditArtworkButton({
               <button
                 type="button"
                 onClick={() => setValue("status", "published", { shouldValidate: true, shouldDirty: true })}
-                className={`px-4 py-2.5 text-sm transition ${
+                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
                   currentStatus === "published"
-                    ? "bg-white text-black"
-                    : "bg-[#09090d] text-white/45 hover:bg-white/[0.05] hover:text-white"
+                    ? "text-white after:scale-x-100 after:bg-white"
+                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
                 Live
@@ -210,11 +208,7 @@ export function EditArtworkButton({
             </div>
           </div>
 
-          {errors.root?.message ? (
-            <p className="border border-rose-300/15 bg-rose-400/8 px-3 py-2.5 text-sm text-rose-200">
-              {errors.root.message}
-            </p>
-          ) : null}
+          {errors.root?.message ? <p className="text-sm text-rose-200">{errors.root.message}</p> : null}
         </form>
       </Modal>
     </>

@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts"
+    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

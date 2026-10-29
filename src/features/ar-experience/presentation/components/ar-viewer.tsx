@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle2, RotateCcw, Settings, TriangleAlert, X } from "lucide-react";
+import { CheckCircle2, RotateCcw, Settings, TriangleAlert, X } from "lucide-react";
 
+import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
-import type { ArExperienceConfig } from "@/features/ar-experience/domain/ar-experience";
+import type { SingleArExperienceConfig } from "@/features/ar-experience/domain/ar-experience";
 import { useArExperience } from "@/features/ar-experience/presentation/hooks/use-ar-experience";
 import {
   collectArtwork,
@@ -14,7 +15,7 @@ import {
 } from "@/features/collection/infrastructure/supabase/collection-repository";
 
 interface ArViewerProps {
-  config: ArExperienceConfig;
+  config: SingleArExperienceConfig;
   backHref?: string;
   artwork?: {
     id: string;
@@ -129,21 +130,9 @@ export function ArViewer({
         className="absolute inset-0 isolate overflow-hidden bg-black [&>video]:!max-w-none [&>video]:!max-h-none [&>video]:!z-0 [&>video]:!opacity-100 [&>video]:!visible [&>canvas]:!z-[1] [&>canvas]:pointer-events-none [&>div]:!z-[2] [&>div]:pointer-events-none"
       />
 
-      <Link
-        href={backHref}
-        aria-label="Back"
-        className="absolute left-4 top-[max(1rem,env(safe-area-inset-top))] z-30 sm:left-6"
-      >
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="size-11 rounded-none border-white/25 bg-black/25 text-white shadow-lg backdrop-blur-md hover:bg-black/45 hover:text-white"
-        >
-          <ArrowLeft className="size-5" aria-hidden="true" />
-          <span className="sr-only">Back</span>
-        </Button>
-      </Link>
+      <div className="absolute left-4 top-[max(1rem,env(safe-area-inset-top))] z-30 rounded-sm bg-black/28 px-3 py-2 backdrop-blur-md sm:left-6">
+        <BackLink href={backHref} label={artwork ? "Work" : "Gallery"} className="text-white/64 hover:text-white" />
+      </div>
 
       {cameraPermissionIssue && (
         <div className="absolute inset-0 z-50 flex items-end justify-center bg-black/70 p-4 backdrop-blur-sm sm:items-center">

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 
+import { AppMotion } from "@/components/organisms/app-motion";
 import { AuthCallbackForwarder } from "@/features/auth/presentation/components/auth-callback-forwarder";
 
 import "./globals.css";
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${geist.variable} font-sans antialiased`}>
         <AuthCallbackForwarder />
+        <AppMotion />
         {children}
       </body>
     </html>

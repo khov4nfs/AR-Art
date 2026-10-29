@@ -18,12 +18,24 @@ export function HistoryBackButton({
   const router = useRouter();
 
   function goBack() {
-    if (window.history.length > 1) {
-      router.back();
+    const navigate = () => {
+      if (window.history.length > 1) {
+        router.back();
+        return;
+      }
+      router.push(fallbackHref);
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      navigate();
       return;
     }
 
-    router.push(fallbackHref);
+    const root = document.documentElement;
+    if (root.classList.contains("route-leaving")) return;
+    root.classList.remove("route-entering");
+    root.classList.add("route-leaving");
+    window.setTimeout(navigate, 260);
   }
 
   return (

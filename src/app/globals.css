@@ -37,6 +37,8 @@
 
 html {
   background: var(--background);
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
@@ -861,6 +863,142 @@ a {
 }
 
 
+
+/* Everie creator success */
+.creator-success {
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+}
+
+.creator-success::before {
+  content: "";
+  position: absolute;
+  width: min(44rem, 72vw);
+  aspect-ratio: 1;
+  left: -14%;
+  top: 8%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(124,58,237,0.16), rgba(34,211,238,0.055) 38%, transparent 70%);
+  filter: blur(18px);
+  opacity: 0;
+  animation: creator-success-bloom 1200ms cubic-bezier(0.16,1,0.3,1) 120ms forwards;
+  pointer-events: none;
+}
+
+.creator-success-copy {
+  position: relative;
+  z-index: 1;
+  animation: creator-success-copy-in 760ms cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.creator-success-mark {
+  position: relative;
+  display: inline-flex;
+  width: 3rem;
+  height: 3rem;
+  align-items: center;
+  justify-content: center;
+  color: rgb(207 250 254);
+  background: radial-gradient(circle, rgba(103,232,249,0.12), transparent 72%);
+}
+
+.creator-success-mark::before,
+.creator-success-mark::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(196,181,253,0.34);
+  border-radius: 999px;
+  transform: translate(-50%, -50%) scale(0.48);
+  opacity: 0;
+  animation: creator-success-ring 1700ms cubic-bezier(0.16,1,0.3,1) 160ms forwards;
+}
+
+.creator-success-mark::after {
+  border-color: rgba(103,232,249,0.26);
+  animation-delay: 360ms;
+}
+
+.creator-success-mark svg {
+  opacity: 0;
+  transform: scale(0.5) rotate(-12deg);
+  animation: creator-success-check 520ms cubic-bezier(0.16,1,0.3,1) 260ms forwards;
+}
+
+.creator-success-qr {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(0,22px,0) scale(0.97);
+  animation: creator-success-qr-in 850ms cubic-bezier(0.16,1,0.3,1) 260ms forwards;
+}
+
+.creator-success-qr-glow {
+  position: absolute;
+  inset: 9% -10% -6%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(196,181,253,0.22), transparent 46%),
+    radial-gradient(circle at 70% 72%, rgba(103,232,249,0.14), transparent 48%);
+  filter: blur(42px);
+  opacity: 0;
+  animation: creator-success-glow 1800ms ease-out 420ms forwards;
+  pointer-events: none;
+}
+
+@keyframes creator-success-copy-in {
+  from { opacity: 0; transform: translate3d(0,18px,0); filter: blur(5px); }
+  to { opacity: 1; transform: translate3d(0,0,0); filter: blur(0); }
+}
+
+@keyframes creator-success-bloom {
+  0% { opacity: 0; transform: scale(0.72); }
+  55% { opacity: 1; }
+  100% { opacity: 0.58; transform: scale(1.08); }
+}
+
+@keyframes creator-success-ring {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.48); }
+  34% { opacity: 0.72; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.35); }
+}
+
+@keyframes creator-success-check {
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes creator-success-qr-in {
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+
+@keyframes creator-success-glow {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 0.72; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creator-success::before,
+  .creator-success-copy,
+  .creator-success-mark::before,
+  .creator-success-mark::after,
+  .creator-success-mark svg,
+  .creator-success-qr,
+  .creator-success-qr-glow {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .creator-success-mark::before,
+  .creator-success-mark::after {
+    display: none;
+  }
+}
+
 /* Everie authentication experience */
 .auth-page {
   isolation: isolate;
@@ -950,15 +1088,11 @@ a {
 
 .auth-mode-indicator {
   position: absolute;
-  left: 0.25rem;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  width: calc(50% - 0.25rem);
-  border-radius: 999px;
-  background: linear-gradient(120deg, #ffffff, #f5f3ff 58%, #ecfeff);
-  box-shadow:
-    0 8px 24px rgba(255,255,255,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.8);
+  left: 0;
+  bottom: -1px;
+  width: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(196,181,253,0.9), rgba(103,232,249,0.8));
   transform: translateX(0);
   transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1125,4 +1259,278 @@ a {
   .auth-submit-button {
     transition-duration: 120ms;
   }
+}
+
+
+/* Everie marketing motion system */
+.everie-page {
+  --everie-ink: #030305;
+  --everie-panel: #09090d;
+  --everie-violet: #a78bfa;
+  isolation: isolate;
+}
+
+.everie-hero-copy {
+  animation: everie-hero-rise 780ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+}
+
+.everie-hero-visual {
+  animation: everie-visual-enter 920ms cubic-bezier(0.16, 1, 0.3, 1) 170ms both;
+}
+
+.everie-marquee-track {
+  animation: everie-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+@keyframes everie-hero-rise {
+  from { opacity: 0; transform: translateY(22px); filter: blur(7px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes everie-visual-enter {
+  from { opacity: 0; transform: translate3d(24px, 12px, 0) scale(0.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes everie-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes studio-view-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.studio-view-enter {
+  animation: studio-view-enter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.motion-reveal {
+  --motion-delay: 0ms;
+  opacity: 0;
+  filter: blur(5px);
+  transform: translate3d(0, 34px, 0) scale(0.995);
+  transition:
+    opacity 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--motion-delay),
+    transform 820ms cubic-bezier(0.16, 1, 0.3, 1) var(--motion-delay),
+    filter 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--motion-delay);
+  will-change: opacity, transform, filter;
+}
+
+.motion-reveal-card {
+  transform: translate3d(0, 22px, 0) scale(0.985);
+}
+
+.motion-reveal.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.studio-view-enter.motion-reveal {
+  animation: none;
+}
+
+.route-curtain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  opacity: 0;
+  background: rgba(3, 3, 5, 0.985);
+  transform: translate3d(0, 7%, 0) scaleY(0.94);
+  transform-origin: center bottom;
+  transition:
+    opacity 300ms cubic-bezier(0.76, 0, 0.24, 1),
+    transform 360ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.route-curtain-line {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: min(34rem, 58vw);
+  height: 1px;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, rgba(196,181,253,0.95), rgba(255,255,255,0.8), rgba(103,232,249,0.82), transparent);
+  transform: translate(-50%, -50%) scaleX(0.08);
+  transform-origin: center;
+  transition:
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 240ms ease;
+}
+
+html.route-leaving .route-curtain {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scaleY(1);
+}
+
+html.route-leaving .route-curtain-line {
+  opacity: 1;
+  transform: translate(-50%, -50%) scaleX(1);
+}
+
+html.route-entering .route-curtain {
+  opacity: 0;
+  transition-duration: 520ms;
+  transform: translate3d(0, -7%, 0) scaleY(1.04);
+}
+
+html.route-entering .route-curtain-line {
+  opacity: 0;
+  transform: translate(-50%, -50%) scaleX(1.35);
+}
+
+html.route-entering main {
+  animation: route-page-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html.route-leaving main {
+  pointer-events: none;
+}
+
+@keyframes route-page-enter {
+  from {
+    opacity: 0.72;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .everie-hero-copy,
+  .everie-hero-visual,
+  .everie-marquee-track,
+  .studio-view-enter {
+    animation: none !important;
+  }
+
+  .everie-capability-strip {
+    overflow-x: auto;
+  }
+
+  .motion-reveal,
+  .motion-reveal-card,
+  .motion-reveal.is-visible {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .route-curtain,
+  .route-curtain-line {
+    transition-duration: 80ms;
+  }
+
+  html.route-entering main {
+    animation: none;
+  }
+}
+
+
+/* Everie ambient divider */
+.everie-divider {
+  position: relative;
+  height: 1.5rem;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.everie-divider-compact {
+  height: 0.85rem;
+}
+
+.everie-divider::before {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(167,139,250,0.04) 16%, rgba(196,181,253,0.34) 42%, rgba(103,232,249,0.26) 58%, rgba(103,232,249,0.04) 84%, transparent 100%);
+  box-shadow: 0 0 18px rgba(139,92,246,0.08);
+  transform: scaleX(0.12);
+  transform-origin: center;
+  opacity: 0;
+}
+
+.everie-divider::after {
+  content: "";
+  position: absolute;
+  top: calc(50% - 1px);
+  left: -12rem;
+  width: 12rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), rgba(103,232,249,0.45), transparent);
+  filter: blur(0.5px);
+  opacity: 0;
+}
+
+
+.everie-divider.is-visible::before {
+  animation: everie-divider-draw 900ms cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.everie-divider.is-visible::after {
+  animation: everie-divider-glide 6.5s ease-in-out 900ms infinite;
+}
+
+.everie-nav-surface {
+  box-shadow: 0 18px 60px rgba(0,0,0,0.18), inset 0 -1px 0 rgba(255,255,255,0.025);
+}
+
+@keyframes everie-divider-draw {
+  from { opacity: 0; transform: scaleX(0.12); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes everie-divider-glide {
+  0%, 20% { transform: translateX(0); opacity: 0; }
+  38% { opacity: 0.38; }
+  70%, 100% { transform: translateX(calc(100vw + 24rem)); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .everie-divider::before,
+  .everie-divider.is-visible::before { animation: none; opacity: 1; transform: scaleX(1); }
+  .everie-divider::after,
+  .everie-divider.is-visible::after { display: none; }
+}
+
+
+/* Everie modal motion */
+.everie-modal-backdrop {
+  animation: everie-modal-backdrop-in 260ms ease-out both;
+}
+
+.everie-modal-surface {
+  transform-origin: 50% 42%;
+  animation: everie-modal-surface-in 460ms cubic-bezier(0.16,1,0.3,1) both;
+}
+
+@keyframes everie-modal-backdrop-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; }
+}
+
+@keyframes everie-modal-surface-in {
+  from { opacity: 0; transform: translate3d(0,18px,0) scale(0.985); filter: blur(5px); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .everie-modal-backdrop,
+  .everie-modal-surface { animation: none; }
 }

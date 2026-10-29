@@ -139,7 +139,7 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
     const { data, error } = await supabase
       .from("artworks")
       .select("*")
-      .or(`owner_id.eq.${ownerId},owner_id.is.null`)
+      .eq("owner_id", ownerId)
       .order("created_at", { ascending: false })
       .limit(EVERIE_MVP_MAX_PRODUCTS)
       .returns<ArtworkRow[]>();

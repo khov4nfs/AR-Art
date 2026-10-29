@@ -261,16 +261,20 @@ export function AuthForm({ nextPath }: AuthFormProps) {
   const recoveryPending = confirmationRecovery.status === "resending";
 
   return (
-    <div className="mt-12 w-full">
-      <div className="grid grid-cols-2 border-b border-white/12">
+    <div className="auth-card relative mt-10 w-full overflow-hidden rounded-[8px] bg-[#0d0a14]/76 shadow-[0_34px_110px_rgba(0,0,0,0.5)] ring-1 ring-inset ring-white/[0.07] backdrop-blur-2xl">
+      <div className="auth-card-glow" />
+
+      <div className="auth-mode-switch relative grid grid-cols-2">
+        <span
+          aria-hidden="true"
+          className={`auth-mode-indicator ${mode === "signup" ? "is-signup" : ""}`}
+        />
         <button
           type="button"
           onClick={() => changeMode("signin")}
           aria-pressed={mode === "signin"}
-          className={`border-b-2 px-0 pb-4 text-left text-xs font-medium uppercase tracking-[0.14em] transition ${
-            mode === "signin"
-              ? "border-white text-white"
-              : "border-transparent text-white/30 hover:text-white/70"
+          className={`relative z-10 px-4 py-3 text-center text-[0.65rem] font-semibold uppercase tracking-[0.14em] transition ${
+            mode === "signin" ? "text-white" : "text-white/38 hover:text-white/70"
           }`}
         >
           Đăng nhập
@@ -279,34 +283,34 @@ export function AuthForm({ nextPath }: AuthFormProps) {
           type="button"
           onClick={() => changeMode("signup")}
           aria-pressed={mode === "signup"}
-          className={`border-b-2 px-0 pb-4 text-right text-xs font-medium uppercase tracking-[0.14em] transition ${
-            mode === "signup"
-              ? "border-white text-white"
-              : "border-transparent text-white/30 hover:text-white/70"
+          className={`relative z-10 px-4 py-3 text-center text-[0.65rem] font-semibold uppercase tracking-[0.14em] transition ${
+            mode === "signup" ? "text-white" : "text-white/38 hover:text-white/70"
           }`}
         >
           Tạo tài khoản
         </button>
       </div>
 
-      <form className="mt-9 space-y-7" onSubmit={submit} noValidate>
+      <form className="relative space-y-6 p-5 sm:p-7" onSubmit={submit} noValidate>
         <input type="hidden" {...register("mode")} />
 
-        <label className="block">
-          <span className="block text-[0.65rem] uppercase tracking-[0.18em] text-white/35">Email</span>
+        <label className="auth-field block">
+          <span className="block text-[0.62rem] uppercase tracking-[0.18em] text-white/38">Email</span>
           <input
             type="email"
             autoComplete="email"
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "auth-email-error" : undefined}
             {...register("email")}
-            className={`mt-3 h-12 w-full border-0 border-b bg-transparent px-0 text-base text-white outline-none transition placeholder:text-white/20 ${
-              errors.email ? "border-rose-300/55" : "border-white/18 focus:border-cyan-200/70"
+            className={`mt-2.5 h-12 w-full rounded-[4px] border bg-white/[0.025] px-3.5 text-sm text-white outline-none transition placeholder:text-white/20 ${
+              errors.email
+                ? "border-rose-300/45"
+                : "border-white/12 hover:border-white/22 focus:border-violet-300/60"
             }`}
             placeholder="you@example.com"
           />
           {errors.email?.message ? (
-            <p id="auth-email-error" className="mt-2 text-xs text-rose-200/80">
+            <p id="auth-email-error" className="auth-error mt-2 text-xs text-rose-200/80">
               {errors.email.message}
             </p>
           ) : null}
@@ -314,10 +318,10 @@ export function AuthForm({ nextPath }: AuthFormProps) {
 
         {showRecovery ? (
           <div
-            className={`border-l-2 py-1 pl-4 text-sm leading-6 ${
+            className={`auth-message rounded-[5px] border p-4 text-sm leading-6 ${
               recoverySucceeded
-                ? "border-emerald-300/55 text-emerald-100/80"
-                : "border-amber-300/55 text-amber-100/80"
+                ? "border-emerald-300/15 bg-emerald-300/[0.055] text-emerald-100/80"
+                : "border-amber-300/15 bg-amber-300/[0.055] text-amber-100/80"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -355,35 +359,45 @@ export function AuthForm({ nextPath }: AuthFormProps) {
           </div>
         ) : null}
 
-        <label className="block">
-          <span className="block text-[0.65rem] uppercase tracking-[0.18em] text-white/35">Mật khẩu</span>
+        <label className="auth-field block">
+          <span className="block text-[0.62rem] uppercase tracking-[0.18em] text-white/38">Mật khẩu</span>
           <input
             type="password"
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
             aria-invalid={Boolean(errors.password)}
             aria-describedby={errors.password ? "auth-password-error" : undefined}
             {...register("password")}
-            className={`mt-3 h-12 w-full border-0 border-b bg-transparent px-0 text-base text-white outline-none transition placeholder:text-white/20 ${
-              errors.password ? "border-rose-300/55" : "border-white/18 focus:border-cyan-200/70"
+            className={`mt-2.5 h-12 w-full rounded-[4px] border bg-white/[0.025] px-3.5 text-sm text-white outline-none transition placeholder:text-white/20 ${
+              errors.password
+                ? "border-rose-300/45"
+                : "border-white/12 hover:border-white/22 focus:border-violet-300/60"
             }`}
             placeholder="Tối thiểu 6 ký tự"
           />
           {errors.password?.message ? (
-            <p id="auth-password-error" className="mt-2 text-xs text-rose-200/80">{errors.password.message}</p>
+            <p id="auth-password-error" className="auth-error mt-2 text-xs text-rose-200/80">
+              {errors.password.message}
+            </p>
           ) : null}
         </label>
 
         {serverMessage ? (
-          <p className="border-l-2 border-rose-300/55 py-1 pl-4 text-sm leading-6 text-rose-100/80">{serverMessage}</p>
+          <p className="auth-error rounded-[5px] border border-rose-300/15 bg-rose-300/[0.05] px-4 py-3 text-sm leading-6 text-rose-100/80">
+            {serverMessage}
+          </p>
         ) : null}
         {successMessage ? (
-          <p className="border-l-2 border-emerald-300/55 py-1 pl-4 text-sm leading-6 text-emerald-100/80">{successMessage}</p>
+          <p className="auth-message rounded-[5px] border border-emerald-300/15 bg-emerald-300/[0.05] px-4 py-3 text-sm leading-6 text-emerald-100/80">
+            {successMessage}
+          </p>
         ) : null}
 
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-13 w-full rounded-none bg-white text-black hover:bg-violet-100"
+          className={`auth-submit-button h-12 w-full rounded-[4px] bg-white text-xs font-semibold uppercase tracking-[0.13em] text-black hover:bg-violet-100 ${
+            isSubmitting ? "is-loading" : ""
+          }`}
         >
           {isSubmitting ? (
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
@@ -396,7 +410,9 @@ export function AuthForm({ nextPath }: AuthFormProps) {
         </Button>
       </form>
 
-      <p className="mt-6 text-xs leading-5 text-white/30">Bộ sưu tập đi theo tài khoản của bạn trên mọi thiết bị.</p>
+      <p className="auth-footnote px-5 py-4 text-xs leading-5 text-white/30 sm:px-7">
+        Bộ sưu tập đi theo tài khoản của bạn trên mọi thiết bị.
+      </p>
     </div>
   );
 }
