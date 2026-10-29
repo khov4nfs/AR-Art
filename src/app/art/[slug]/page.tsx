@@ -6,6 +6,7 @@ import { backNavigationClassName } from "@/components/atoms/back-link";
 import { EverieBrand } from "@/components/atoms/everie-brand";
 import { HistoryBackButton } from "@/components/molecules/history-back-button";
 import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { ArtworkArQrCode } from "@/features/artwork/presentation/components/artwork-ar-qr-code";
 import { EditArtworkButton } from "@/features/artwork/presentation/components/edit-artwork-button";
 import { ShareArtworkButton } from "@/features/artwork/presentation/components/share-artwork-button";
 
@@ -21,6 +22,8 @@ export default async function ArtworkPage({
   const artwork = await getPublishedArtwork.execute(slug);
 
   if (!artwork) notFound();
+
+  const arHref = `/ar/${artwork.slug}`;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
@@ -73,7 +76,7 @@ export default async function ArtworkPage({
 
           <div className="mt-7 flex flex-wrap items-center gap-2">
             <Link
-              href={`/ar/${artwork.slug}`}
+              href={arHref}
               className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100"
             >
               <Camera className="size-4" aria-hidden="true" />
@@ -105,6 +108,10 @@ export default async function ArtworkPage({
               text={artwork.description || `Discover ${artwork.title} in Everie.`}
               imageUrl={artwork.targetImageUrl}
             />
+          </div>
+
+          <div className="mt-12 flex justify-end lg:mt-16">
+            <ArtworkArQrCode href={arHref} title={artwork.title} />
           </div>
         </div>
       </section>
