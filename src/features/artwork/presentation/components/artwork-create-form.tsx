@@ -25,6 +25,8 @@ import {
   type ArtworkCreateFormValues,
 } from "@/features/artwork/domain/artwork-create-form-schema";
 import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { validateOriginalVideo, videoNeedsConversion } from "@/features/artwork/domain/original-video";
+import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-video-for-ar";
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
 import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
 import { compileMindTarget } from "@/features/artwork/presentation/lib/compile-mind-target";
@@ -96,6 +98,10 @@ function formatMb(bytes: number) {
 export function ArtworkCreateForm() {
   const [workflow, dispatch] = useReducer(workflowReducer, initialWorkflowState);
   const [targetError, setTargetError] = useState<string | null>(null);
+  const [conversionError, setConversionError] = useState<string | null>(null);
+  const [conversionMessage, setConversionMessage] = useState<string | null>(null);
+  const [converting, setConverting] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   const {
     control,
@@ -103,7 +109,9 @@ export function ArtworkCreateForm() {
     handleSubmit,
     setValue,
     clearErrors,
-    formState: { errors, isSubmitting, isSubmitted },
+    getValues,
+    trigger,
+    formState: { errors, isSubmitting },
   } = useForm<ArtworkCreateFormValues>({
     resolver: zodResolver(artworkCreateFormSchema),
     mode: "onSubmit",
@@ -138,7 +146,7 @@ export function ArtworkCreateForm() {
   const detailsReady = Boolean(title?.trim() && artistName?.trim());
   const arReady = Boolean(firstVideo && targetImage && !targetPreparing && !targetError);
   // Keep submit enabled for incomplete forms so validation appears only after a click.
-  const canPublish = !isSubmitting && !targetPreparing;
+  const canPublish = !isSubmitting && !targetPreparing && !converting;
 
   useEffect(() => {
     let active = true;
@@ -296,8 +304,53 @@ export function ArtworkCreateForm() {
     }
   }
 
-  const publish = handleSubmit((values) => runWorkflow(values, "publish"));
-  const saveDraft = handleSubmit((values) => runWorkflow(values, "draft"));
+  async function submitArtwork(intent: "draft" | "publish") {
+    if (converting || isSubmitting) return;
+    setSubmitAttempted(true);
+    setConversionError(null);
+    clearErrors(["spatialLayers", "targetImage"]);
+    const source = spatialLayers[0]?.file;
+
+    // Small, already-compatible MP4/WebM files keep the normal browser flow.
+    if (!source || !videoNeedsConversion(source)) {
+      await handleSubmit((values) => runWorkflow(values, intent))();
+      return;
+    }
+
+    // Validate details only on Save / Publish, before sending a large MOV.
+    if (!(await trigger(["title", "artistName"]))) return;
+    const originalError = validateOriginalVideo(source);
+    if (originalError) {
+      setConversionError(originalError);
+      return;
+    }
+
+    setConverting(true);
+    try {
+      const auth = await getAuthHeaders();
+      const converted = await convertVideoForAr(source, auth, setConversionMessage);
+      setConversionMessage("Preparing AR tracking from the converted video…");
+      const target = await extractVideoTarget(converted);
+      const current = getValues();
+      if (current.spatialLayers[0]?.file !== source) {
+        throw new Error("The selected video changed. Please save again.");
+      }
+      const prepared = artworkCreateFormSchema.safeParse({
+        ...current,
+        targetImage: target,
+        spatialLayers: [{ ...current.spatialLayers[0], file: converted }],
+      });
+      if (!prepared.success) {
+        throw new Error(prepared.error.issues[0]?.message ?? "Converted video is invalid.");
+      }
+      await runWorkflow(prepared.data, intent);
+    } catch (error) {
+      setConversionError(error instanceof Error ? error.message : "Unable to convert this video.");
+    } finally {
+      setConverting(false);
+      setConversionMessage(null);
+    }
+  }
 
   async function copyShareUrl() {
     if (!workflow.result?.shareUrl) return;
@@ -310,6 +363,8 @@ export function ArtworkCreateForm() {
     const file = files?.item(0);
     if (!file) return;
     setTargetError(null);
+    setConversionError(null);
+    setSubmitAttempted(false);
     clearErrors(["spatialLayers", "targetImage"]);
     setValue("targetImage", undefined as unknown as File, { shouldValidate: false });
     replaceSpatialLayers([{
@@ -428,7 +483,7 @@ export function ArtworkCreateForm() {
           </div>
         </div>
 
-        <form onSubmit={publish} noValidate className="mt-16 grid gap-10 border-t border-white/12 pt-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <form onSubmit={(event) => { event.preventDefault(); void submitArtwork("publish"); }} noValidate className="mt-16 grid gap-10 border-t border-white/12 pt-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-9">
             <div className="grid gap-8 sm:grid-cols-2">
               <label className="block">
@@ -450,16 +505,18 @@ export function ArtworkCreateForm() {
                   <Video className="size-5 shrink-0" />
                   <div>
                     <p className="font-serif text-2xl">Upload AR video</p>
-                    <p className="mt-1 text-xs text-white/36">MP4 or WebM · max 6 MB</p>
+                    <p className="mt-1 text-xs text-white/36">MOV, MP4 or WebM · originals up to 240 MB · auto-convert on save</p>
                   </div>
                 </div>
-                <input type="file" accept="video/mp4,video/webm,.mp4,.webm" className="sr-only" onChange={(event) => { selectVideo(event.target.files); event.currentTarget.value = ""; }} />
+                <input type="file" accept="video/quicktime,video/mp4,video/webm,.mov,.mp4,.webm" className="sr-only" onChange={(event) => { selectVideo(event.target.files); event.currentTarget.value = ""; }} />
               </label>
               <p className="text-xs leading-5 text-white/40">
                 We automatically create a tracking image from your video. For AR scanning to work, the video needs a recognizable frame matching the physical artwork. Transparent motion alone may not be trackable.
               </p>
               {targetPreparing ? <p className="text-xs text-violet-200/75" role="status">Preparing tracking from video…</p> : null}
-              {isSubmitted && targetError ? <p className="text-xs text-rose-200/80" role="alert">{targetError}</p> : null}
+              {conversionMessage ? <p className="text-xs text-violet-200/75" role="status">{conversionMessage}</p> : null}
+              {submitAttempted && conversionError ? <p className="text-xs text-rose-200/80" role="alert">{conversionError}</p> : null}
+              {submitAttempted && targetError ? <p className="text-xs text-rose-200/80" role="alert">{targetError}</p> : null}
               {spatialFields.map((field, index) => {
                 const layer = spatialLayers[index];
                 if (!layer) return null;
@@ -474,9 +531,9 @@ export function ArtworkCreateForm() {
                   </div>
                 );
               })}
-              {isSubmitted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
-              {isSubmitted && errors.spatialLayers?.[0]?.file?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers[0].file.message}</p> : null}
-              {isSubmitted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
+              {submitAttempted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
+              {submitAttempted && errors.spatialLayers?.[0]?.file?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers[0].file.message}</p> : null}
+              {submitAttempted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-5 border-y border-white/12 py-4">
@@ -485,13 +542,13 @@ export function ArtworkCreateForm() {
                 <span className={arReady ? "text-white" : ""}>Video</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" disabled={!canPublish} onClick={() => void saveDraft()} className="h-12 rounded-none border-white/15 bg-transparent px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/55 hover:bg-white/[0.05] hover:text-white disabled:opacity-30">
-                  {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <Check className="size-4" />}
+                <Button type="button" variant="outline" disabled={!canPublish} onClick={() => void submitArtwork("draft")} className="h-12 rounded-none border-white/15 bg-transparent px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/55 hover:bg-white/[0.05] hover:text-white disabled:opacity-30">
+                  {isSubmitting || converting ? <LoaderCircle className="size-4 animate-spin" /> : <Check className="size-4" />}
                   Save draft
                 </Button>
                 <Button type="submit" disabled={!canPublish} className="h-12 rounded-none bg-white px-6 text-xs font-medium uppercase tracking-[0.12em] text-black hover:bg-violet-100 disabled:bg-white/10 disabled:text-white/25">
-                  {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
-                  {isSubmitting ? "Working…" : "Publish and get QR"}
+                  {isSubmitting || converting ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                  {isSubmitting || converting ? "Preparing…" : "Publish and get QR"}
                 </Button>
               </div>
             </div>
