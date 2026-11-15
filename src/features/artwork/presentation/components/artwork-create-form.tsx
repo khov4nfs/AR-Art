@@ -25,7 +25,7 @@ import {
   type ArtworkCreateFormValues,
 } from "@/features/artwork/domain/artwork-create-form-schema";
 import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
-import { validateOriginalVideo, videoNeedsConversion } from "@/features/artwork/domain/original-video";
+import { isPackedAlphaVideoName, validateOriginalVideo, videoNeedsConversion } from "@/features/artwork/domain/original-video";
 import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-video-for-ar";
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
 import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
@@ -196,6 +196,7 @@ export function ArtworkCreateForm() {
         spatialLayers: values.spatialLayers.map((layer, index) => ({
           extension: fileExtension(layer.file),
           mimeType: layer.file.type,
+          alphaPacking: isPackedAlphaVideoName(layer.file.name) ? "side-by-side" : undefined,
           aspectRatio: layerAspectRatios[index],
           x: layer.x,
           y: layer.y,
@@ -374,7 +375,7 @@ export function ArtworkCreateForm() {
       x: 0,
       y: 0,
       depth: 0.05,
-      scale: 0.8,
+      scale: 1,
     }]);
   }
 
