@@ -2,9 +2,10 @@ import { z } from "zod";
 
 export const ARTWORK_UPLOAD_MAX_FILE_SIZE = 6 * 1024 * 1024;
 
-const MAX_SPATIAL_VIDEOS = 1;
+const MAX_AR_ASSETS = 1;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const videoTypes = new Set(["video/mp4", "video/webm"]);
+const arAssetTypes = new Set([...videoTypes, ...imageTypes]);
 function isFile(value: unknown): value is File {
   return typeof File !== "undefined" && value instanceof File;
 }
@@ -24,9 +25,9 @@ function fileSchema(options: {
 }
 
 const spatialFileSchema = z
-  .custom<File>(isFile, "Choose a video.")
-  .refine((file) => videoTypes.has(file.type), "Only MP4 or WebM video is supported.")
-  .refine((file) => file.size > 0 && file.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE, "Each video must be between 1 byte and 6 MB.");
+  .custom<File>(isFile, "Choose a video or image.")
+  .refine((file) => arAssetTypes.has(file.type), "Choose PNG, JPG, WebP, MP4 or WebM.")
+  .refine((file) => file.size > 0 && file.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE, "Images and converted videos must be between 1 byte and 6 MB.");
 
 export const spatialLayerFormSchema = z.object({
   file: spatialFileSchema,
@@ -52,11 +53,11 @@ export const artworkCreateFormSchema = z
       .max(120, "Artist / creator must be 120 characters or fewer."),
     arMode: z.literal("spatial_layers"),
     targetImage: fileSchema({
-      missingMessage: "A tracking frame could not be generated from this video.",
+      missingMessage: "A tracking image could not be prepared from this media.",
       typeMessage: "Target image must be JPG, PNG, or WebP.",
       allowedTypes: imageTypes,
     }),
-    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Please upload a video.").max(MAX_SPATIAL_VIDEOS, "Only one video is allowed."),
+    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Please upload a video or image.").max(MAX_AR_ASSETS, "Only one AR video or image is allowed."),
   });
 
 export type ArtworkCreateFormValues = z.infer<typeof artworkCreateFormSchema>;

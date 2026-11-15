@@ -12,7 +12,7 @@ import {
   LoaderCircle,
   Trash2,
   Upload,
-  Video,
+  ImageIcon,
 } from "lucide-react";
 
 import { BackLink } from "@/components/atoms/back-link";
@@ -31,6 +31,7 @@ import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-v
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
 import { compileMindTarget } from "@/features/artwork/presentation/lib/compile-mind-target";
 import { extractVideoTarget } from "@/features/artwork/presentation/lib/extract-video-target";
+import { extractImageTarget } from "@/features/artwork/presentation/lib/extract-image-target";
 import { readImageAspectRatio } from "@/features/artwork/presentation/lib/read-image-aspect-ratio";
 import { readVideoAspectRatio } from "@/features/artwork/presentation/lib/read-video-aspect-ratio";
 import { uploadArtworkAssets } from "@/features/artwork/presentation/lib/upload-artwork-assets";
@@ -107,6 +108,7 @@ export function ArtworkCreateForm({
   const [workflow, dispatch] = useReducer(workflowReducer, initialWorkflowState);
   const [submitIntent, setSubmitIntent] = useState<"draft" | "publish" | null>(null);
   const [targetError, setTargetError] = useState<string | null>(null);
+  const [trackingReference, setTrackingReference] = useState<File | null>(null);
   const [conversionError, setConversionError] = useState<string | null>(null);
   const [conversionMessage, setConversionMessage] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
@@ -144,12 +146,16 @@ export function ArtworkCreateForm({
   const targetImage = useWatch({ control, name: "targetImage" });
   const spatialLayers = useWatch({ control, name: "spatialLayers" }) ?? [];
 
-  const firstVideo = spatialLayers[0]?.file;
+  const firstAsset = spatialLayers[0]?.file;
+  const isImageAsset = Boolean(firstAsset?.type.startsWith("image/"));
   const canExtractTarget = Boolean(
-    firstVideo &&
-    ["video/mp4", "video/webm"].includes(firstVideo.type) &&
-    firstVideo.size > 0 &&
-    firstVideo.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE,
+    (trackingReference || firstAsset) &&
+    (trackingReference || (
+      firstAsset &&
+      (isImageAsset || ["video/mp4", "video/webm"].includes(firstAsset.type)) &&
+      firstAsset.size > 0 &&
+      firstAsset.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE
+    )),
   );
   const targetPreparing = canExtractTarget && !targetImage && !targetError;
   const detailsReady = Boolean(title?.trim() && artistName?.trim());
@@ -160,21 +166,23 @@ export function ArtworkCreateForm({
   useEffect(() => {
     let active = true;
     setValue("targetImage", undefined as unknown as File, { shouldValidate: false });
-    if (!firstVideo || !canExtractTarget) {
+    if (!canExtractTarget || !firstAsset) {
       return () => { active = false; };
     }
 
-    void extractVideoTarget(firstVideo)
+    const source = trackingReference ?? firstAsset;
+    const prepare = source.type.startsWith("image/") ? extractImageTarget(source) : extractVideoTarget(source);
+    void prepare
       .then((image) => {
         if (!active) return;
         setValue("targetImage", image, { shouldDirty: true, shouldValidate: false });
       })
       .catch((error: unknown) => {
         if (!active) return;
-        setTargetError(error instanceof Error ? error.message : "Unable to prepare the video frame.");
+        setTargetError(error instanceof Error ? error.message : "Unable to prepare the tracking image.");
       });
     return () => { active = false; };
-  }, [firstVideo, canExtractTarget, setValue]);
+  }, [firstAsset, trackingReference, canExtractTarget, setValue]);
 
   async function getAuthHeaders() {
     const supabase = getSupabaseBrowserClient();
@@ -261,7 +269,9 @@ export function ArtworkCreateForm({
     try {
       dispatch({ type: "message", message: "Checking your AR assets…" });
       const targetAspectRatio = await readImageAspectRatio(values.targetImage);
-      const layerAspectRatios = await Promise.all(values.spatialLayers.map((layer) => readVideoAspectRatio(layer.file)));
+      const layerAspectRatios = await Promise.all(values.spatialLayers.map((layer) =>
+        layer.file.type.startsWith("image/") ? readImageAspectRatio(layer.file) : readVideoAspectRatio(layer.file),
+      ));
 
       dispatch({ type: "message", message: "Preparing your artwork…" });
       const targetMind = await compileMindTarget(values.targetImage, (value) =>
@@ -325,7 +335,7 @@ export function ArtworkCreateForm({
 
     try {
       // Compatible small files use the established save/publish workflow.
-      if (!source || !videoNeedsConversion(source)) {
+      if (!source || source.type.startsWith("image/") || !videoNeedsConversion(source)) {
         await handleSubmit((values) => runWorkflow(values, intent))();
         return;
       }
@@ -342,7 +352,7 @@ export function ArtworkCreateForm({
       const auth = await getAuthHeaders();
       const converted = await convertVideoForAr(source, auth, setConversionMessage);
       setConversionMessage("Preparing AR tracking from the converted video…");
-      const target = await extractVideoTarget(converted);
+      const target = trackingReference ? await extractImageTarget(trackingReference) : await extractVideoTarget(converted);
       const current = getValues();
       if (current.spatialLayers[0]?.file !== source) {
         throw new Error("The selected video changed. Please save again.");
@@ -372,10 +382,11 @@ export function ArtworkCreateForm({
     window.setTimeout(() => dispatch({ type: "copied", value: false }), 1600);
   }
 
-  function selectVideo(files: FileList | null) {
+  function selectAsset(files: FileList | null) {
     const file = files?.item(0);
     if (!file) return;
     setTargetError(null);
+    setTrackingReference(null);
     setConversionError(null);
     setSubmitAttempted(false);
     clearErrors(["spatialLayers", "targetImage"]);
@@ -487,13 +498,13 @@ export function ArtworkCreateForm({
 
       <section className={embedded ? "relative mx-auto w-full max-w-none p-0" : "relative mx-auto w-full max-w-[94rem] px-5 py-14 sm:px-8 lg:px-12 lg:py-20"}>
         <h1 className={embedded ? "hidden" : "max-w-5xl font-serif text-6xl leading-[0.86] tracking-[-0.055em] sm:text-8xl lg:text-9xl"}>
-          Bring your video<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">into AR.</span>
+          Bring your artwork<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">into AR.</span>
         </h1>
 
         <div className={`${embedded ? "mt-0" : "mt-12"} grid grid-cols-3 gap-5 pt-2`}>
           {[
             ["01", "Details", detailsReady],
-            ["02", "Video", arReady],
+            ["02", "AR media", arReady],
             ["03", "Publish", publishReady],
           ].map(([number, label, ready]) => (
             <div
@@ -541,18 +552,49 @@ export function ArtworkCreateForm({
             <div className="space-y-3">
               <label className="flex cursor-pointer items-center justify-between gap-6 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-white/35 hover:bg-white/[0.04]">
                 <div className="flex items-center gap-4">
-                  <Video className="size-5 shrink-0" />
+                  <ImageIcon className="size-5 shrink-0" />
                   <div>
-                    <p className="font-serif text-2xl">Upload AR video</p>
-                    <p className="mt-1 text-xs text-white/36">MOV, MP4 or WebM · originals up to 240 MB · auto-convert on save</p>
+                    <p className="font-serif text-2xl">Upload AR video or image</p>
+                    <p className="mt-1 text-xs leading-5 text-white/36">MOV, MP4 or WebM video (up to 240 MB) · PNG, JPG or WebP image (up to 6 MB)</p>
                   </div>
                 </div>
-                <input type="file" accept="video/quicktime,video/mp4,video/webm,.mov,.mp4,.webm" className="sr-only" onChange={(event) => { selectVideo(event.target.files); event.currentTarget.value = ""; }} />
+                <input type="file" accept="video/quicktime,video/mp4,video/webm,image/png,image/jpeg,image/webp,.mov,.mp4,.webm,.png,.jpg,.jpeg,.webp" className="sr-only" onChange={(event) => { selectAsset(event.target.files); event.currentTarget.value = ""; }} />
               </label>
               <p className="text-xs leading-5 text-white/40">
-                We automatically create a tracking image from your video. For AR scanning to work, the video needs a recognizable frame matching the physical artwork. Transparent motion alone may not be trackable.
+                AR images preserve transparency. We create a white-backed tracking frame from your selected media. If the physical artwork looks different, choose its actual photo below so visitors can scan it correctly.
               </p>
-              {targetPreparing ? <p className="text-xs text-violet-200/75" role="status">Preparing tracking from video…</p> : null}
+              {firstAsset ? (
+                <label className="flex cursor-pointer items-center justify-between gap-4 border border-white/10 bg-white/[0.025] px-4 py-3 transition hover:border-white/25">
+                  <span className="text-xs text-white/65">
+                    {trackingReference ? "Tracking reference: " + trackingReference.name : "Optional: upload a photo of the physical artwork for AR recognition"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"
+                    className="sr-only"
+                    aria-label="Upload physical artwork tracking reference"
+                    onChange={(event) => {
+                      const reference = event.currentTarget.files?.item(0);
+                      event.currentTarget.value = "";
+                      if (!reference) return;
+                      setTargetError(null);
+                      setSubmitAttempted(false);
+                      setTrackingReference(reference);
+                    }}
+                  />
+                  <span className="shrink-0 text-[0.63rem] uppercase tracking-wider text-cyan-200/70">Choose image</span>
+                </label>
+              ) : null}
+              {trackingReference ? (
+                <button
+                  type="button"
+                  onClick={() => { setTargetError(null); setTrackingReference(null); clearErrors(["targetImage"]); }}
+                  className="text-xs text-white/45 underline underline-offset-4 hover:text-white"
+                >
+                  Use automatically generated tracking image
+                </button>
+              ) : null}
+              {targetPreparing ? <p className="text-xs text-violet-200/75" role="status">Preparing AR tracking image…</p> : null}
               {conversionMessage ? <p className="text-xs text-violet-200/75" role="status">{conversionMessage}</p> : null}
               {submitAttempted && conversionError ? <p className="text-xs text-rose-200/80" role="alert">{conversionError}</p> : null}
               {submitAttempted && targetError ? <p className="text-xs text-rose-200/80" role="alert">{targetError}</p> : null}
@@ -564,15 +606,15 @@ export function ArtworkCreateForm({
                     <Controller name={`spatialLayers.${index}.file`} control={control} render={() => <></>} />
                     <div className="min-w-0">
                       <p className="truncate text-sm text-white/75">{layer.file.name}</p>
-                      <p className="mt-1 text-xs text-white/35">{formatMb(layer.file.size)} · Video</p>
+                      <p className="mt-1 text-xs text-white/35">{formatMb(layer.file.size)} · {layer.file.type === "image/png" ? "PNG image (alpha preserved)" : layer.file.type.startsWith("image/") ? "Image" : "Video"}</p>
                     </div>
-                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); setConversionError(null); setSubmitAttempted(false); clearErrors(["spatialLayers", "targetImage"]); setValue("targetImage", undefined as unknown as File, { shouldValidate: false }); removeSpatialLayer(index); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
+                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); setTrackingReference(null); setConversionError(null); setSubmitAttempted(false); clearErrors(["spatialLayers", "targetImage"]); setValue("targetImage", undefined as unknown as File, { shouldValidate: false }); removeSpatialLayer(index); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
                   </div>
                 );
               })}
               {submitAttempted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
               {submitAttempted && errors.spatialLayers?.[0]?.file?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers[0].file.message}</p> : null}
-              {submitAttempted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError && !conversionError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
+              {submitAttempted && firstAsset && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError && !conversionError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking. Try another file or upload the physical artwork reference.</p> : null}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-5 rounded-[5px] bg-white/[0.018] px-4 py-4">
