@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Camera, CheckCircle2, LoaderCircle, RotateCcw, ScanLine, TriangleAlert } from "lucide-react";
+import { Camera, CheckCircle2, ChevronDown, ChevronUp, LoaderCircle, RotateCcw, ScanLine, TriangleAlert } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BackLink } from "@/components/atoms/back-link";
@@ -27,11 +27,14 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
   const containerRef = useRef<HTMLDivElement>(null);
   const savedRef = useRef(new Set<string>());
   const activeArtworkRef = useRef<string | null>(null);
+  const collapseButtonRef = useRef<HTMLButtonElement>(null);
+  const expandButtonRef = useRef<HTMLButtonElement>(null);
   const [attempt, setAttempt] = useState(0);
   const [targetBundle, setTargetBundle] = useState<string | null>(null);
   const [compileProgress, setCompileProgress] = useState(0);
   const [compileError, setCompileError] = useState<string | null>(null);
   const [matched, setMatched] = useState<ScannerArtwork | null>(null);
+  const [isSheetCollapsed, setIsSheetCollapsed] = useState(false);
   const [collectionNote, setCollectionNote] = useState<CollectionNote>(null);
   const [collectionError, setCollectionError] = useState<string | null>(null);
 
@@ -60,6 +63,8 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
     const artwork = artworks[index];
     if (!artwork) return;
 
+    // Repeated recognitions of the same artwork should not reopen a dismissed sheet.
+    if (activeArtworkRef.current !== artwork.id) setIsSheetCollapsed(false);
     activeArtworkRef.current = artwork.id;
     setMatched(artwork);
     setCollectionError(null);
@@ -96,6 +101,14 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
   const {
     status, error, cameraPermissionIssue, start, stop,
   } = useArExperience(config, onRecognized);
+
+  const toggleRecognitionSheet = (collapsed: boolean) => {
+    setIsSheetCollapsed(collapsed);
+    // Preserve keyboard focus when one chevron replaces the other.
+    window.requestAnimationFrame(() => {
+      (collapsed ? expandButtonRef : collapseButtonRef).current?.focus({ preventScroll: true });
+    });
+  };
 
   const startScanner = () => {
     const container = containerRef.current;
@@ -185,8 +198,29 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
       )}
 
       {matched && status !== "error" && (
-        <div role="status" aria-live="polite" className="absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-[7px] bg-[#08080c]/90 p-4 shadow-[0_20px_70px_rgba(0,0,0,0.4)] ring-1 ring-inset ring-white/10 backdrop-blur-xl sm:p-5">
-          <div className="flex items-start gap-3">
+        <>
+          <div
+            role="status"
+            aria-live="polite"
+            aria-hidden={isSheetCollapsed}
+            inert={isSheetCollapsed}
+            className={[
+              "absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-[7px] bg-[#08080c]/90 p-4 shadow-[0_20px_70px_rgba(0,0,0,0.4)] ring-1 ring-inset ring-white/10 backdrop-blur-xl sm:p-5",
+              "transition-[transform,opacity] duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              isSheetCollapsed ? "pointer-events-none translate-y-[calc(100%+4rem)] opacity-0" : "translate-y-0 opacity-100",
+            ].join(" ")}
+          >
+            <button
+              ref={collapseButtonRef}
+              type="button"
+              aria-label="Collapse artwork details"
+              aria-expanded={!isSheetCollapsed}
+              onClick={() => toggleRecognitionSheet(true)}
+              className="absolute left-1/2 top-0 z-10 flex h-9 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/95 text-white/80 shadow-lg backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-100"
+            >
+              <ChevronDown aria-hidden="true" className="size-5" />
+            </button>
+            <div className="flex items-start gap-3">
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-cyan-100" />
             <div className="min-w-0 flex-1">
               <p className="font-serif text-2xl leading-none">{matched.title}</p>
@@ -205,11 +239,27 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
                 ) : collectionNote === "saved" ? (
                   <Link href="/collection" className="text-cyan-100 underline underline-offset-4">Collection</Link>
                 ) : null}
-                <button type="button" onClick={() => { setMatched(null); setCollectionNote(null); void stop(); }} className="text-white/45 underline underline-offset-4 hover:text-white">Close camera</button>
+                <button type="button" onClick={() => { activeArtworkRef.current = null; setMatched(null); setIsSheetCollapsed(false); setCollectionNote(null); void stop(); }} className="text-white/45 underline underline-offset-4 hover:text-white">Close camera</button>
               </div>
             </div>
           </div>
-        </div>
+          </div>
+          <button
+            ref={expandButtonRef}
+            type="button"
+            aria-label="Expand artwork details"
+            aria-expanded={!isSheetCollapsed}
+            aria-hidden={!isSheetCollapsed}
+            tabIndex={isSheetCollapsed ? 0 : -1}
+            onClick={() => toggleRecognitionSheet(false)}
+            className={[
+              "absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-11 w-16 -translate-x-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/90 text-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-[transform,opacity] duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-100 motion-reduce:transition-none",
+              isSheetCollapsed ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0",
+            ].join(" ")}
+          >
+            <ChevronUp aria-hidden="true" className="size-5" />
+          </button>
+        </>
       )}
     </main>
   );
