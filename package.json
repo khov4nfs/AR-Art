@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts"
+    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
