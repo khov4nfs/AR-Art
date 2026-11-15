@@ -114,18 +114,18 @@ async function readChunk(request: Request, expectedLength: number) {
 
 async function convert(directory: string, byteCount: number) {
   const source = path.join(directory, "source.video");
-  const output = path.join(directory, "converted.webm");
+  const output = path.join(directory, "converted.alpha.mp4");
   if ((await stat(source)).size !== byteCount) fail("Original video upload is incomplete.", 409);
 
   let probe: {
-    streams?: Array<{ width?: number; height?: number; duration?: string }>;
+    streams?: Array<{ width?: number; height?: number; duration?: string; codec_name?: string; tags?: { alpha_mode?: string } }>;
     format?: { duration?: string };
   };
   try {
     const result = await run(
       ffprobe,
       ["-v", "error", "-select_streams", "v:0", "-show_entries",
-        "stream=width,height,duration:format=duration", "-of", "json", source],
+        "stream=width,height,duration,codec_name:stream_tags=alpha_mode:format=duration", "-of", "json", source],
       { timeout: 12000, maxBuffer: 256 * 1024 },
     );
     probe = JSON.parse(result.stdout) as typeof probe;
@@ -144,18 +144,24 @@ async function convert(directory: string, byteCount: number) {
   }
 
   const started = Date.now();
-  for (const crf of [33, 42, 48]) {
+  for (const crf of [24, 29, 34]) {
     const remaining = 82_000 - (Date.now() - started);
     if (remaining < 5_000) fail("Video conversion timed out. Try a shorter video.", 422);
     try {
+      // Embed RGB and alpha in one conventional H.264 stream for Safari/WebGL.
+      // The shader uses the left half as color and right half as an alpha mask.
+      const decoder = video?.codec_name === "vp9" && video.tags?.alpha_mode === "1"
+        ? ["-c:v", "libvpx-vp9"]
+        : [];
       await run(ffmpeg, [
         "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
-        "-i", source, "-map", "0:v:0", "-an",
-        "-vf", "scale=w='min(iw,1080)':h='min(ih,1920)':force_original_aspect_ratio=decrease:force_divisible_by=2",
-        "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", String(crf),
-        "-deadline", "realtime", "-cpu-used", "5", "-threads", "2",
-        "-pix_fmt", "yuva420p", "-auto-alt-ref", "0",
-        "-f", "webm", output,
+        ...decoder, "-i", source, "-an",
+        "-filter_complex",
+        "[0:v]scale=w='min(iw,960)':h='min(ih,1920)':force_original_aspect_ratio=decrease:force_divisible_by=2,format=rgba,split=2[clr][trans];[clr]format=yuv420p[c];[trans]alphaextract,format=yuv420p[a];[c][a]hstack=inputs=2,format=yuv420p[v]",
+        "-map", "[v]",
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", String(crf),
+        "-threads", "2", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+        "-f", "mp4", output,
       ], { timeout: remaining, maxBuffer: 256 * 1024, killSignal: "SIGKILL" });
     } catch {
       return fail("The server could not convert this video. Check the original file.", 422);
@@ -250,7 +256,7 @@ export async function POST(request: Request) {
           return new Response(body, {
             status: 200,
             headers: {
-              "content-type": "video/webm",
+              "content-type": "video/mp4",
               "content-length": String(result.byteLength),
               "cache-control": "no-store",
             },

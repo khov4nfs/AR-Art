@@ -7,6 +7,17 @@ export const AR_VIDEO_MAX_SOURCE_SIZE = 240 * 1024 * 1024;
 
 const extensions = new Set(["mov", "mp4", "webm"]);
 
+/** MP4 packed AR video: the left half contains RGB, right half contains alpha. */
+export function isPackedAlphaVideoName(name: string) {
+  return /\.alpha\.mp4$/i.test(name);
+}
+
+/** Prefer a settled frame with the complete artwork instead of the opening animation. */
+export function trackingSampleTime(duration: number) {
+  if (!Number.isFinite(duration) || duration <= 0) return 0;
+  return Math.max(0, Math.min(duration * 0.7, duration - 0.05));
+}
+
 export function validateOriginalVideo(file: File): string | null {
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
   if (!extensions.has(extension)) {
@@ -21,9 +32,9 @@ export function validateOriginalVideo(file: File): string | null {
 
 export function videoNeedsConversion(file: File): boolean {
   const extension = file.name.split(".").pop()?.toLowerCase();
-  return extension === "mov" ||
+  return extension === "mov" || extension === "webm" ||
     file.size > AR_VIDEO_READY_MAX_SIZE ||
-    !["video/mp4", "video/webm"].includes(file.type);
+    file.type !== "video/mp4";
 }
 
 export function conversionChunkCount(size: number) {
