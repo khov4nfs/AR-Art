@@ -35,6 +35,7 @@ type MindArConstructor = new (options: {
   filterBeta?: number;
   warmupTolerance?: number;
   missTolerance?: number;
+  maxTrack?: number;
 }) => MindArRuntime;
 
 type MindArModule = { MindARThree: MindArConstructor };
@@ -76,9 +77,9 @@ function getPreloadedMindArRuntime() {
 
 export class MindArImageEngine implements ArEngine {
   private runtime: MindArRuntime | null = null;
-  private overlayScene: ThreeArOverlayScene | null = null;
+  private overlayScenes = new Map<number, ThreeArOverlayScene>();
+  private visibleTargets = new Set<number>();
   private started = false;
-  private targetVisible = false;
   private cleanupViewportSync: (() => void) | null = null;
 
   async start(
@@ -90,36 +91,69 @@ export class MindArImageEngine implements ArEngine {
 
     try {
       const mindArModule = getPreloadedMindArRuntime();
+      const targets = "targets" in config
+        ? config.targets
+        : [{ index: config.targetIndex, overlay: config.overlay }];
+      if (!targets.length) throw new Error("No artwork targets are ready.");
+
       const runtime = new mindArModule.MindARThree({
         container,
         imageTargetSrc: config.targetUrl,
+        maxTrack: 1,
         uiLoading: "no",
         uiScanning: "no",
         uiError: "no",
       });
-
       this.runtime = runtime;
       const { renderer, scene, camera } = runtime;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      const anchor = runtime.addAnchor(config.targetIndex);
-      anchor.onTargetFound = () => {
-        this.targetVisible = true;
-        this.overlayScene?.setTargetVisible(true);
-        callbacks.onTargetFound();
-      };
-      anchor.onTargetLost = () => {
-        this.targetVisible = false;
-        this.overlayScene?.setTargetVisible(false);
-        callbacks.onTargetLost();
+      const anchors = new Map<number, MindArAnchor>();
+      const ensureOverlay = (target: typeof targets[number]) => {
+        if (this.runtime !== runtime || this.overlayScenes.has(target.index)) return;
+        const anchor = anchors.get(target.index);
+        if (!anchor) return;
+
+        const overlayScene = new ThreeArOverlayScene();
+        this.overlayScenes.set(target.index, overlayScene);
+        overlayScene.setTargetVisible(this.visibleTargets.has(target.index));
+        void overlayScene.create(target.overlay).then((overlay) => {
+          if (this.runtime !== runtime || this.overlayScenes.get(target.index) !== overlayScene) {
+            overlayScene.dispose();
+            return;
+          }
+          anchor.group.add(overlay);
+        }).catch((cause: unknown) => {
+          overlayScene.dispose();
+          if (this.overlayScenes.get(target.index) === overlayScene) {
+            this.overlayScenes.delete(target.index);
+            callbacks.onError(cause instanceof Error ? cause : new Error("Unable to load artwork AR layers."));
+          }
+        });
       };
 
-      // Camera/tracking starts before artwork assets are loaded. This preserves
-      // the iOS Safari user-gesture permission path even for larger GLB assets.
+      for (const target of targets) {
+        const anchor = runtime.addAnchor(target.index);
+        anchors.set(target.index, anchor);
+        anchor.onTargetFound = () => {
+          if (this.runtime !== runtime) return;
+          this.visibleTargets.add(target.index);
+          this.overlayScenes.get(target.index)?.setTargetVisible(true);
+          if (this.started) ensureOverlay(target);
+          callbacks.onTargetFound(target.index);
+        };
+        anchor.onTargetLost = () => {
+          if (this.runtime !== runtime) return;
+          this.visibleTargets.delete(target.index);
+          this.overlayScenes.get(target.index)?.setTargetVisible(false);
+          callbacks.onTargetLost(target.index);
+        };
+      }
+
+      // Request tracking first so Safari has the same camera permission path.
       await runtime.start();
 
-      const cameraVideo =
-        runtime.video ?? container.querySelector<HTMLVideoElement>("video");
+      const cameraVideo = runtime.video ?? container.querySelector<HTMLVideoElement>("video");
       if (!cameraVideo || !(cameraVideo.srcObject instanceof MediaStream)) {
         throw new Error("Camera started but the live preview stream is unavailable.");
       }
@@ -133,56 +167,42 @@ export class MindArImageEngine implements ArEngine {
       cameraVideo.setAttribute("webkit-playsinline", "");
       cameraVideo.setAttribute("autoplay", "");
       Object.assign(cameraVideo.style, {
-        zIndex: "0",
-        display: "block",
-        visibility: "visible",
-        opacity: "1",
-        background: "#000",
+        zIndex: "0", display: "block", visibility: "visible", opacity: "1", background: "#000",
       });
 
-      const canvas = renderer.domElement;
-      Object.assign(canvas.style, {
-        zIndex: "1",
-        pointerEvents: "none",
-        background: "transparent",
+      Object.assign(renderer.domElement.style, {
+        zIndex: "1", pointerEvents: "none", background: "transparent",
       });
-
       if (runtime.cssRenderer?.domElement) {
         Object.assign(runtime.cssRenderer.domElement.style, {
-          zIndex: "2",
-          pointerEvents: "none",
+          zIndex: "2", pointerEvents: "none",
         });
       }
 
       this.bindViewportSync(runtime, container);
-
       try {
         await cameraVideo.play();
       } catch {
-        // Safari can reject a redundant play() while the camera is already live.
+        // Safari may reject redundant play() when the camera is already live.
       }
 
       this.started = true;
-      callbacks.onScanning();
-
-      const overlayScene = new ThreeArOverlayScene();
-      this.overlayScene = overlayScene;
-      overlayScene.setTargetVisible(this.targetVisible);
-      const overlay = await overlayScene.create(config.overlay);
-      if (this.runtime !== runtime || this.overlayScene !== overlayScene) {
-        overlayScene.dispose();
-        return;
-      }
-      anchor.group.add(overlay);
-
       const clock = new THREE.Clock();
       renderer.setAnimationLoop(() => {
-        overlayScene.update(clock.getElapsedTime());
+        const elapsed = clock.getElapsedTime();
+        for (const overlayScene of this.overlayScenes.values()) overlayScene.update(elapsed);
         renderer.render(scene, camera);
       });
+      callbacks.onScanning();
+
+      // Prepare the single-artwork layer immediately; in universal mode only
+      // prepare the recognized artwork, keeping other videos/GLBs unloaded.
+      if (!("targets" in config)) ensureOverlay(targets[0]!);
+      for (const target of targets) {
+        if (this.visibleTargets.has(target.index)) ensureOverlay(target);
+      }
     } catch (cause) {
-      const error =
-        cause instanceof Error ? cause : new Error("Unable to start the AR camera.");
+      const error = cause instanceof Error ? cause : new Error("Unable to start the AR camera.");
       callbacks.onError(error);
       await this.stop();
       throw error;
@@ -236,9 +256,9 @@ export class MindArImageEngine implements ArEngine {
 
   async stop() {
     this.cleanupViewportSync?.();
-    this.overlayScene?.dispose();
-    this.overlayScene = null;
-    this.targetVisible = false;
+    for (const overlayScene of this.overlayScenes.values()) overlayScene.dispose();
+    this.overlayScenes.clear();
+    this.visibleTargets.clear();
 
     if (!this.runtime) return;
     const runtime = this.runtime;

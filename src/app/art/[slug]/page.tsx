@@ -2,8 +2,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Camera, Sparkles } from "lucide-react";
 import { notFound } from "next/navigation";
 
+import { backNavigationClassName } from "@/components/atoms/back-link";
+import { EverieBrand } from "@/components/atoms/everie-brand";
 import { HistoryBackButton } from "@/components/molecules/history-back-button";
 import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { ArtworkArQrCode } from "@/features/artwork/presentation/components/artwork-ar-qr-code";
 import { EditArtworkButton } from "@/features/artwork/presentation/components/edit-artwork-button";
 import { ShareArtworkButton } from "@/features/artwork/presentation/components/share-artwork-button";
 
@@ -20,25 +23,27 @@ export default async function ArtworkPage({
 
   if (!artwork) notFound();
 
+  const arHref = `/ar/${artwork.slug}`;
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
       <div className="pointer-events-none absolute right-[10%] top-[18%] size-80 rounded-full bg-violet-700/7 blur-[130px]" />
-      <header className="relative mx-auto flex w-full max-w-[94rem] items-center justify-between border-b border-white/12 px-5 py-5 sm:px-8 lg:px-12">
+      <header className="relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12">
         <HistoryBackButton
           fallbackHref="/"
           variant="ghost"
-          className="h-auto rounded-none p-0 text-xs uppercase tracking-[0.14em] text-white/50 hover:bg-transparent hover:text-white"
+          className={`${backNavigationClassName} h-auto p-0 hover:bg-transparent`}
         >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
+          <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" aria-hidden="true" />
           Gallery
         </HistoryBackButton>
-        <Link href="/" className="text-lg font-semibold tracking-[-0.045em]">EVERIE</Link>
-        <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">Digital work</span>
+        <EverieBrand />
+        <span aria-hidden="true" />
       </header>
 
       <section className="relative mx-auto grid min-h-[calc(100svh-4.8rem)] w-full max-w-[94rem] gap-12 px-5 py-12 sm:px-8 lg:grid-cols-[1.16fr_0.84fr] lg:items-center lg:px-12 lg:py-16">
         <div className="relative">
-          <div className="overflow-hidden border border-white/10 bg-[#0a0a0d] p-2 shadow-[0_35px_120px_rgba(0,0,0,0.38)] sm:p-3">
+          <div className="overflow-hidden rounded-[7px] bg-[#0a0a0d] p-2 shadow-[0_35px_120px_rgba(0,0,0,0.38)] ring-1 ring-inset ring-white/[0.06] sm:p-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={artwork.targetImageUrl}
@@ -46,19 +51,14 @@ export default async function ArtworkPage({
               className="mx-auto aspect-[4/5] max-h-[74svh] w-full object-contain"
             />
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-white/12 pt-3 text-[0.62rem] uppercase tracking-[0.15em] text-white/30">
+          <div className="mt-3 flex items-center justify-between pt-1 text-[0.62rem] uppercase tracking-[0.15em] text-white/30">
             <span>Everie archive</span>
             <span className="text-cyan-100/45">AR enabled</span>
           </div>
         </div>
 
         <div className="lg:pl-8">
-          <div className="flex items-center justify-between gap-6 border-t border-white/12 pt-3 text-[0.62rem] uppercase tracking-[0.16em] text-white/30">
-            <span>Work / {artwork.slug}</span>
-            <span>2D AR</span>
-          </div>
-
-          <h1 className="mt-10 font-serif text-6xl leading-[0.86] tracking-[-0.06em] sm:text-8xl">
+          <h1 className="font-serif text-6xl leading-[0.86] tracking-[-0.06em] sm:text-8xl">
             {artwork.title}
           </h1>
           <p className="mt-6 text-xs uppercase tracking-[0.18em] text-violet-100/45">{artwork.artistName}</p>
@@ -76,8 +76,8 @@ export default async function ArtworkPage({
 
           <div className="mt-7 flex flex-wrap items-center gap-2">
             <Link
-              href={`/ar/${artwork.slug}`}
-              className="inline-flex h-12 items-center gap-2 bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100"
+              href={arHref}
+              className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100"
             >
               <Camera className="size-4" aria-hidden="true" />
               Open AR
@@ -86,7 +86,7 @@ export default async function ArtworkPage({
 
             <Link
               href="/collection"
-              className="inline-flex h-12 items-center gap-2 border border-white/18 px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:border-white/45 hover:text-white"
+              className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white/[0.035] px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 ring-1 ring-inset ring-white/10 transition hover:bg-white/[0.06] hover:text-white hover:ring-white/20"
             >
               <Sparkles className="size-4" aria-hidden="true" />
               Collection
@@ -108,6 +108,10 @@ export default async function ArtworkPage({
               text={artwork.description || `Discover ${artwork.title} in Everie.`}
               imageUrl={artwork.targetImageUrl}
             />
+          </div>
+
+          <div className="mt-12 flex justify-end lg:mt-16">
+            <ArtworkArQrCode href={arHref} title={artwork.title} />
           </div>
         </div>
       </section>

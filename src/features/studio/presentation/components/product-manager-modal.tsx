@@ -7,7 +7,6 @@ import {
   Download,
   ExternalLink,
   LoaderCircle,
-  Pencil,
   QrCode,
   ScanLine,
   Trash2,
@@ -187,22 +186,20 @@ export function ProductManagerModal({
     <Modal
       open
       onClose={onClose}
-      eyebrow="Manage product"
       title={product.title}
-      icon={<Pencil className="size-4" />}
-      maxWidthClassName="max-w-5xl"
+      maxWidthClassName="max-w-6xl"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               disabled={deleteState.deleting || isSubmitting}
               onClick={() => void removeProduct()}
               className={
                 deleteState.confirming
-                  ? "rounded-none border-rose-300/25 bg-rose-400/10 text-rose-200 hover:bg-rose-400/15 hover:text-rose-100"
-                  : "rounded-none border-white/10 bg-transparent text-white/42 hover:bg-white/[0.05] hover:text-rose-200"
+                  ? "h-9 px-0 text-rose-200 hover:bg-transparent hover:text-rose-100"
+                  : "h-9 px-0 text-white/38 hover:bg-transparent hover:text-rose-200"
               }
             >
               {deleteState.deleting ? (
@@ -226,9 +223,9 @@ export function ProductManagerModal({
           <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={onClose}
-              className="rounded-none border-white/10 bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
+              className="px-3 text-white/50 hover:bg-transparent hover:text-white"
             >
               Close
             </Button>
@@ -236,7 +233,7 @@ export function ProductManagerModal({
               type="submit"
               form="studio-product-manager-form"
               disabled={!isValid || isSubmitting || deleteState.deleting}
-              className="rounded-none bg-white text-black hover:bg-violet-100"
+              className="bg-white text-black hover:bg-violet-100"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -249,15 +246,15 @@ export function ProductManagerModal({
         </div>
       }
     >
-      <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-        <form id="studio-product-manager-form" onSubmit={submit} className="space-y-5">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.72fr)]">
+        <form id="studio-product-manager-form" onSubmit={submit} className="space-y-7">
           <div className="grid gap-2">
             <Label htmlFor="manage-product-title" className="text-white/68">
               Product name
             </Label>
             <Input
               id="manage-product-title"
-              className="h-11 rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("title")}
             />
             {errors.title ? <p className="text-xs text-rose-300">{errors.title.message}</p> : null}
@@ -269,7 +266,7 @@ export function ProductManagerModal({
             </Label>
             <Input
               id="manage-product-artist"
-              className="h-11 rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("artistName")}
             />
             {errors.artistName ? (
@@ -284,7 +281,7 @@ export function ProductManagerModal({
             <Textarea
               id="manage-product-description"
               rows={5}
-              className="rounded-none border-white/10 bg-white/[0.045] text-white"
+              className="rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
               {...register("description")}
             />
             {errors.description ? (
@@ -294,16 +291,16 @@ export function ProductManagerModal({
 
           <div>
             <Label className="text-white/68">Visibility</Label>
-            <div className="mt-2 grid grid-cols-2 gap-px border border-white/10 bg-white/10 p-px">
+            <div className="mt-2 flex gap-6">
               <button
                 type="button"
                 onClick={() =>
                   setValue("status", "draft", { shouldValidate: true, shouldDirty: true })
                 }
-                className={`px-4 py-2.5 text-sm transition ${
+                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
                   currentStatus === "draft"
-                    ? "bg-white text-black"
-                    : "bg-[#09090d] text-white/45 hover:bg-white/[0.05] hover:text-white"
+                    ? "text-white after:scale-x-100 after:bg-white"
+                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
                 Draft
@@ -313,10 +310,10 @@ export function ProductManagerModal({
                 onClick={() =>
                   setValue("status", "published", { shouldValidate: true, shouldDirty: true })
                 }
-                className={`px-4 py-2.5 text-sm transition ${
+                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
                   currentStatus === "published"
-                    ? "bg-white text-black"
-                    : "bg-[#09090d] text-white/45 hover:bg-white/[0.05] hover:text-white"
+                    ? "text-white after:scale-x-100 after:bg-white"
+                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
                 Live
@@ -325,14 +322,12 @@ export function ProductManagerModal({
           </div>
 
           {errors.root?.message ? (
-            <p className="border border-rose-300/15 bg-rose-400/8 px-3 py-2.5 text-sm text-rose-200">
-              {errors.root.message}
-            </p>
+            <p className="text-sm text-rose-200">{errors.root.message}</p>
           ) : null}
         </form>
 
-        <aside className="border-t border-white/14 pt-5 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-          <div className="flex items-center justify-between gap-4 border-b border-white/12 pb-4">
+        <aside className="pt-3 lg:pl-4 lg:pt-0">
+          <div className="flex items-center justify-between gap-4 pb-2">
             <div>
               <p className="text-[0.62rem] uppercase tracking-[0.16em] text-white/28">
                 Distribution
@@ -341,21 +336,19 @@ export function ProductManagerModal({
                 {product.status === "published" ? "Public QR and AR access" : "Private until published"} · {arModeLabel(product.arMode)}
               </p>
             </div>
-            <span
-              className={`border px-2 py-1 text-[0.58rem] uppercase tracking-[0.16em] ${
-                product.status === "published"
-                  ? "border-emerald-300/18 bg-emerald-300/10 text-emerald-100/75"
-                  : "border-white/10 text-white/42"
-              }`}
-            >
+            <span className={`inline-flex items-center gap-2 text-[0.58rem] uppercase tracking-[0.16em] ${product.status === "published" ? "text-emerald-100/75" : "text-white/42"}`}>
+              <span className={`size-1.5 rounded-full ${product.status === "published" ? "bg-emerald-200" : "bg-white/35"}`} />
               {product.status === "published" ? "Live" : "Draft"}
             </span>
           </div>
 
           {product.status === "published" && publicPath ? (
             <div className="pt-6">
+              <p className="mb-6 max-w-md text-xs leading-5 text-white/38">
+                QR opens the AR camera directly. Collection is updated only after the artwork is recognized.
+              </p>
               {qrDataUrl ? (
-                <div className="mx-auto max-w-[14rem] border border-white/12 bg-white p-3">
+                <div className="mx-auto max-w-[13rem] rounded-[5px] bg-white p-3 shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={qrDataUrl}
@@ -364,20 +357,23 @@ export function ProductManagerModal({
                   />
                 </div>
               ) : (
-                <div className="mx-auto flex aspect-square max-w-[14rem] items-center justify-center border border-white/12 text-white/25">
+                <div className="mx-auto flex aspect-square max-w-[13rem] items-center justify-center rounded-[5px] bg-white/[0.035] text-white/25">
                   <QrCode className="size-7" />
                 </div>
               )}
 
-              <p className="mt-5 break-all border-y border-white/10 py-3 text-xs leading-5 text-white/38">
-                {publicPath}
-              </p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              <div className="mt-6 space-y-4 rounded-[5px] bg-white/[0.018] p-4">
+                <p className="text-[0.55rem] uppercase tracking-[0.15em] text-white/24">Public artwork link · view only</p>
+                <p className="mt-1 break-all text-xs leading-5 text-white/42">{publicPath}</p>
+                <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-violet-100/38">QR destination · AR camera</p>
+                <p className="mt-1 break-all text-xs leading-5 text-white/42">{arPath}</p>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 pt-1">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => void copyLink()}
-                  className="rounded-none border-white/12 bg-transparent text-white/58 hover:bg-white/[0.05] hover:text-white"
+                  className="h-9 px-0 text-xs uppercase tracking-[0.12em] text-white/52 hover:bg-transparent hover:text-white"
                 >
                   {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                   {copied ? "Copied" : "Copy link"}
@@ -386,7 +382,7 @@ export function ProductManagerModal({
                   <a
                     href={qrDataUrl}
                     download={`everie-${product.slug}-qr.png`}
-                    className="inline-flex h-9 items-center justify-center gap-2 border border-white/12 px-3 text-sm text-white/58 transition hover:border-white/35 hover:text-white"
+                    className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                   >
                     <Download className="size-4" /> Download QR
                   </a>
@@ -395,7 +391,7 @@ export function ProductManagerModal({
                   href={`/art/${product.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-9 items-center justify-center gap-2 border border-white/12 px-3 text-sm text-white/58 transition hover:border-white/35 hover:text-white"
+                  className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                 >
                   <ExternalLink className="size-4" /> Open work
                 </a>
@@ -403,7 +399,7 @@ export function ProductManagerModal({
                   href={`/ar/${product.slug}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-9 items-center justify-center gap-2 border border-white/12 px-3 text-sm text-white/58 transition hover:border-white/35 hover:text-white"
+                  className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                 >
                   <ScanLine className="size-4" /> Open AR
                 </a>

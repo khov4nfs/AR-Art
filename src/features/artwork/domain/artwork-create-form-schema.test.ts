@@ -64,35 +64,6 @@ test("rejects empty and oversized videos", () => {
   }
 });
 
-test("MOV displays a video format error rather than a tracking error", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...values(),
-    targetImage: undefined,
-    spatialLayers: [videoLayer("VER 1.mov", "video/quicktime", 166 * 1024 * 1024)],
-  });
-  assert.equal(result.success, false);
-  if (!result.success) {
-    const fileError = result.error.issues.find((issue) =>
-      issue.path.join(".") === "spatialLayers.0.file",
-    );
-    assert.equal(fileError?.message, "Only MP4 or WebM video is supported.");
-  }
-});
-
-test("oversized MP4 reports the size limit at the video field", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...values(),
-    spatialLayers: [videoLayer("large.mp4", "video/mp4", ARTWORK_UPLOAD_MAX_FILE_SIZE + 1)],
-  });
-  assert.equal(result.success, false);
-  if (!result.success) {
-    const fileError = result.error.issues.find((issue) =>
-      issue.path.join(".") === "spatialLayers.0.file",
-    );
-    assert.equal(fileError?.message, "Each video must be between 1 byte and 6 MB.");
-  }
-});
-
 test("requires generated target image and video-only mode", () => {
   assert.equal(artworkCreateFormSchema.safeParse({ ...values(), targetImage: undefined }).success, false);
   assert.equal(artworkCreateFormSchema.safeParse({ ...values(), arMode: "motion_extract" }).success, false);

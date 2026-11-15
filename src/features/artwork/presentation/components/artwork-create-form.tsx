@@ -6,7 +6,6 @@ import { useEffect, useReducer, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import QRCode from "qrcode";
 import {
-  ArrowLeft,
   Check,
   Copy,
   Download,
@@ -16,7 +15,9 @@ import {
   Video,
 } from "lucide-react";
 
+import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
+import { EverieBrand } from "@/components/atoms/everie-brand";
 import { Input } from "@/components/atoms/input";
 import type { ArtworkUploadSession } from "@/features/artwork/domain/artwork";
 import {
@@ -28,7 +29,6 @@ import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supa
 import { isPackedAlphaVideoName, validateOriginalVideo, videoNeedsConversion } from "@/features/artwork/domain/original-video";
 import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-video-for-ar";
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
-import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
 import { compileMindTarget } from "@/features/artwork/presentation/lib/compile-mind-target";
 import { extractVideoTarget } from "@/features/artwork/presentation/lib/extract-video-target";
 import { readImageAspectRatio } from "@/features/artwork/presentation/lib/read-image-aspect-ratio";
@@ -95,8 +95,17 @@ function formatMb(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function ArtworkCreateForm() {
+export function ArtworkCreateForm({
+  embedded = false,
+  onCreated,
+  onDone,
+}: {
+  embedded?: boolean;
+  onCreated?: (productId: string) => void;
+  onDone?: () => void;
+}) {
   const [workflow, dispatch] = useReducer(workflowReducer, initialWorkflowState);
+  const [submitIntent, setSubmitIntent] = useState<"draft" | "publish" | null>(null);
   const [targetError, setTargetError] = useState<string | null>(null);
   const [conversionError, setConversionError] = useState<string | null>(null);
   const [conversionMessage, setConversionMessage] = useState<string | null>(null);
@@ -144,9 +153,9 @@ export function ArtworkCreateForm() {
   );
   const targetPreparing = canExtractTarget && !targetImage && !targetError;
   const detailsReady = Boolean(title?.trim() && artistName?.trim());
-  const arReady = Boolean(firstVideo && targetImage && !targetPreparing && !targetError);
-  // Keep submit enabled for incomplete forms so validation appears only after a click.
-  const canPublish = !isSubmitting && !targetPreparing && !converting;
+  const arReady = spatialLayers.length > 0 && Boolean(targetImage) && !targetPreparing && !targetError;
+  const publishReady = detailsReady && arReady;
+  const canSubmit = !isSubmitting && !targetPreparing && !converting;
 
   useEffect(() => {
     let active = true;
@@ -282,21 +291,22 @@ export function ArtworkCreateForm() {
       );
 
       if (intent === "draft") {
-        dispatch({
-          type: "success",
-          result: {
-            status: "draft",
-            productId: session.artworkId,
-            shareUrl: null,
-            arUrl: null,
-            qrDataUrl: null,
-          },
-        });
+        const result: PublishResult = {
+          status: "draft",
+          productId: session.artworkId,
+          shareUrl: null,
+          arUrl: null,
+          qrDataUrl: null,
+        };
+        dispatch({ type: "success", result });
+        onCreated?.(result.productId);
         return;
       }
 
       dispatch({ type: "message", message: "Finishing up…" });
-      dispatch({ type: "success", result: await publishArtwork(session) });
+      const result = await publishArtwork(session);
+      dispatch({ type: "success", result });
+      onCreated?.(result.productId);
     } catch (cause) {
       dispatch({
         type: "error",
@@ -307,27 +317,28 @@ export function ArtworkCreateForm() {
 
   async function submitArtwork(intent: "draft" | "publish") {
     if (converting || isSubmitting) return;
+    setSubmitIntent(intent);
     setSubmitAttempted(true);
     setConversionError(null);
     clearErrors(["spatialLayers", "targetImage"]);
     const source = spatialLayers[0]?.file;
 
-    // Small, already-compatible MP4/WebM files keep the normal browser flow.
-    if (!source || !videoNeedsConversion(source)) {
-      await handleSubmit((values) => runWorkflow(values, intent))();
-      return;
-    }
-
-    // Validate details only on Save / Publish, before sending a large MOV.
-    if (!(await trigger(["title", "artistName"]))) return;
-    const originalError = validateOriginalVideo(source);
-    if (originalError) {
-      setConversionError(originalError);
-      return;
-    }
-
-    setConverting(true);
     try {
+      // Compatible small files use the established save/publish workflow.
+      if (!source || !videoNeedsConversion(source)) {
+        await handleSubmit((values) => runWorkflow(values, intent))();
+        return;
+      }
+
+      // Validate only after Save/Publish, before transferring the original.
+      if (!(await trigger(["title", "artistName"]))) return;
+      const validationError = validateOriginalVideo(source);
+      if (validationError) {
+        setConversionError(validationError);
+        return;
+      }
+
+      setConverting(true);
       const auth = await getAuthHeaders();
       const converted = await convertVideoForAr(source, auth, setConversionMessage);
       setConversionMessage("Preparing AR tracking from the converted video…");
@@ -350,6 +361,7 @@ export function ArtworkCreateForm() {
     } finally {
       setConverting(false);
       setConversionMessage(null);
+      setSubmitIntent(null);
     }
   }
 
@@ -380,124 +392,150 @@ export function ArtworkCreateForm() {
   }
 
   if (workflow.result) {
+    const isPublished = workflow.result.status === "published";
+
     return (
-      <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
-        <div className="pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-violet-700/7 blur-[130px]" />
-        <header className="relative mx-auto flex w-full max-w-[94rem] items-center justify-between border-b border-white/12 px-5 py-5 sm:px-8 lg:px-12">
-          <Link href="/studio/products" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/50 transition hover:text-white">
-            <ArrowLeft className="size-3.5" /> Products
-          </Link>
-          <span className="text-lg font-semibold tracking-[-0.045em]">EVERIE</span>
-          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-cyan-100/45">
-            {workflow.result.status === "published" ? "Published" : "Draft saved"}
-          </span>
+      <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
+        <div className={embedded ? "hidden" : "pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-violet-700/7 blur-[130px]"} />
+        <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
+          <BackLink href="/studio/products" label="Products" />
+          <EverieBrand />
+          <span aria-hidden="true" />
         </header>
 
-        <section className="relative mx-auto grid min-h-[calc(100svh-4.8rem)] w-full max-w-[94rem] items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:px-12 lg:py-20">
-          <div>
-            <p className="text-[0.68rem] uppercase tracking-[0.24em] text-violet-200/45">
-              {workflow.result.status === "published" ? "Work is live" : "Saved privately"}
-            </p>
-            <h1 className="mt-6 max-w-3xl font-serif text-6xl leading-[0.88] tracking-[-0.055em] sm:text-8xl">
-              {workflow.result.status === "published" ? (
-                <>Ready for<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">the wall.</span></>
+        <section className={embedded ? `creator-success relative mx-auto grid w-full items-center gap-10 ${isPublished ? "lg:grid-cols-[1.05fr_0.95fr]" : ""}` : `creator-success relative mx-auto grid min-h-[calc(100svh-4.8rem)] w-full max-w-[94rem] items-center gap-12 px-5 py-14 sm:px-8 lg:px-12 lg:py-20 ${isPublished ? "lg:grid-cols-[1.05fr_0.95fr]" : ""}`}>
+          <div className="creator-success-copy">
+            <div className="creator-success-mark" aria-hidden="true">
+              <Check className="size-5" />
+            </div>
+
+            <h1 className={embedded ? "mt-8 max-w-3xl font-serif text-5xl leading-[0.9] tracking-[-0.05em] sm:text-6xl" : "mt-8 max-w-4xl font-serif text-6xl leading-[0.88] tracking-[-0.055em] sm:text-8xl"}>
+              {isPublished ? (
+                <>Now part of <span className="bg-gradient-to-r from-violet-200 via-white to-cyan-200 bg-clip-text italic text-transparent">Everie.</span></>
               ) : (
-                <>Ready when<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">you are.</span></>
+                <>Draft <span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">saved.</span></>
               )}
             </h1>
 
-            {workflow.result.shareUrl ? (
-              <div className="mt-10 border-y border-white/12 py-4">
-                <p className="text-[0.62rem] uppercase tracking-[0.16em] text-white/28">Artwork link</p>
-                <p className="mt-2 break-all text-sm text-white/58">{workflow.result.shareUrl}</p>
-              </div>
-            ) : (
-              <p className="mt-8 max-w-xl text-sm leading-6 text-white/45">
-                Your artwork and AR experience are uploaded and kept private. Open the product in Studio whenever you are ready to publish it.
-              </p>
-            )}
+            <p className="mt-6 max-w-xl text-sm leading-7 text-white/46 sm:text-base">
+              {isPublished
+                ? "Your artwork is live in the Everie archive. Its AR experience can now be discovered, recognized, and added to a visitor’s collection."
+                : "Your artwork and AR setup are safely stored in Studio. Keep refining it and publish whenever it is ready to join Everie."}
+            </p>
 
-            <div className="mt-6 flex flex-wrap gap-2">
+            {workflow.result.shareUrl ? (
+              <p className="mt-5 max-w-xl break-all text-xs leading-5 text-white/28">{workflow.result.shareUrl}</p>
+            ) : null}
+
+            <div className="mt-8 flex flex-wrap gap-2">
               {workflow.result.shareUrl ? (
                 <>
-                  <button type="button" onClick={copyShareUrl} className="inline-flex h-12 items-center gap-2 bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                  <button type="button" onClick={copyShareUrl} className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
                     {workflow.copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                     {workflow.copied ? "Copied" : "Copy link"}
                   </button>
                   {workflow.result.qrDataUrl ? (
-                    <a href={workflow.result.qrDataUrl} download="everie-qr.png" className="inline-flex h-12 items-center gap-2 border border-white/18 px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:border-white/45 hover:text-white">
+                    <a href={workflow.result.qrDataUrl} download="everie-qr.png" className="inline-flex h-12 items-center gap-2 rounded-[4px] px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:bg-white/[0.04] hover:text-white">
                       <Download className="size-4" /> Download QR
                     </a>
                   ) : null}
-                  <a href={workflow.result.shareUrl} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center border border-white/18 px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:border-white/45 hover:text-white">
+                  <a href={workflow.result.shareUrl} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center rounded-[4px] px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:bg-white/[0.04] hover:text-white">
                     Open work
                   </a>
+                  {embedded && onDone ? (
+                    <button type="button" onClick={onDone} className="inline-flex h-12 items-center rounded-[4px] px-4 text-xs font-medium uppercase tracking-[0.12em] text-white/42 transition hover:text-white">
+                      Done
+                    </button>
+                  ) : null}
                 </>
+              ) : embedded && onDone ? (
+                <button type="button" onClick={onDone} className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                  Back to Studio
+                </button>
               ) : (
-                <Link href="/studio/products" className="inline-flex h-12 items-center bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
-                  Manage draft
+                <Link href="/studio/products" className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                  Back to Studio
                 </Link>
               )}
             </div>
           </div>
 
-          <div className="border border-white/10 bg-[#09090d] p-8 shadow-[0_35px_120px_rgba(0,0,0,0.35)] sm:p-12">
-            {workflow.result.qrDataUrl ? (
-              <div className="mx-auto max-w-sm border border-white/12 p-7">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={workflow.result.qrDataUrl} alt="QR code for the published AR artwork" className="aspect-square w-full bg-white p-3" />
-                <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4 text-[0.62rem] uppercase tracking-[0.16em] text-white/45">
-                  <span>Everie</span><span>Scan to enter AR</span>
-                </div>
+          {isPublished && workflow.result.qrDataUrl ? (
+            <div className="creator-success-qr relative mx-auto w-full max-w-sm">
+              <div className="creator-success-qr-glow" aria-hidden="true" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={workflow.result.qrDataUrl} alt="QR code for the published AR artwork" className="relative aspect-square w-full rounded-[6px] bg-white p-3 shadow-[0_35px_120px_rgba(0,0,0,0.48)]" />
+              <div className="relative mt-5 flex items-center justify-between text-[0.6rem] uppercase tracking-[0.15em] text-white/38">
+                <EverieBrand href={null} className="opacity-65" textClassName="text-[0.58rem]" iconClassName="size-3.5" />
+                <span>Scan to enter AR</span>
               </div>
-            ) : (
-              <div className="flex min-h-[24rem] flex-col items-center justify-center border border-white/12 px-8 text-center">
-                <Check className="size-7 text-cyan-100/65" />
-                <p className="mt-5 font-serif text-3xl">Saved privately.</p>
-                <p className="mt-3 max-w-xs text-sm leading-6 text-white/35">QR and public sharing become available when you publish this product from Studio.</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : null}
         </section>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
-      <div className="pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-violet-700/7 blur-[130px]" />
-      <header className="relative mx-auto flex w-full max-w-[94rem] items-center justify-between border-b border-white/12 px-5 py-5 sm:px-8 lg:px-12">
-        <Link href="/studio/products" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-white/50 transition hover:text-white">
-          <ArrowLeft className="size-3.5" /> Studio
-        </Link>
-        <span className="text-lg font-semibold tracking-[-0.045em]">EVERIE</span>
-        <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">New work</span>
+    <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
+      <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-violet-700/7 blur-[130px]"} />
+      <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
+        <BackLink href="/studio/products" label="Studio" />
+        <EverieBrand />
+        <span aria-hidden="true" />
       </header>
 
-      <section className="relative mx-auto w-full max-w-[94rem] px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
-        <div className="grid gap-10 lg:grid-cols-[0.38fr_1.62fr]">
-          <p className="text-[0.68rem] uppercase tracking-[0.24em] text-violet-200/45">Publish / 01</p>
-          <div>
-            <h1 className="max-w-5xl font-serif text-6xl leading-[0.86] tracking-[-0.055em] sm:text-8xl lg:text-9xl">
-              Bring your video<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">into AR.</span>
-            </h1>
-          </div>
+      <section className={embedded ? "relative mx-auto w-full max-w-none p-0" : "relative mx-auto w-full max-w-[94rem] px-5 py-14 sm:px-8 lg:px-12 lg:py-20"}>
+        <h1 className={embedded ? "hidden" : "max-w-5xl font-serif text-6xl leading-[0.86] tracking-[-0.055em] sm:text-8xl lg:text-9xl"}>
+          Bring your video<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">into AR.</span>
+        </h1>
+
+        <div className={`${embedded ? "mt-0" : "mt-12"} grid grid-cols-3 gap-5 pt-2`}>
+          {[
+            ["01", "Details", detailsReady],
+            ["02", "Video", arReady],
+            ["03", "Publish", publishReady],
+          ].map(([number, label, ready]) => (
+            <div
+              key={String(label)}
+              className={`min-w-0 py-2 ${ready ? "text-white" : "text-white/28"}`}
+            >
+              <p className="text-[0.55rem] tabular-nums tracking-[0.14em] opacity-55">{String(number)}</p>
+              <p className="mt-1 truncate text-[0.58rem] font-medium uppercase tracking-[0.1em] sm:text-[0.62rem]">
+                {String(label)}
+              </p>
+              <div className="mt-2 h-px bg-white/10">
+                <div className={`h-px transition-all duration-500 ${ready ? "w-full bg-violet-200" : "w-0"}`} />
+              </div>
+            </div>
+          ))}
         </div>
 
-        <form onSubmit={(event) => { event.preventDefault(); void submitArtwork("publish"); }} noValidate className="mt-16 grid gap-10 border-t border-white/12 pt-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-9">
-            <div className="grid gap-8 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-[0.65rem] uppercase tracking-[0.17em] text-white/35">Artwork title</span>
-                <Input id="title" maxLength={120} aria-invalid={Boolean(errors.title)} placeholder="e.g. Neon Saigon" {...register("title")} className="mt-3 h-12 rounded-none border-0 border-b border-white/18 bg-transparent px-0 text-base text-white shadow-none placeholder:text-white/18 focus-visible:border-cyan-200/70 focus-visible:ring-0" />
-                {errors.title?.message ? <p className="mt-2 text-xs text-rose-200/80">{errors.title.message}</p> : null}
-              </label>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submitArtwork("publish");
+          }}
+          noValidate
+          className="mt-6 grid overflow-hidden rounded-[8px] bg-[#07070a]/68 shadow-[0_36px_120px_rgba(0,0,0,0.3)] ring-1 ring-inset ring-white/[0.06] lg:grid-cols-[1.05fr_0.95fr]"
+        >
+          <div className="space-y-9 p-5 sm:p-7 lg:p-8">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <label htmlFor="title" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34 transition-colors focus-within:text-violet-100/70">Artwork title</label>
+                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.title ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-violet-200/24"}`}>
+                  <Input id="title" maxLength={120} aria-invalid={Boolean(errors.title)} placeholder="e.g. Neon Saigon" {...register("title")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
+                </div>
+                {errors.title?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.title.message}</p> : null}
+              </div>
 
-              <label className="block">
-                <span className="text-[0.65rem] uppercase tracking-[0.17em] text-white/35">Artist / creator</span>
-                <Input id="artistName" maxLength={120} aria-invalid={Boolean(errors.artistName)} placeholder="Artist name" {...register("artistName")} className="mt-3 h-12 rounded-none border-0 border-b border-white/18 bg-transparent px-0 text-base text-white shadow-none placeholder:text-white/18 focus-visible:border-cyan-200/70 focus-visible:ring-0" />
-                {errors.artistName?.message ? <p className="mt-2 text-xs text-rose-200/80">{errors.artistName.message}</p> : null}
-              </label>
+              <div className="grid gap-2">
+                <label htmlFor="artistName" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34">Artist / creator</label>
+                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.artistName ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-violet-200/24"}`}>
+                  <Input id="artistName" maxLength={120} aria-invalid={Boolean(errors.artistName)} placeholder="Artist name" {...register("artistName")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
+                </div>
+                {errors.artistName?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.artistName.message}</p> : null}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -528,28 +566,41 @@ export function ArtworkCreateForm() {
                       <p className="truncate text-sm text-white/75">{layer.file.name}</p>
                       <p className="mt-1 text-xs text-white/35">{formatMb(layer.file.size)} · Video</p>
                     </div>
-                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); clearErrors(["spatialLayers", "targetImage"]); setValue("targetImage", undefined as unknown as File, { shouldValidate: false }); removeSpatialLayer(index); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
+                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); setConversionError(null); setSubmitAttempted(false); clearErrors(["spatialLayers", "targetImage"]); setValue("targetImage", undefined as unknown as File, { shouldValidate: false }); removeSpatialLayer(index); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
                   </div>
                 );
               })}
               {submitAttempted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
               {submitAttempted && errors.spatialLayers?.[0]?.file?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers[0].file.message}</p> : null}
-              {submitAttempted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
+              {submitAttempted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError && !conversionError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-5 border-y border-white/12 py-4">
-              <div className="flex items-center gap-5 text-[0.62rem] uppercase tracking-[0.13em] text-white/28">
-                <span className={detailsReady ? "text-white" : ""}>Details</span>
-                <span className={arReady ? "text-white" : ""}>Video</span>
-              </div>
+            <div className="flex flex-wrap items-center justify-between gap-5 rounded-[5px] bg-white/[0.018] px-4 py-4">
+              <p className="max-w-sm text-xs leading-5 text-white/32">
+                Publish creates a public artwork page and a QR that opens the AR camera directly. Collection happens only after target recognition.
+              </p>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" disabled={!canPublish} onClick={() => void submitArtwork("draft")} className="h-12 rounded-none border-white/15 bg-transparent px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/55 hover:bg-white/[0.05] hover:text-white disabled:opacity-30">
-                  {isSubmitting || converting ? <LoaderCircle className="size-4 animate-spin" /> : <Check className="size-4" />}
-                  Save draft
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!canSubmit}
+                  onClick={() => {
+                    setSubmitIntent("draft");
+                    void submitArtwork("draft");
+                  }}
+                  className="h-12 border-white/12 bg-transparent px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/55 hover:bg-white/[0.05] hover:text-white disabled:opacity-30"
+                >
+                  {submitIntent === "draft" && (isSubmitting || converting) ? <LoaderCircle className="size-4 animate-spin" /> : <Check className="size-4" />}
+                  {submitIntent === "draft" && (isSubmitting || converting) ? "Preparing…" : "Save draft"}
                 </Button>
-                <Button type="submit" disabled={!canPublish} className="h-12 rounded-none bg-white px-6 text-xs font-medium uppercase tracking-[0.12em] text-black hover:bg-violet-100 disabled:bg-white/10 disabled:text-white/25">
-                  {isSubmitting || converting ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
-                  {isSubmitting || converting ? "Preparing…" : "Publish and get QR"}
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  onClick={() => setSubmitIntent("publish")}
+                  className="h-12 bg-white px-6 text-xs font-medium uppercase tracking-[0.12em] text-black hover:bg-violet-100 disabled:bg-white/10 disabled:text-white/25"
+                >
+                  {submitIntent === "publish" && (isSubmitting || converting) ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                  {submitIntent === "publish" && (isSubmitting || converting) ? "Preparing…" : "Publish and get QR"}
                 </Button>
               </div>
             </div>
@@ -557,7 +608,7 @@ export function ArtworkCreateForm() {
             {workflow.message ? <p className={`text-sm ${isSubmitting ? "text-white/40" : "text-rose-200/80"}`} role="status">{workflow.message}</p> : null}
           </div>
 
-          <aside className="relative min-h-[34rem] overflow-hidden border border-white/10 bg-[#09090d] text-white">
+          <aside className="relative min-h-[34rem] overflow-hidden bg-[#09090d] text-white">
             {targetImage ? (
               <ArCompositionPreview
                 targetImage={targetImage}
@@ -565,16 +616,12 @@ export function ArtworkCreateForm() {
                 spatialLayers={spatialLayers}
               />
             ) : (
-              <CreatorSpatialScene />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_62%_32%,rgba(124,58,237,0.12),transparent_30%),radial-gradient(circle_at_30%_72%,rgba(34,211,238,0.06),transparent_26%),linear-gradient(180deg,#09090d,#050507)]" />
             )}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/78 via-black/5 to-black/20" />
             <div className="absolute inset-x-0 bottom-0 z-10 p-6 sm:p-8">
-              <p className="text-[0.62rem] uppercase tracking-[0.18em] text-white/45">From video to AR</p>
-              <div className="mt-5 grid grid-cols-3 gap-4 border-t border-white/20 pt-4 text-xs uppercase tracking-[0.11em] text-white/58">
-                <span>01 · Video</span><span>02 · Prepare</span><span>03 · Publish</span>
-              </div>
               {isSubmitting && workflow.compilerProgress > 0 && workflow.compilerProgress < 100 ? (
-                <div className="mt-6 border-t border-white/15 pt-4">
+                <div className="mt-6 pt-2">
                   <div className="flex justify-between text-[0.62rem] uppercase tracking-[0.12em] text-white/45"><span>Preparing</span><span>{workflow.compilerProgress}%</span></div>
                   <div className="mt-2 h-px bg-white/15"><div className="h-px bg-cyan-100 transition-[width]" style={{ width: `${workflow.compilerProgress}%` }} /></div>
                 </div>
