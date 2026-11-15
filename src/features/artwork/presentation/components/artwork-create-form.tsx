@@ -105,15 +105,14 @@ export function ArtworkCreateForm({
   const [workflow, dispatch] = useReducer(workflowReducer, initialWorkflowState);
   const [submitIntent, setSubmitIntent] = useState<"draft" | "publish" | null>(null);
   const [targetError, setTargetError] = useState<string | null>(null);
-  const [videoError, setVideoError] = useState<string | null>(null);
 
   const {
     control,
     register,
     handleSubmit,
     setValue,
-    trigger,
-    formState: { errors, isSubmitting },
+    clearErrors,
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<ArtworkCreateFormValues>({
     resolver: zodResolver(artworkCreateFormSchema),
     mode: "onSubmit",
@@ -128,7 +127,7 @@ export function ArtworkCreateForm({
 
   const {
     fields: spatialFields,
-    append: appendSpatialLayer,
+    replace: replaceSpatialLayers,
     remove: removeSpatialLayer,
   } = useFieldArray({ control, name: "spatialLayers" });
 
@@ -138,30 +137,36 @@ export function ArtworkCreateForm({
   const spatialLayers = useWatch({ control, name: "spatialLayers" }) ?? [];
 
   const firstVideo = spatialLayers[0]?.file;
-  const targetPreparing = Boolean(firstVideo) && !targetImage && !targetError;
+  const canExtractTarget = Boolean(
+    firstVideo &&
+    ["video/mp4", "video/webm"].includes(firstVideo.type) &&
+    firstVideo.size > 0 &&
+    firstVideo.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE,
+  );
+  const targetPreparing = canExtractTarget && !targetImage && !targetError;
   const detailsReady = Boolean(title?.trim() && artistName?.trim());
   const arReady = spatialLayers.length > 0 && Boolean(targetImage) && !targetPreparing && !targetError;
   const publishReady = detailsReady && arReady;
-  const canSubmit = !isSubmitting && publishReady;
+  const canSubmit = !isSubmitting && !targetPreparing;
 
   useEffect(() => {
     let active = true;
-    setValue("targetImage", undefined as unknown as File, { shouldValidate: true });
-    if (!firstVideo) {
+    setValue("targetImage", undefined as unknown as File, { shouldValidate: false });
+    if (!firstVideo || !canExtractTarget) {
       return () => { active = false; };
     }
 
     void extractVideoTarget(firstVideo)
       .then((image) => {
         if (!active) return;
-        setValue("targetImage", image, { shouldDirty: true, shouldValidate: true });
+        setValue("targetImage", image, { shouldDirty: true, shouldValidate: false });
       })
       .catch((error: unknown) => {
         if (!active) return;
         setTargetError(error instanceof Error ? error.message : "Unable to prepare the video frame.");
       });
     return () => { active = false; };
-  }, [firstVideo, setValue]);
+  }, [firstVideo, canExtractTarget, setValue]);
 
   async function getAuthHeaders() {
     const supabase = getSupabaseBrowserClient();
@@ -329,36 +334,21 @@ export function ArtworkCreateForm({
     window.setTimeout(() => dispatch({ type: "copied", value: false }), 1600);
   }
 
-  function addSpatialFiles(files: FileList | null) {
-    if (!files?.length) return;
-    setVideoError(null);
+  function selectVideo(files: FileList | null) {
+    const file = files?.item(0);
+    if (!file) return;
     setTargetError(null);
-    const selected = Array.from(files);
-    const remaining = 2 - spatialFields.length;
-    if (selected.length > remaining) {
-      setVideoError("You can add up to 2 videos per artwork.");
-      return;
-    }
-    if (selected.some((file) => !["video/mp4", "video/webm"].includes(file.type))) {
-      setVideoError("Only MP4 and WebM video are supported. Convert MOV to WebM before uploading.");
-      return;
-    }
-    if (selected.some((file) => file.size === 0 || file.size > ARTWORK_UPLOAD_MAX_FILE_SIZE)) {
-      setVideoError("Each video must be between 1 byte and 6 MB.");
-      return;
-    }
-    selected.forEach((file, offset) => {
-      appendSpatialLayer({
-        file,
-        animation: "none",
-        blendMode: "normal",
-        x: spatialFields.length + offset === 0 ? 0 : 0.2,
-        y: 0,
-        depth: 0.05 + (spatialFields.length + offset) * 0.025,
-        scale: 0.8,
-      });
-    });
-    window.setTimeout(() => void trigger("spatialLayers"), 0);
+    clearErrors(["spatialLayers", "targetImage"]);
+    setValue("targetImage", undefined as unknown as File, { shouldValidate: false });
+    replaceSpatialLayers([{
+      file,
+      animation: "none",
+      blendMode: "normal",
+      x: 0,
+      y: 0,
+      depth: 0.05,
+      scale: 0.8,
+    }]);
   }
 
   if (workflow.result) {
@@ -514,18 +504,16 @@ export function ArtworkCreateForm({
                   <Video className="size-5 shrink-0" />
                   <div>
                     <p className="font-serif text-2xl">Upload AR video</p>
-                    <p className="mt-1 text-xs text-white/36">MP4 or WebM · max 6 MB each · up to 2 videos</p>
+                    <p className="mt-1 text-xs text-white/36">MP4 or WebM · max 6 MB</p>
                   </div>
                 </div>
-                <span className="shrink-0 text-[0.62rem] uppercase tracking-[0.15em] text-white/28">{spatialFields.length}/2</span>
-                <input type="file" multiple accept="video/mp4,video/webm,.mp4,.webm" className="sr-only" onChange={(event) => { addSpatialFiles(event.target.files); event.currentTarget.value = ""; }} />
+                <input type="file" accept="video/mp4,video/webm,.mp4,.webm" className="sr-only" onChange={(event) => { selectVideo(event.target.files); event.currentTarget.value = ""; }} />
               </label>
               <p className="text-xs leading-5 text-white/40">
-                We automatically create a tracking image from your first video. For AR scanning to work, the video needs a recognizable frame matching the physical artwork. Transparent motion alone may not be trackable.
+                We automatically create a tracking image from your video. For AR scanning to work, the video needs a recognizable frame matching the physical artwork. Transparent motion alone may not be trackable.
               </p>
               {targetPreparing ? <p className="text-xs text-violet-200/75" role="status">Preparing tracking from video…</p> : null}
-              {targetError ? <p className="text-xs text-rose-200/80" role="alert">{targetError}</p> : null}
-              {videoError ? <p className="text-xs text-rose-200/80" role="alert">{videoError}</p> : null}
+              {isSubmitted && targetError ? <p className="text-xs text-rose-200/80" role="alert">{targetError}</p> : null}
               {spatialFields.map((field, index) => {
                 const layer = spatialLayers[index];
                 if (!layer) return null;
@@ -534,14 +522,14 @@ export function ArtworkCreateForm({
                     <Controller name={`spatialLayers.${index}.file`} control={control} render={() => <></>} />
                     <div className="min-w-0">
                       <p className="truncate text-sm text-white/75">{layer.file.name}</p>
-                      <p className="mt-1 text-xs text-white/35">{formatMb(layer.file.size)} · Video {index + 1}</p>
+                      <p className="mt-1 text-xs text-white/35">{formatMb(layer.file.size)} · Video</p>
                     </div>
-                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); removeSpatialLayer(index); window.setTimeout(() => void trigger("spatialLayers"), 0); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
+                    <button type="button" aria-label={`Remove ${layer.file.name}`} onClick={() => { setTargetError(null); clearErrors(["spatialLayers", "targetImage"]); setValue("targetImage", undefined as unknown as File, { shouldValidate: false }); removeSpatialLayer(index); }} className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
                   </div>
                 );
               })}
-              {errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80">{errors.spatialLayers.message}</p> : null}
-              {errors.targetImage?.message && !targetPreparing ? <p className="text-xs text-rose-200/80">{errors.targetImage.message}</p> : null}
+              {isSubmitted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
+              {isSubmitted && firstVideo && errors.targetImage?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-5 rounded-[5px] bg-white/[0.018] px-4 py-4">
