@@ -7,64 +7,70 @@ function makeFile(name: string, type: string, size = 16) {
   return new File([new Uint8Array(size)], name, { type });
 }
 
-function videoLayer(name: string, type = "video/webm", size = 16) {
-  return { file: makeFile(name, type, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 0.8 };
+function layer(name: string, type: string, size = 16) {
+  return { file: makeFile(name, type, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 1 };
 }
 
 function values() {
   return {
     title: "  Calla Lily  ",
     artistName: "  Studio  ",
-    targetImage: makeFile("generated-tracking.png", "image/png"),
+    targetImage: makeFile("tracking.png", "image/png"),
     arMode: "spatial_layers",
-    spatialLayers: [videoLayer("version-1.webm")],
+    spatialLayers: [layer("video.mp4", "video/mp4")],
   };
 }
 
-test("accepts a video-only artwork and trims labels", () => {
-  const result = artworkCreateFormSchema.parse(values());
-  assert.equal(result.title, "Calla Lily");
-  assert.equal(result.artistName, "Studio");
-  assert.equal(result.spatialLayers.length, 1);
+test("supports a single MP4 or WebM video, trimming title and artist", () => {
+  for (const [name, mime] of [["sample.mp4", "video/mp4"], ["sample.webm", "video/webm"]]) {
+    const result = artworkCreateFormSchema.parse({ ...values(), spatialLayers: [layer(name, mime)] });
+    assert.equal(result.title, "Calla Lily");
+    assert.equal(result.artistName, "Studio");
+    assert.equal(result.spatialLayers.length, 1);
+  }
 });
 
-test("accepts a single MP4 video", () => {
-  assert.equal(artworkCreateFormSchema.safeParse({
-    ...values(), spatialLayers: [videoLayer("one.mp4", "video/mp4")],
-  }).success, true);
-});
-
-test("rejects two videos for one artwork", () => {
+test("supports a transparent PNG AR image like Calla Lily.png", () => {
   const result = artworkCreateFormSchema.safeParse({
-    ...values(), spatialLayers: [videoLayer("one.mp4", "video/mp4"), videoLayer("two.webm")],
+    ...values(), spatialLayers: [layer("Calla Lily.png", "image/png", 184304)],
   });
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.ok(result.error.issues.some((issue) => issue.message === "Only one video is allowed."));
+  assert.equal(result.success, true);
+});
+
+test("supports standalone JPG and WebP image overlays", () => {
+  for (const [name, mime] of [["flower.jpg", "image/jpeg"], ["flower.webp", "image/webp"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...values(), spatialLayers: [layer(name, mime)],
+    }).success, true);
   }
 });
 
-test("rejects non-video uploads and MOV", () => {
-  for (const [name, mime] of [["image.png", "image/png"], ["model.glb", "model/gltf-binary"], ["clip.mov", "video/quicktime"]]) {
-    const result = artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer(name, mime)] });
-    assert.equal(result.success, false, name);
-  }
-});
-
-test("requires exactly one video", () => {
+test("requires one AR image or video, not multiple assets", () => {
   const empty = artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [] });
   assert.equal(empty.success, false);
-  if (!empty.success) assert.ok(empty.error.issues.some((issue) => issue.message === "Please upload a video."));
-  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer("1.webm"), videoLayer("2.webm"), videoLayer("3.webm")] }).success, false);
+  if (!empty.success) assert.ok(empty.error.issues.some((issue) => issue.message === "Please upload a video or image."));
+  const extra = artworkCreateFormSchema.safeParse({
+    ...values(), spatialLayers: [layer("flower.png", "image/png"), layer("motion.mp4", "video/mp4")],
+  });
+  assert.equal(extra.success, false);
+  if (!extra.success) assert.ok(extra.error.issues.some((issue) => issue.message === "Only one AR video or image is allowed."));
 });
 
-test("rejects empty and oversized videos", () => {
-  for (const size of [0, ARTWORK_UPLOAD_MAX_FILE_SIZE + 1]) {
-    assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer("one.webm", "video/webm", size)] }).success, false);
+test("rejects unsupported models, MOV originals before conversion, and PDFs", () => {
+  for (const [name, mime] of [["model.glb", "model/gltf-binary"], ["clip.mov", "video/quicktime"], ["document.pdf", "application/pdf"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [layer(name, mime)] }).success, false, name);
   }
 });
 
-test("requires generated target image and video-only mode", () => {
+test("rejects empty or oversized media", () => {
+  for (const size of [0, ARTWORK_UPLOAD_MAX_FILE_SIZE + 1]) {
+    for (const [name, mime] of [["flower.png", "image/png"], ["video.mp4", "video/mp4"]]) {
+      assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [layer(name, mime, size)] }).success, false, name);
+    }
+  }
+});
+
+test("requires a separately compiled tracking target and spatial AR mode", () => {
   assert.equal(artworkCreateFormSchema.safeParse({ ...values(), targetImage: undefined }).success, false);
   assert.equal(artworkCreateFormSchema.safeParse({ ...values(), arMode: "motion_extract" }).success, false);
 });
