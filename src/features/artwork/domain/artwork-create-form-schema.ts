@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const ARTWORK_UPLOAD_MAX_FILE_SIZE = 6 * 1024 * 1024;
 
-const MAX_SPATIAL_VIDEOS = 2;
+const MAX_SPATIAL_VIDEOS = 1;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const videoTypes = new Set(["video/mp4", "video/webm"]);
 function isFile(value: unknown): value is File {
@@ -52,11 +52,11 @@ export const artworkCreateFormSchema = z
       .max(120, "Artist / creator must be 120 characters or fewer."),
     arMode: z.literal("spatial_layers"),
     targetImage: fileSchema({
-      missingMessage: "Tracking artwork is required.",
+      missingMessage: "A tracking frame could not be generated from this video.",
       typeMessage: "Target image must be JPG, PNG, or WebP.",
       allowedTypes: imageTypes,
     }),
-    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Add at least one video.").max(MAX_SPATIAL_VIDEOS, "Upload no more than 2 videos."),
+    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Please upload a video.").max(MAX_SPATIAL_VIDEOS, "Only one video is allowed."),
   });
 
 export type ArtworkCreateFormValues = z.infer<typeof artworkCreateFormSchema>;
