@@ -9,6 +9,7 @@ import { createArtworkServices } from "@/features/artwork/infrastructure/supabas
 import { ArtworkArQrCode } from "@/features/artwork/presentation/components/artwork-ar-qr-code";
 import { EditArtworkButton } from "@/features/artwork/presentation/components/edit-artwork-button";
 import { ShareArtworkButton } from "@/features/artwork/presentation/components/share-artwork-button";
+import { ArtworkViewTracker } from "@/features/gallery/presentation/components/artwork-view-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +28,11 @@ export default async function ArtworkPage({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
+      <ArtworkViewTracker slug={artwork.slug} />
       <div className="pointer-events-none absolute right-[10%] top-[18%] size-80 rounded-full bg-violet-700/7 blur-[130px]" />
       <header className="relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12">
         <HistoryBackButton
-          fallbackHref="/"
+          fallbackHref="/gallery"
           variant="ghost"
           className={`${backNavigationClassName} h-auto p-0 hover:bg-transparent`}
         >
