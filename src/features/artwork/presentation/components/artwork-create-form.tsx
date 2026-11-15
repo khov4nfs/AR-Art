@@ -555,6 +555,7 @@ export function ArtworkCreateForm({
             <div className="space-y-7">
               <div className="space-y-3">
                 <p className="text-[0.62rem] uppercase tracking-[0.19em] text-cyan-100/65">01 / Image to scan · Required</p>
+                {!trackingReference ? (
                 <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-cyan-100/45 hover:bg-white/[0.04]">
                   <ImageIcon className="size-5 shrink-0 text-cyan-100/75" aria-hidden="true" />
                   <span className="min-w-0">
@@ -564,6 +565,7 @@ export function ArtworkCreateForm({
                   <input type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-label="Upload the artwork image to scan" className="sr-only"
                     onChange={(event) => { selectTrackingImage(event.currentTarget.files); event.currentTarget.value = ""; }} />
                 </label>
+                ) : null}
                 {trackingReference ? (
                   <div className="flex items-center justify-between gap-3 border border-white/10 bg-[#09090d] p-4">
                     <div className="min-w-0">
@@ -583,6 +585,7 @@ export function ArtworkCreateForm({
 
               <div className="space-y-3">
                 <p className="text-[0.62rem] uppercase tracking-[0.19em] text-violet-200/65">02 / Animated AR layer · Required</p>
+                {!firstVideo ? (
                 <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-violet-200/45 hover:bg-white/[0.04]">
                   <Video className="size-5 shrink-0 text-violet-200/80" aria-hidden="true" />
                   <span className="min-w-0">
@@ -592,6 +595,7 @@ export function ArtworkCreateForm({
                   <input type="file" accept="video/quicktime,video/mp4,video/webm,.mov,.mp4,.webm" aria-label="Upload the AR animation video" className="sr-only"
                     onChange={(event) => { selectVideo(event.currentTarget.files); event.currentTarget.value = ""; }} />
                 </label>
+                ) : null}
                 {spatialFields.map((field, index) => {
                   const layer = spatialLayers[index];
                   if (!layer) return null;
