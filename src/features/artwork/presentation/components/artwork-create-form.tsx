@@ -475,7 +475,8 @@ export function ArtworkCreateForm() {
                 );
               })}
               {isSubmitted && errors.spatialLayers?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers.message}</p> : null}
-              {isSubmitted && firstVideo && errors.targetImage?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
+              {isSubmitted && errors.spatialLayers?.[0]?.file?.message ? <p className="text-xs text-rose-200/80" role="alert">{errors.spatialLayers[0].file.message}</p> : null}
+              {isSubmitted && firstVideo && errors.targetImage?.message && !errors.spatialLayers?.[0]?.file?.message && !targetPreparing && !targetError ? <p className="text-xs text-rose-200/80" role="alert">Unable to prepare tracking from this video. Try another video.</p> : null}
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-5 border-y border-white/12 py-4">
