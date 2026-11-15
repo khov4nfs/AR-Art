@@ -6,6 +6,7 @@ import type {
   ArExperienceConfig,
 } from "@/features/ar-experience/domain/ar-experience";
 import { ThreeArOverlayScene } from "@/features/ar-experience/infrastructure/three/three-ar-overlay-scene";
+import { AnchorPoseSmoother } from "@/features/ar-experience/infrastructure/mindar/anchor-pose-smoother";
 
 type MindArAnchor = {
   group: THREE.Group;
@@ -79,6 +80,7 @@ export class MindArImageEngine implements ArEngine {
   private runtime: MindArRuntime | null = null;
   private overlayScenes = new Map<number, ThreeArOverlayScene>();
   private visibleTargets = new Set<number>();
+  private poseSmoothers = new Map<number, AnchorPoseSmoother>();
   private started = false;
   private cleanupViewportSync: (() => void) | null = null;
 
@@ -100,6 +102,11 @@ export class MindArImageEngine implements ArEngine {
         container,
         imageTargetSrc: config.targetUrl,
         maxTrack: 1,
+        // MindAR OneEuroFilter: damp noisy estimates while retaining responsiveness.
+        filterMinCF: 0.001,
+        filterBeta: 300,
+        warmupTolerance: 8,
+        missTolerance: 8,
         uiLoading: "no",
         uiScanning: "no",
         uiError: "no",
@@ -111,8 +118,8 @@ export class MindArImageEngine implements ArEngine {
       const anchors = new Map<number, MindArAnchor>();
       const ensureOverlay = (target: typeof targets[number]) => {
         if (this.runtime !== runtime || this.overlayScenes.has(target.index)) return;
-        const anchor = anchors.get(target.index);
-        if (!anchor) return;
+        const smoother = this.poseSmoothers.get(target.index);
+        if (!smoother) return;
 
         const overlayScene = new ThreeArOverlayScene();
         this.overlayScenes.set(target.index, overlayScene);
@@ -122,7 +129,7 @@ export class MindArImageEngine implements ArEngine {
             overlayScene.dispose();
             return;
           }
-          anchor.group.add(overlay);
+          smoother.pivot.add(overlay);
         }).catch((cause: unknown) => {
           overlayScene.dispose();
           if (this.overlayScenes.get(target.index) === overlayScene) {
@@ -135,9 +142,12 @@ export class MindArImageEngine implements ArEngine {
       for (const target of targets) {
         const anchor = runtime.addAnchor(target.index);
         anchors.set(target.index, anchor);
+        const smoother = new AnchorPoseSmoother(anchor.group);
+        this.poseSmoothers.set(target.index, smoother);
         anchor.onTargetFound = () => {
           if (this.runtime !== runtime) return;
           this.visibleTargets.add(target.index);
+          smoother.reset();
           this.overlayScenes.get(target.index)?.setTargetVisible(true);
           if (this.started) ensureOverlay(target);
           callbacks.onTargetFound(target.index);
@@ -145,6 +155,7 @@ export class MindArImageEngine implements ArEngine {
         anchor.onTargetLost = () => {
           if (this.runtime !== runtime) return;
           this.visibleTargets.delete(target.index);
+          smoother.reset();
           this.overlayScenes.get(target.index)?.setTargetVisible(false);
           callbacks.onTargetLost(target.index);
         };
@@ -188,8 +199,12 @@ export class MindArImageEngine implements ArEngine {
 
       this.started = true;
       const clock = new THREE.Clock();
+      let lastElapsed = 0;
       renderer.setAnimationLoop(() => {
         const elapsed = clock.getElapsedTime();
+        const delta = elapsed - lastElapsed;
+        lastElapsed = elapsed;
+        for (const smoother of this.poseSmoothers.values()) smoother.update(delta);
         for (const overlayScene of this.overlayScenes.values()) overlayScene.update(elapsed);
         renderer.render(scene, camera);
       });
@@ -259,6 +274,7 @@ export class MindArImageEngine implements ArEngine {
     for (const overlayScene of this.overlayScenes.values()) overlayScene.dispose();
     this.overlayScenes.clear();
     this.visibleTargets.clear();
+    this.poseSmoothers.clear();
 
     if (!this.runtime) return;
     const runtime = this.runtime;

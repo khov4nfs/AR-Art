@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { BackLink } from "@/components/atoms/back-link";
+import { ARTWORK_VIDEO_PLANE_DEPTH } from "@/features/ar-experience/domain/video-plane-fit";
 import { Button } from "@/components/atoms/button";
 import { EverieBrand } from "@/components/atoms/everie-brand";
 import { Input } from "@/components/atoms/input";
@@ -391,7 +392,7 @@ export function ArtworkCreateForm({
       blendMode: "normal",
       x: 0,
       y: 0,
-      depth: 0.05,
+      depth: ARTWORK_VIDEO_PLANE_DEPTH,
       scale: 1,
     }]);
   }
