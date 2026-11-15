@@ -22,6 +22,7 @@ export interface ArtworkSpatialLayerConfig {
   mimeType?: string;
   aspectRatio?: number;
   alphaPacking?: "side-by-side";
+  fitToTarget?: boolean;
   transform: ArtworkArLayerTransform;
   animation?: {
     type: ArtworkArLayerAnimation;

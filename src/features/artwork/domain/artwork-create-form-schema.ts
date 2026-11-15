@@ -2,10 +2,9 @@ import { z } from "zod";
 
 export const ARTWORK_UPLOAD_MAX_FILE_SIZE = 6 * 1024 * 1024;
 
-const MAX_AR_ASSETS = 1;
+const MAX_ANIMATION_VIDEOS = 1;
 const imageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const videoTypes = new Set(["video/mp4", "video/webm"]);
-const arAssetTypes = new Set([...videoTypes, ...imageTypes]);
 function isFile(value: unknown): value is File {
   return typeof File !== "undefined" && value instanceof File;
 }
@@ -25,9 +24,9 @@ function fileSchema(options: {
 }
 
 const spatialFileSchema = z
-  .custom<File>(isFile, "Choose a video or image.")
-  .refine((file) => arAssetTypes.has(file.type), "Choose PNG, JPG, WebP, MP4 or WebM.")
-  .refine((file) => file.size > 0 && file.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE, "Images and converted videos must be between 1 byte and 6 MB.");
+  .custom<File>(isFile, "Upload the animation video.")
+  .refine((file) => videoTypes.has(file.type), "The animation must be MP4 or WebM (MOV is converted on Save).")
+  .refine((file) => file.size > 0 && file.size <= ARTWORK_UPLOAD_MAX_FILE_SIZE, "The converted animation must be between 1 byte and 6 MB.");
 
 export const spatialLayerFormSchema = z.object({
   file: spatialFileSchema,
@@ -53,11 +52,11 @@ export const artworkCreateFormSchema = z
       .max(120, "Artist / creator must be 120 characters or fewer."),
     arMode: z.literal("spatial_layers"),
     targetImage: fileSchema({
-      missingMessage: "A tracking image could not be prepared from this media.",
+      missingMessage: "Upload the artwork image visitors will scan.",
       typeMessage: "Target image must be JPG, PNG, or WebP.",
       allowedTypes: imageTypes,
     }),
-    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Please upload a video or image.").max(MAX_AR_ASSETS, "Only one AR video or image is allowed."),
+    spatialLayers: z.array(spatialLayerFormSchema).min(1, "Upload the animation video.").max(MAX_ANIMATION_VIDEOS, "Only one animation video is allowed."),
   });
 
 export type ArtworkCreateFormValues = z.infer<typeof artworkCreateFormSchema>;

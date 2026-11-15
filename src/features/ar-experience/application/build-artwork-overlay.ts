@@ -52,6 +52,7 @@ export function buildArtworkOverlay(artwork: PublishedArtwork): ArOverlay {
             aspectRatio: layer.aspectRatio ?? 1,
             transparent: true,
             alphaPacking: layer.alphaPacking,
+            fitToTarget: layer.fitToTarget,
           };
         }
 

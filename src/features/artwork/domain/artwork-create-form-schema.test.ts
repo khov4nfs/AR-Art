@@ -1,76 +1,78 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-
 import { ARTWORK_UPLOAD_MAX_FILE_SIZE, artworkCreateFormSchema } from "./artwork-create-form-schema.ts";
 
-function makeFile(name: string, type: string, size = 16) {
-  return new File([new Uint8Array(size)], name, { type });
+function makeFile(name: string, mime: string, size = 16) {
+  return new File([new Uint8Array(size)], name, { type: mime });
 }
-
-function layer(name: string, type: string, size = 16) {
-  return { file: makeFile(name, type, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 1 };
+function videoLayer(name: string, mime = "video/mp4", size = 16) {
+  return { file: makeFile(name, mime, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 1 };
 }
-
-function values() {
+function pairedValues() {
   return {
     title: "  Calla Lily  ",
     artistName: "  Studio  ",
-    targetImage: makeFile("tracking.png", "image/png"),
+    targetImage: makeFile("tracking-from-image.png", "image/png", 184304),
     arMode: "spatial_layers",
-    spatialLayers: [layer("video.mp4", "video/mp4")],
+    spatialLayers: [videoLayer("animation.mp4")],
   };
 }
-
-test("supports a single MP4 or WebM video, trimming title and artist", () => {
-  for (const [name, mime] of [["sample.mp4", "video/mp4"], ["sample.webm", "video/webm"]]) {
-    const result = artworkCreateFormSchema.parse({ ...values(), spatialLayers: [layer(name, mime)] });
-    assert.equal(result.title, "Calla Lily");
-    assert.equal(result.artistName, "Studio");
-    assert.equal(result.spatialLayers.length, 1);
-  }
+test("one image tracking target and one video form one published AR artwork", () => {
+  const values = artworkCreateFormSchema.parse(pairedValues());
+  assert.equal(values.title, "Calla Lily");
+  assert.equal(values.artistName, "Studio");
+  assert.equal(values.spatialLayers.length, 1);
+  assert.equal(values.spatialLayers[0].file.type, "video/mp4");
+  assert.equal(values.targetImage.type, "image/png");
 });
-
-test("supports a transparent PNG AR image like Calla Lily.png", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...values(), spatialLayers: [layer("Calla Lily.png", "image/png", 184304)],
-  });
-  assert.equal(result.success, true);
-});
-
-test("supports standalone JPG and WebP image overlays", () => {
-  for (const [name, mime] of [["flower.jpg", "image/jpeg"], ["flower.webp", "image/webp"]]) {
+test("accepts either converted MP4 or WebM animation", () => {
+  for (const [name, type] of [["animation.mp4", "video/mp4"], ["animation.webm", "video/webm"]]) {
     assert.equal(artworkCreateFormSchema.safeParse({
-      ...values(), spatialLayers: [layer(name, mime)],
+      ...pairedValues(), spatialLayers: [videoLayer(name, type)],
     }).success, true);
   }
 });
-
-test("requires one AR image or video, not multiple assets", () => {
-  const empty = artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [] });
-  assert.equal(empty.success, false);
-  if (!empty.success) assert.ok(empty.error.issues.some((issue) => issue.message === "Please upload a video or image."));
-  const extra = artworkCreateFormSchema.safeParse({
-    ...values(), spatialLayers: [layer("flower.png", "image/png"), layer("motion.mp4", "video/mp4")],
+test("rejects missing artwork image even if animation exists", () => {
+  const parsed = artworkCreateFormSchema.safeParse({ ...pairedValues(), targetImage: undefined });
+  assert.equal(parsed.success, false);
+});
+test("rejects missing animation even if artwork image exists", () => {
+  const parsed = artworkCreateFormSchema.safeParse({ ...pairedValues(), spatialLayers: [] });
+  assert.equal(parsed.success, false);
+  if (!parsed.success) assert.ok(parsed.error.issues.some(issue => issue.message === "Upload the animation video."));
+});
+test("a static image alone cannot replace an animation", () => {
+  for (const [name, type] of [["Calla Lily.png","image/png"], ["printed.jpg","image/jpeg"], ["art.webp","image/webp"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers: [videoLayer(name, type)],
+    }).success, false, name);
+  }
+});
+test("only one animation video can be paired with the image", () => {
+  const parsed = artworkCreateFormSchema.safeParse({
+    ...pairedValues(), spatialLayers: [videoLayer("one.mp4"), videoLayer("two.webm", "video/webm")],
   });
-  assert.equal(extra.success, false);
-  if (!extra.success) assert.ok(extra.error.issues.some((issue) => issue.message === "Only one AR video or image is allowed."));
+  assert.equal(parsed.success, false);
 });
-
-test("rejects unsupported models, MOV originals before conversion, and PDFs", () => {
-  for (const [name, mime] of [["model.glb", "model/gltf-binary"], ["clip.mov", "video/quicktime"], ["document.pdf", "application/pdf"]]) {
-    assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [layer(name, mime)] }).success, false, name);
+test("MOV originals require conversion first and unsupported models are rejected", () => {
+  for (const [name,type] of [["animation.mov", "video/quicktime"],["model.glb","model/gltf-binary"],["print.pdf","application/pdf"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers: [videoLayer(name,type)],
+    }).success, false, name);
   }
 });
-
-test("rejects empty or oversized media", () => {
-  for (const size of [0, ARTWORK_UPLOAD_MAX_FILE_SIZE + 1]) {
-    for (const [name, mime] of [["flower.png", "image/png"], ["video.mp4", "video/mp4"]]) {
-      assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [layer(name, mime, size)] }).success, false, name);
-    }
+test("rejects empty or oversized finished media and tracking image", () => {
+  for (const size of [0,ARTWORK_UPLOAD_MAX_FILE_SIZE+1]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers:[videoLayer("animation.mp4","video/mp4",size)],
+    }).success,false);
   }
+  assert.equal(artworkCreateFormSchema.safeParse({
+    ...pairedValues(),targetImage:makeFile("tracking.png","image/png",ARTWORK_UPLOAD_MAX_FILE_SIZE+1),
+  }).success,false);
 });
-
-test("requires a separately compiled tracking target and spatial AR mode", () => {
-  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), targetImage: undefined }).success, false);
-  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), arMode: "motion_extract" }).success, false);
+test("non-spatial AR publishing is not permitted in paired workflow", () => {
+  assert.equal(artworkCreateFormSchema.safeParse({
+    ...pairedValues(), arMode:"motion_extract",
+  }).success,false);
 });

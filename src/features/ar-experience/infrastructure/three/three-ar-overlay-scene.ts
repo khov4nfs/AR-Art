@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { fitVideoPlaneInTarget } from "@/features/ar-experience/domain/video-plane-fit";
 
 import type {
   ArLayerAnimation,
@@ -72,7 +73,7 @@ export class ThreeArOverlayScene {
       for (let index = 0; index < layers.length; index += 1) {
         const layer = layers[index];
         if (!layer) continue;
-        group.add(await this.createSpatialLayer(layer, index * 0.73));
+        group.add(await this.createSpatialLayer(layer, index * 0.73, overlay.targetAspectRatio));
       }
       return group;
     }
@@ -277,7 +278,7 @@ export class ThreeArOverlayScene {
     });
   }
 
-  private async createSpatialLayer(layer: ArSceneLayer, phase: number) {
+  private async createSpatialLayer(layer: ArSceneLayer, phase: number, targetAspectRatio: number) {
     let object: THREE.Object3D;
 
     if (layer.type === "image") {
@@ -331,8 +332,11 @@ export class ThreeArOverlayScene {
             blending: blendingFor(layer.blendMode),
             side: THREE.DoubleSide,
           }));
+      const dimensions = layer.fitToTarget
+        ? fitVideoPlaneInTarget(layer.aspectRatio, targetAspectRatio)
+        : { width: 1, height: 1 / Math.max(layer.aspectRatio, 0.05) };
       const geometry = this.registerGeometry(
-        new THREE.PlaneGeometry(1, 1 / Math.max(layer.aspectRatio, 0.05)),
+        new THREE.PlaneGeometry(dimensions.width, dimensions.height),
       );
       object = new THREE.Mesh(geometry, material);
     } else if (layer.type === "model") {
