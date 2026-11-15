@@ -14,8 +14,24 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
 
   const origin = request.headers.get("origin");
   const fetchSite = request.headers.get("sec-fetch-site");
-  // No cross-origin or cross-site forms can inflate view counts.
-  if (fetchSite === "cross-site" || (origin && new URL(origin).host !== new URL(request.url).host)) {
+  // Next.js may see an internal upstream URL behind Caddy; the browser still
+  // sends Sec-Fetch-Site: same-origin. Trust that browser-owned signal, or
+  // compare Origin against the public forwarded/Host header for other clients.
+  const publicHost = (
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    new URL(request.url).host
+  ).split(",")[0].trim();
+  let samePublicOrigin = false;
+  try {
+    samePublicOrigin = !!origin && new URL(origin).host === publicHost;
+  } catch {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
+  if (
+    fetchSite === "cross-site" ||
+    (origin && !samePublicOrigin && fetchSite !== "same-origin")
+  ) {
     return NextResponse.json({ error: "Cross-origin view not allowed." }, { status: 403 });
   }
 
