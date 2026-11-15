@@ -110,6 +110,7 @@ export function SiteHeader() {
           >
             Artists
           </a>
+          <Link href="/gallery" className="text-white/75 transition hover:text-white">Gallery</Link>
           <Link href="/ar" className="text-cyan-100/80 transition hover:text-cyan-100">Scan AR</Link>
           <Link href="/collection" className="hidden text-white/46 transition hover:text-white sm:inline">
             Collection
