@@ -21,6 +21,7 @@ export interface ArtworkSpatialLayerConfig {
   assetPath?: string;
   mimeType?: string;
   aspectRatio?: number;
+  alphaPacking?: "side-by-side";
   transform: ArtworkArLayerTransform;
   animation?: {
     type: ArtworkArLayerAnimation;

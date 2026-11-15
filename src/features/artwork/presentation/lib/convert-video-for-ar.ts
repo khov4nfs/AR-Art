@@ -53,7 +53,7 @@ export async function convertVideoForAr(
       if (!response.ok) throw new Error(await messageFromResponse(response));
     }
 
-    onProgress("Converting your video to AR WebM…");
+    onProgress("Converting your video to transparent AR MP4…");
     const completed = await fetch(
       `/api/videos/convert?stage=finish&id=${encodeURIComponent(session.id)}`,
       { method: "POST", headers: authHeaders },
@@ -64,7 +64,7 @@ export async function convertVideoForAr(
       throw new Error("Converted video exceeds the 6 MB AR limit.");
     }
     const baseName = original.name.replace(/\.[^/.]+$/, "");
-    return new File([blob], `${baseName}.webm`, { type: "video/webm" });
+    return new File([blob], `${baseName}.alpha.mp4`, { type: "video/mp4" });
   } catch (error) {
     void fetch(
       `/api/videos/convert?stage=cancel&id=${encodeURIComponent(session.id)}`,

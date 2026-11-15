@@ -298,15 +298,39 @@ export class ThreeArOverlayScene {
     } else if (layer.type === "video") {
       const video = this.createVideo(layer.url);
       const texture = this.createVideoTexture(video);
-      const material = this.registerMaterial(
-        new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: layer.transparent ?? true,
-          depthWrite: false,
-          blending: blendingFor(layer.blendMode),
-          side: THREE.DoubleSide,
-        }),
-      );
+      const material = layer.alphaPacking === "side-by-side"
+        ? this.registerMaterial(new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.NormalBlending,
+            side: THREE.DoubleSide,
+            uniforms: { uPackedVideo: { value: texture } },
+            vertexShader: `
+              varying vec2 vUv;
+              void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+              }
+            `,
+            fragmentShader: `
+              uniform sampler2D uPackedVideo;
+              varying vec2 vUv;
+              void main() {
+                vec3 color = texture2D(uPackedVideo, vec2(vUv.x * 0.5, vUv.y)).rgb;
+                vec3 matte = texture2D(uPackedVideo, vec2(0.5 + vUv.x * 0.5, vUv.y)).rgb;
+                float alpha = clamp((dot(matte, vec3(0.299, 0.587, 0.114)) - 0.02) / 0.96, 0.0, 1.0);
+                if (alpha < 0.01) discard;
+                gl_FragColor = vec4(color, alpha);
+              }
+            `,
+          }))
+        : this.registerMaterial(new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: layer.transparent ?? true,
+            depthWrite: false,
+            blending: blendingFor(layer.blendMode),
+            side: THREE.DoubleSide,
+          }));
       const geometry = this.registerGeometry(
         new THREE.PlaneGeometry(1, 1 / Math.max(layer.aspectRatio, 0.05)),
       );

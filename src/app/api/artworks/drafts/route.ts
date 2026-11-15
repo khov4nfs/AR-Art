@@ -98,7 +98,9 @@ export async function POST(request: Request) {
       const layer = raw as Record<string, unknown>;
       const extension = clean(layer.extension, 8).toLowerCase();
       const assetType = assetTypeFor(extension);
-      if (!spatialExtensions.has(extension) || !assetType) {
+      const alphaPacking = layer.alphaPacking === "side-by-side" ? "side-by-side" as const : undefined;
+      if (!spatialExtensions.has(extension) || !assetType ||
+          (layer.alphaPacking !== undefined && (alphaPacking === undefined || extension !== "mp4"))) {
         throw new Error(`Layer ${index + 1} has an unsupported format.`);
       }
 
@@ -129,6 +131,7 @@ export async function POST(request: Request) {
         extension: extension as "jpg" | "jpeg" | "png" | "webp" | "mp4" | "webm" | "glb",
         mimeType: clean(layer.mimeType, 80) || "application/octet-stream",
         assetType,
+        alphaPacking,
         aspectRatio,
         transform: {
           position: { x, y, z: depth },

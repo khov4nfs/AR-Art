@@ -38,6 +38,7 @@ export type ArSceneLayer =
       url: string;
       aspectRatio: number;
       transparent?: boolean;
+      alphaPacking?: "side-by-side";
     })
   | (ArSceneLayerBase & {
       type: "model";
