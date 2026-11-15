@@ -868,19 +868,20 @@ a {
 .creator-success {
   isolation: isolate;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .creator-success::before {
   content: "";
   position: absolute;
-  width: min(44rem, 72vw);
-  aspect-ratio: 1;
-  left: -14%;
-  top: 8%;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(124,58,237,0.16), rgba(34,211,238,0.055) 38%, transparent 70%);
-  filter: blur(18px);
+  inset: 0;
+  /* Glow fades to transparent before every edge of the embedded modal. */
+  background: radial-gradient(
+    ellipse 36% 42% at 42% 48%,
+    rgba(124,58,237,0.16) 0%,
+    rgba(34,211,238,0.055) 38%,
+    transparent 100%
+  );
   opacity: 0;
   animation: creator-success-bloom 1200ms cubic-bezier(0.16,1,0.3,1) 120ms forwards;
   pointer-events: none;
@@ -955,9 +956,9 @@ a {
 }
 
 @keyframes creator-success-bloom {
-  0% { opacity: 0; transform: scale(0.72); }
-  55% { opacity: 1; }
-  100% { opacity: 0.58; transform: scale(1.08); }
+  0% { opacity: 0; }
+  55% { opacity: 0.58; }
+  100% { opacity: 0.58; }
 }
 
 @keyframes creator-success-ring {
