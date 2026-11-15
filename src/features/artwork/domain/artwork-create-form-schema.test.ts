@@ -1,127 +1,58 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  ARTWORK_UPLOAD_MAX_FILE_SIZE,
-  artworkCreateFormSchema,
-} from "./artwork-create-form-schema.ts";
+import { ARTWORK_UPLOAD_MAX_FILE_SIZE, artworkCreateFormSchema } from "./artwork-create-form-schema.ts";
 
 function makeFile(name: string, type: string, size = 16) {
   return new File([new Uint8Array(size)], name, { type });
 }
 
-function baseValues() {
+function videoLayer(name: string, type = "video/webm", size = 16) {
+  return { file: makeFile(name, type, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 0.8 };
+}
+
+function values() {
   return {
-    title: "  Neon Rift  ",
-    artistName: "  Everie Studio  ",
-    targetImage: makeFile("target.png", "image/png"),
-    spatialLayers: [],
+    title: "  Calla Lily  ",
+    artistName: "  Studio  ",
+    targetImage: makeFile("generated-tracking.png", "image/png"),
+    arMode: "spatial_layers",
+    spatialLayers: [videoLayer("version-1.webm")],
   };
 }
 
-test("accepts motion extract and trims text", () => {
-  const result = artworkCreateFormSchema.parse({
-    ...baseValues(),
-    arMode: "motion_extract",
-    overlayVideo: makeFile("overlay.mp4", "video/mp4"),
-  });
-
-  assert.equal(result.title, "Neon Rift");
-  assert.equal(result.artistName, "Everie Studio");
-  assert.equal(result.arMode, "motion_extract");
+test("accepts a video-only artwork and trims labels", () => {
+  const result = artworkCreateFormSchema.parse(values());
+  assert.equal(result.title, "Calla Lily");
+  assert.equal(result.artistName, "Studio");
+  assert.equal(result.spatialLayers.length, 1);
 });
 
-test("accepts transparent motion video", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "transparent_motion",
-    overlayVideo: makeFile("motion.webm", "video/webm"),
-  });
-
-  assert.equal(result.success, true);
+test("accepts two MP4/WebM videos", () => {
+  assert.equal(artworkCreateFormSchema.safeParse({
+    ...values(), spatialLayers: [videoLayer("one.mp4", "video/mp4"), videoLayer("two.webm")],
+  }).success, true);
 });
 
-test("accepts layered AR with image and GLB assets", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "spatial_layers",
-    spatialLayers: [
-      {
-        file: makeFile("glow.png", "image/png"),
-        animation: "pulse",
-        blendMode: "additive",
-        x: 0,
-        y: 0,
-        depth: 0.05,
-        scale: 0.4,
-      },
-      {
-        file: makeFile("orb.glb", "model/gltf-binary"),
-        animation: "rotate",
-        blendMode: "normal",
-        x: 0,
-        y: 0,
-        depth: 0.12,
-        scale: 0.25,
-      },
-    ],
-  });
-
-  assert.equal(result.success, true);
-});
-
-test("requires a motion video outside layered AR", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "motion_extract",
-  });
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.ok(
-      result.error.issues.some(
-        (issue) => issue.message === "AR motion video is required for this mode.",
-      ),
-    );
+test("rejects non-video uploads and MOV", () => {
+  for (const [name, mime] of [["image.png", "image/png"], ["model.glb", "model/gltf-binary"], ["clip.mov", "video/quicktime"]]) {
+    const result = artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer(name, mime)] });
+    assert.equal(result.success, false, name);
   }
 });
 
-test("rejects unsupported artwork and motion mime types", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "transparent_motion",
-    targetImage: makeFile("target.gif", "image/gif"),
-    overlayVideo: makeFile("overlay.mov", "video/quicktime"),
-  });
+test("requires one or two videos", () => {
+  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [] }).success, false);
+  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer("1.webm"), videoLayer("2.webm"), videoLayer("3.webm")] }).success, false);
+});
 
-  assert.equal(result.success, false);
-  if (!result.success) {
-    const messages = result.error.issues.map((issue) => issue.message);
-    assert.ok(messages.includes("Target image must be JPG, PNG, or WebP."));
-    assert.ok(messages.includes("AR motion must be MP4 or WebM."));
+test("rejects empty and oversized videos", () => {
+  for (const size of [0, ARTWORK_UPLOAD_MAX_FILE_SIZE + 1]) {
+    assert.equal(artworkCreateFormSchema.safeParse({ ...values(), spatialLayers: [videoLayer("one.webm", "video/webm", size)] }).success, false);
   }
 });
 
-test("rejects files larger than the MVP upload limit", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "motion_extract",
-    targetImage: makeFile(
-      "target.png",
-      "image/png",
-      ARTWORK_UPLOAD_MAX_FILE_SIZE + 1,
-    ),
-    overlayVideo: makeFile("overlay.mp4", "video/mp4"),
-  });
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.ok(
-      result.error.issues.some(
-        (issue) =>
-          issue.message ===
-          "Each uploaded file must be 6 MB or smaller for this MVP.",
-      ),
-    );
-  }
+test("requires generated target image and video-only mode", () => {
+  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), targetImage: undefined }).success, false);
+  assert.equal(artworkCreateFormSchema.safeParse({ ...values(), arMode: "motion_extract" }).success, false);
 });
