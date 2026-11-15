@@ -1,3 +1,5 @@
+import { isPackedAlphaVideoName } from "@/features/artwork/domain/original-video";
+
 export async function readVideoAspectRatio(file: File) {
   const videoUrl = URL.createObjectURL(file);
 
@@ -10,7 +12,7 @@ export async function readVideoAspectRatio(file: File) {
           reject(new Error("Unable to read the AR video's dimensions."));
           return;
         }
-        resolve(video.videoWidth / video.videoHeight);
+        resolve((isPackedAlphaVideoName(file.name) ? video.videoWidth / 2 : video.videoWidth) / video.videoHeight);
       };
       video.onerror = () => reject(new Error("Unable to read the AR video."));
       video.src = videoUrl;

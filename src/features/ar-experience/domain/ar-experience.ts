@@ -39,6 +39,7 @@ export type ArSceneLayer =
       aspectRatio: number;
       transparent?: boolean;
       alphaPacking?: "side-by-side";
+      fitToTarget?: boolean;
     })
   | (ArSceneLayerBase & {
       type: "model";

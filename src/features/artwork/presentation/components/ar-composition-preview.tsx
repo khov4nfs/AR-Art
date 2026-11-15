@@ -8,6 +8,7 @@ import { ThreeArOverlayScene } from "@/features/ar-experience/infrastructure/thr
 import type { ArtworkArMode } from "@/features/artwork/domain/artwork";
 import type { ArtworkCreateFormValues } from "@/features/artwork/domain/artwork-create-form-schema";
 import { readImageAspectRatio } from "@/features/artwork/presentation/lib/read-image-aspect-ratio";
+import { isPackedAlphaVideoName } from "@/features/artwork/domain/original-video";
 import { readVideoAspectRatio } from "@/features/artwork/presentation/lib/read-video-aspect-ratio";
 
 interface ArCompositionPreviewProps {
@@ -109,7 +110,7 @@ export function ArCompositionPreview({
           if (isModel(layer.file)) return { ...base, type: "model", url };
           const aspectRatio = (await layerAspectRatio(layer.file)) ?? 1;
           if (isVideo(layer.file)) {
-            return { ...base, type: "video", url, aspectRatio, transparent: true };
+            return { ...base, type: "video", url, aspectRatio, transparent: true, fitToTarget: true, alphaPacking: isPackedAlphaVideoName(layer.file.name) ? "side-by-side" : undefined };
           }
           return { ...base, type: "image", url, aspectRatio };
         }),
