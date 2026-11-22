@@ -10,7 +10,7 @@ import {
 
 export function AuthCallbackForwarder() {
   useEffect(() => {
-    if (window.location.pathname === "/login") return;
+    if (window.location.pathname === "/ar-login") return;
 
     const callback = parseAuthCallbackHash(window.location.hash);
     if (callback.kind === "none") return;
@@ -27,7 +27,7 @@ export function AuthCallbackForwarder() {
     }
 
     const search = existingSearch.toString();
-    const target = `/login${search ? `?${search}` : ""}${window.location.hash}`;
+    const target = `/ar-login${search ? `?${search}` : ""}${window.location.hash}`;
     window.location.replace(target);
   }, []);
 

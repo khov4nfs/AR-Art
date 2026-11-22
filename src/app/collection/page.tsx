@@ -1,35 +1,26 @@
-import { BackLink } from "@/components/atoms/back-link";
-import { EverieBrand } from "@/components/atoms/everie-brand";
+import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
+import Link from "next/link";
+import { EverieArHeader } from "@/components/everie-ar/everie-ar-header";
 import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
 import { CollectionGrid } from "@/features/collection/presentation/components/collection-grid";
 
 export const dynamic = "force-dynamic";
 
 export default async function CollectionPage() {
+  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Bộ sưu tập AR" />;
+
   const { listPublishedArtworks } = createArtworkServices();
   const artworks = await listPublishedArtworks.execute();
-
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
-      <div className="pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-violet-700/7 blur-[130px]" />
-      <header className="relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12">
-        <BackLink href="/" />
-        <EverieBrand />
-        <span aria-hidden="true" />
-      </header>
-
-      <section className="relative mx-auto w-full max-w-[94rem] px-5 pb-12 pt-16 sm:px-8 lg:px-12 lg:pb-16 lg:pt-24">
-        <h1 className="max-w-5xl font-serif text-6xl leading-[0.88] tracking-[-0.055em] sm:text-8xl lg:text-9xl">
-          Works you <span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">discovered.</span>
-        </h1>
-        <p className="mt-6 max-w-2xl text-sm leading-6 text-white/38">
-          Open a published work in AR and point the camera at the physical artwork. It appears here only after recognition succeeds; remove anything you no longer want to keep.
-        </p>
-      </section>
-
-      <div className="relative mx-auto w-full max-w-[94rem] px-5 pb-24 sm:px-8 lg:px-12">
-        <CollectionGrid artworks={artworks} />
-      </div>
-    </main>
+    <div className="min-h-screen bg-[#0C0C0E] text-white">
+      <EverieArHeader active="gallery" />
+      <main className="mx-auto max-w-[1440px] px-5 pb-24 pt-16 md:px-8 lg:pt-24">
+        <p className="text-[11px] uppercase tracking-[0.3em] text-[#C5A880]">EVERIE / Your Collection</p>
+        <h1 className="mt-5 max-w-4xl font-serif text-6xl leading-[0.95] tracking-tight md:text-8xl">Tác phẩm bạn đã <span className="italic text-[#C5A880]">khám phá.</span></h1>
+        <p className="mt-7 max-w-2xl text-sm leading-7 text-stone-400">Tác phẩm chỉ được thêm sau khi camera AR thực sự nhận diện đúng hình ảnh. Bạn có thể mở lại và quản lý các tác phẩm đã lưu.</p>
+        <div className="mt-8 flex flex-wrap gap-4 text-xs uppercase tracking-widest"><Link href="/ar" className="border-b border-[#C5A880] pb-2 text-[#C5A880]">Quét AR</Link><Link href="/gallery" className="border-b border-white/25 pb-2 text-stone-300">Xem thư viện</Link></div>
+        <div className="mt-12"><CollectionGrid artworks={artworks} /></div>
+      </main>
+    </div>
   );
 }

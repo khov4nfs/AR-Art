@@ -33,7 +33,7 @@ export function ArtworkArQrCode({ href, title }: { href: string; title: string }
       aria-label={`Open ${title} in AR`}
       className="group inline-flex flex-col items-end gap-3"
     >
-      <span className="rounded-[5px] bg-white p-2.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-violet-200">
+      <span className="rounded-[5px] bg-white p-2.5 transition-transform duration-200 group-hover:-translate-y-0.5 group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-4 group-focus-visible:outline-amber-200">
         {qrDataUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img

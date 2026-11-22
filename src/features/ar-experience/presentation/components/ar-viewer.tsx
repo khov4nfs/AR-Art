@@ -69,7 +69,7 @@ export function ArViewer({
 
         if (!user) {
           const nextPath = `${window.location.pathname}${window.location.search}`;
-          router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
+          router.replace(`/ar-login?next=${encodeURIComponent(nextPath)}`);
           return;
         }
 
@@ -102,11 +102,13 @@ export function ArViewer({
     }
 
     collectionSavedRef.current = true;
-    setCollectionSaveError(null);
 
     void collectArtwork(artwork.id)
       .then((result) => {
-        if (result.collected) setCollectionSaved(true);
+        if (result.collected) {
+          setCollectionSaveError(null);
+          setCollectionSaved(true);
+        }
       })
       .catch((cause) => {
         collectionSavedRef.current = false;
@@ -187,7 +189,7 @@ export function ArViewer({
 
             <Button
               type="button"
-              className="mt-5 w-full rounded-none bg-white text-black hover:bg-violet-100"
+              className="mt-5 w-full rounded-none bg-white text-black hover:bg-amber-100"
               onClick={retry}
             >
               <RotateCcw className="size-4" aria-hidden="true" />
@@ -221,8 +223,8 @@ export function ArViewer({
       )}
 
       {collectionSaved && !collectionSaveError && (
-        <div className="absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 border border-cyan-100/18 bg-black/78 p-4 backdrop-blur-xl">
-          <CheckCircle2 className="size-5 shrink-0 text-cyan-100" aria-hidden="true" />
+        <div className="absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 border border-amber-100/18 bg-black/78 p-4 backdrop-blur-xl">
+          <CheckCircle2 className="size-5 shrink-0 text-amber-100" aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-white">Artwork unlocked</p>
             <p className="mt-0.5 text-xs text-white/48">Added to your collection.</p>

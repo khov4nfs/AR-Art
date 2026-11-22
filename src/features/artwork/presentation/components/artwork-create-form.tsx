@@ -411,7 +411,7 @@ export function ArtworkCreateForm({
 
     return (
       <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
-        <div className={embedded ? "hidden" : "pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-violet-700/7 blur-[130px]"} />
+        <div className={embedded ? "hidden" : "pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
         <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
           <BackLink href="/studio/products" label="Products" />
           <EverieBrand />
@@ -426,9 +426,9 @@ export function ArtworkCreateForm({
 
             <h1 className={embedded ? "mt-8 max-w-3xl font-serif text-5xl leading-[0.9] tracking-[-0.05em] sm:text-6xl" : "mt-8 max-w-4xl font-serif text-6xl leading-[0.88] tracking-[-0.055em] sm:text-8xl"}>
               {isPublished ? (
-                <>Now part of <span className="bg-gradient-to-r from-violet-200 via-white to-cyan-200 bg-clip-text italic text-transparent">Everie.</span></>
+                <>Now part of <span className="bg-gradient-to-r from-amber-200 via-white to-amber-200 bg-clip-text italic text-transparent">Everie.</span></>
               ) : (
-                <>Draft <span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">saved.</span></>
+                <>Draft <span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">saved.</span></>
               )}
             </h1>
 
@@ -445,7 +445,7 @@ export function ArtworkCreateForm({
             <div className="mt-8 flex flex-wrap gap-2">
               {workflow.result.shareUrl ? (
                 <>
-                  <button type="button" onClick={copyShareUrl} className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                  <button type="button" onClick={copyShareUrl} className="inline-flex h-12 items-center gap-2 rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-amber-100">
                     {workflow.copied ? <Check className="size-4" /> : <Copy className="size-4" />}
                     {workflow.copied ? "Copied" : "Copy link"}
                   </button>
@@ -464,11 +464,11 @@ export function ArtworkCreateForm({
                   ) : null}
                 </>
               ) : embedded && onDone ? (
-                <button type="button" onClick={onDone} className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                <button type="button" onClick={onDone} className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-amber-100">
                   Back to Studio
                 </button>
               ) : (
-                <Link href="/studio/products" className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100">
+                <Link href="/studio/products" className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-amber-100">
                   Back to Studio
                 </Link>
               )}
@@ -493,7 +493,7 @@ export function ArtworkCreateForm({
 
   return (
     <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
-      <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-violet-700/7 blur-[130px]"} />
+      <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
       <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
         <BackLink href="/studio/products" label="Studio" />
         <EverieBrand />
@@ -502,7 +502,7 @@ export function ArtworkCreateForm({
 
       <section className={embedded ? "relative mx-auto w-full max-w-none p-0" : "relative mx-auto w-full max-w-[94rem] px-5 py-14 sm:px-8 lg:px-12 lg:py-20"}>
         <h1 className={embedded ? "hidden" : "max-w-5xl font-serif text-6xl leading-[0.86] tracking-[-0.055em] sm:text-8xl lg:text-9xl"}>
-          Bring your artwork<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">into AR.</span>
+          Khơi dậy tác phẩm<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">cùng AR.</span>
         </h1>
 
         <div className={`${embedded ? "mt-0" : "mt-12"} grid grid-cols-3 gap-5 pt-2`}>
@@ -520,7 +520,7 @@ export function ArtworkCreateForm({
                 {String(label)}
               </p>
               <div className="mt-2 h-px bg-white/10">
-                <div className={`h-px transition-all duration-500 ${ready ? "w-full bg-violet-200" : "w-0"}`} />
+                <div className={`h-px transition-all duration-500 ${ready ? "w-full bg-amber-200" : "w-0"}`} />
               </div>
             </div>
           ))}
@@ -537,8 +537,8 @@ export function ArtworkCreateForm({
           <div className="space-y-9 p-5 sm:p-7 lg:p-8">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <label htmlFor="title" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34 transition-colors focus-within:text-violet-100/70">Artwork title</label>
-                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.title ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-violet-200/24"}`}>
+                <label htmlFor="title" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34 transition-colors focus-within:text-amber-100/70">Tên tác phẩm</label>
+                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.title ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-amber-200/24"}`}>
                   <Input id="title" maxLength={120} aria-invalid={Boolean(errors.title)} placeholder="e.g. Neon Saigon" {...register("title")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
                 </div>
                 {errors.title?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.title.message}</p> : null}
@@ -546,7 +546,7 @@ export function ArtworkCreateForm({
 
               <div className="grid gap-2">
                 <label htmlFor="artistName" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34">Artist / creator</label>
-                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.artistName ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-violet-200/24"}`}>
+                <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.artistName ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-amber-200/24"}`}>
                   <Input id="artistName" maxLength={120} aria-invalid={Boolean(errors.artistName)} placeholder="Artist name" {...register("artistName")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
                 </div>
                 {errors.artistName?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.artistName.message}</p> : null}
@@ -555,10 +555,10 @@ export function ArtworkCreateForm({
 
             <div className="space-y-7">
               <div className="space-y-3">
-                <p className="text-[0.62rem] uppercase tracking-[0.19em] text-cyan-100/65">01 / Image to scan · Required</p>
+                <p className="text-[0.62rem] uppercase tracking-[0.19em] text-amber-100/65">01 / Ảnh nhận diện · Bắt buộc</p>
                 {!trackingReference ? (
-                <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-cyan-100/45 hover:bg-white/[0.04]">
-                  <ImageIcon className="size-5 shrink-0 text-cyan-100/75" aria-hidden="true" />
+                <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-amber-100/45 hover:bg-white/[0.04]">
+                  <ImageIcon className="size-5 shrink-0 text-amber-100/75" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block font-serif text-2xl">Upload artwork image</span>
                     <span className="mt-1 block text-xs leading-5 text-white/40">PNG, JPG or WebP · max 6 MB · the exact picture visitors will scan</span>
@@ -578,17 +578,17 @@ export function ArtworkCreateForm({
                       className="p-2 text-white/35 transition hover:text-rose-200"><Trash2 className="size-4" /></button>
                   </div>
                 ) : null}
-                {targetPreparing ? <p role="status" className="text-xs text-violet-200/75">Preparing image recognition target…</p> : null}
+                {targetPreparing ? <p role="status" className="text-xs text-amber-200/75">Preparing image recognition target…</p> : null}
                 {submitAttempted && targetError ? <p role="alert" className="text-xs text-rose-200/80">{targetError}</p> : null}
                 {submitAttempted && errors.targetImage?.message && !targetPreparing && !targetError ?
                   <p role="alert" className="text-xs text-rose-200/80">{errors.targetImage.message}</p> : null}
               </div>
 
               <div className="space-y-3">
-                <p className="text-[0.62rem] uppercase tracking-[0.19em] text-violet-200/65">02 / Animated AR layer · Required</p>
+                <p className="text-[0.62rem] uppercase tracking-[0.19em] text-amber-200/65">02 / Video chuyển động · Bắt buộc</p>
                 {!firstVideo ? (
-                <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-violet-200/45 hover:bg-white/[0.04]">
-                  <Video className="size-5 shrink-0 text-violet-200/80" aria-hidden="true" />
+                <label className="flex cursor-pointer items-center gap-4 border border-dashed border-white/18 bg-[#09090d] p-5 transition hover:border-amber-200/45 hover:bg-white/[0.04]">
+                  <Video className="size-5 shrink-0 text-amber-200/80" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block font-serif text-2xl">Upload animation video</span>
                     <span className="mt-1 block text-xs leading-5 text-white/40">MOV, MP4 or WebM · up to 240 MB original · auto-convert on Save</span>
@@ -613,7 +613,7 @@ export function ArtworkCreateForm({
                     </div>
                   );
                 })}
-                {conversionMessage ? <p role="status" className="text-xs text-violet-200/75">{conversionMessage}</p> : null}
+                {conversionMessage ? <p role="status" className="text-xs text-amber-200/75">{conversionMessage}</p> : null}
                 {submitAttempted && conversionError ? <p role="alert" className="text-xs text-rose-200/80">{conversionError}</p> : null}
                 {submitAttempted && errors.spatialLayers?.message ?
                   <p role="alert" className="text-xs text-rose-200/80">{errors.spatialLayers.message}</p> : null}
@@ -650,7 +650,7 @@ export function ArtworkCreateForm({
                   type="submit"
                   disabled={!canSubmit}
                   onClick={() => setSubmitIntent("publish")}
-                  className="h-12 bg-white px-6 text-xs font-medium uppercase tracking-[0.12em] text-black hover:bg-violet-100 disabled:bg-white/10 disabled:text-white/25"
+                  className="h-12 bg-white px-6 text-xs font-medium uppercase tracking-[0.12em] text-black hover:bg-amber-100 disabled:bg-white/10 disabled:text-white/25"
                 >
                   {submitIntent === "publish" && (isSubmitting || converting) ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
                   {submitIntent === "publish" && (isSubmitting || converting) ? "Preparing…" : "Publish and get QR"}
@@ -676,7 +676,7 @@ export function ArtworkCreateForm({
               {isSubmitting && workflow.compilerProgress > 0 && workflow.compilerProgress < 100 ? (
                 <div className="mt-6 pt-2">
                   <div className="flex justify-between text-[0.62rem] uppercase tracking-[0.12em] text-white/45"><span>Preparing</span><span>{workflow.compilerProgress}%</span></div>
-                  <div className="mt-2 h-px bg-white/15"><div className="h-px bg-cyan-100 transition-[width]" style={{ width: `${workflow.compilerProgress}%` }} /></div>
+                  <div className="mt-2 h-px bg-white/15"><div className="h-px bg-amber-100 transition-[width]" style={{ width: `${workflow.compilerProgress}%` }} /></div>
                 </div>
               ) : null}
             </div>

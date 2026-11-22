@@ -69,7 +69,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
   async function signOut() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
-    router.replace("/login?next=/collection");
+    router.replace("/ar-login?next=/collection");
     router.refresh();
   }
 
@@ -100,11 +100,11 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
         <div className="max-w-2xl">
           <ScanLine className="size-5 text-white/30" aria-hidden="true" />
           <h2 className="mt-6 font-serif text-5xl leading-[0.95] tracking-[-0.045em] sm:text-6xl">
-            Sign in to keep<br /><span className="text-violet-100 italic">what you discover.</span>
+            Sign in to keep<br /><span className="text-amber-100 italic">what you discover.</span>
           </h2>
           <Link
-            href="/login?next=/collection"
-            className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-violet-100"
+            href="/ar-login?next=/collection"
+            className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-amber-100"
           >
             Sign in <ArrowUpRight className="size-4" />
           </Link>
@@ -158,7 +158,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                     <h2 className="font-serif text-2xl leading-none text-white">{artwork.title}</h2>
                     <p className="mt-2 text-xs uppercase tracking-[0.12em] text-white/35">{artwork.artistName}</p>
                   </div>
-                  <ArrowUpRight className="mt-1 size-4 text-white/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-100" />
+                  <ArrowUpRight className="mt-1 size-4 text-white/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-amber-100" />
                 </div>
               </Link>
 

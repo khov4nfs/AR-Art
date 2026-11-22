@@ -1,0 +1,39 @@
+name: everievn
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION: 24-slim
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}
+    image: everievn-web:latest
+    container_name: everievn-web
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - "SESSION_SECRET=${SESSION_SECRET:?set SESSION_SECRET in deploy/.env}"
+      - SITE_URL=https://everievn.com
+      - NEXT_PUBLIC_SITE_URL=https://everievn.com
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
+      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:-}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
+      - SUPABASE_ASSET_BUCKET=${SUPABASE_ASSET_BUCKET:-ar-art-assets}
+    volumes:
+      - /opt/everievn/data:/app/data
+      - /opt/everievn/public/uploads:/app/public/uploads
+    networks:
+      - vms_edge
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+networks:
+  vms_edge:
+    external: true

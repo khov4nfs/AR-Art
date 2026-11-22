@@ -54,5 +54,5 @@ export function buildAuthRedirectUrl(requestOrigin: string, nextPath?: string) {
   const origin = requestOrigin.replace(/\/+$/, "");
   const safeNext = sanitizeNextPath(nextPath);
 
-  return `${origin}/login?next=${encodeURIComponent(safeNext)}`;
+  return `${origin}/ar-login?next=${encodeURIComponent(safeNext)}`;
 }

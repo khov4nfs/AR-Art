@@ -13,9 +13,9 @@ import {
 } from "@/features/gallery/domain/gallery-artwork";
 
 const FILTERS: { key: GallerySort; label: string }[] = [
-  { key: "all", label: "All works" },
-  { key: "newest", label: "Newest" },
-  { key: "views", label: "Most viewed" },
+  { key: "all", label: "Tất cả" },
+  { key: "newest", label: "Mới nhất" },
+  { key: "views", label: "Xem nhiều" },
 ];
 
 function formatViews(count: number) {
@@ -34,7 +34,7 @@ function ArtworkCard({
   return (
     <Link
       href={`/art/${artwork.slug}`}
-      className="group block min-w-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+      className="group block min-w-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C5A880]"
       aria-label={`View ${artwork.title} by ${artwork.artistName}`}
     >
       <div className={`relative overflow-hidden border border-white/10 bg-[#111116] transition duration-500 group-hover:border-white/30 ${featured ? "aspect-[3/4]" : "aspect-[4/5]"}`}>
@@ -86,12 +86,12 @@ export function GalleryExplorer({ artworks }: { artworks: GalleryArtwork[] }) {
           <div className="mx-auto max-w-[94rem] px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
             <div className="mb-9 flex flex-wrap items-end justify-between gap-6">
               <div>
-                <p className="text-[0.62rem] uppercase tracking-[0.26em] text-cyan-200/65">01 / Fresh from the studio</p>
+                <p className="text-[0.62rem] uppercase tracking-[0.26em] text-[#C5A880]/65">01 / Mới từ studio</p>
                 <h2 id="gallery-newest" className="mt-3 font-serif text-5xl tracking-[-0.055em] sm:text-7xl">
-                  Just arrived<span className="text-cyan-200">.</span>
+                  Mới xuất bản<span className="text-[#C5A880]">.</span>
                 </h2>
               </div>
-              <p className="max-w-[15rem] text-sm leading-6 text-white/43">Newly published works from artists across the Everie gallery.</p>
+              <p className="max-w-[15rem] text-sm leading-6 text-white/43">Những tác phẩm mới nhất được xuất bản tại EVERIE.</p>
             </div>
             {newest.length ? (
               <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -107,14 +107,14 @@ export function GalleryExplorer({ artworks }: { artworks: GalleryArtwork[] }) {
       <section id="all-works" aria-labelledby="gallery-all-heading" className="mx-auto max-w-[94rem] px-5 pb-24 pt-16 sm:px-8 lg:px-12 lg:pb-32 lg:pt-24">
         <div className="flex flex-col justify-between gap-7 border-b border-white/15 pb-7 lg:flex-row lg:items-end">
           <div>
-            <p className="text-[0.62rem] uppercase tracking-[0.26em] text-violet-200/65">
-              {showNewest ? "02 / Explore the archive" : "01 / Explore the archive"}
+            <p className="text-[0.62rem] uppercase tracking-[0.26em] text-[#C5A880]/65">
+              {showNewest ? "02 / Khám phá thư viện" : "01 / Khám phá thư viện"}
             </p>
             <h2 id="gallery-all-heading" className="mt-3 font-serif text-5xl tracking-[-0.055em] sm:text-7xl">
-              {filter === "newest" ? "The latest works" : "The most seen"}<span className="text-violet-300">.</span>
+              {filter === "newest" ? "Tác phẩm mới nhất" : "Được xem nhiều"}<span className="text-[#C5A880]">.</span>
             </h2>
             <p className="mt-4 text-sm text-white/42">
-              {listed.length} {listed.length === 1 ? "work" : "works"} · {filter === "newest" ? "Sorted by publish date" : "Sorted by views"}
+              {listed.length} {listed.length === 1 ? "work" : "works"} · {filter === "newest" ? "Sắp xếp theo ngày xuất bản" : "Sắp xếp theo lượt xem"}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2" aria-label="Sort gallery artworks">
@@ -125,7 +125,7 @@ export function GalleryExplorer({ artworks }: { artworks: GalleryArtwork[] }) {
                 type="button"
                 aria-pressed={filter === key}
                 onClick={() => setFilter(key)}
-                className={`rounded-[4px] border px-4 py-3 text-[0.65rem] uppercase tracking-[0.12em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200 ${
+                className={`rounded-[4px] border px-4 py-3 text-[0.65rem] uppercase tracking-[0.12em] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C5A880] ${
                   filter === key
                     ? "border-white bg-white text-[#08080c]"
                     : "border-white/15 bg-white/[0.025] text-white/55 hover:border-white/35 hover:text-white"
@@ -145,11 +145,11 @@ export function GalleryExplorer({ artworks }: { artworks: GalleryArtwork[] }) {
           </div>
         ) : (
           <div className="mt-8 flex min-h-60 flex-col items-start justify-center border border-dashed border-white/15 px-7 py-12">
-            <Clock3 className="size-7 text-cyan-100/55" aria-hidden="true" />
-            <p className="mt-5 font-serif text-3xl">A gallery in the making.</p>
-            <p className="mt-3 max-w-sm text-sm leading-6 text-white/45">Published artworks from every creator will appear here automatically.</p>
+            <Clock3 className="size-7 text-[#C5A880]/55" aria-hidden="true" />
+            <p className="mt-5 font-serif text-3xl">Thư viện đang hình thành.</p>
+            <p className="mt-3 max-w-sm text-sm leading-6 text-white/45">Tác phẩm được xuất bản sẽ tự động hiển thị tại đây.</p>
             <Link href="/create" className="mt-6 inline-flex items-center gap-2 border-b border-white/50 pb-2 text-xs uppercase tracking-[0.14em] text-white/80">
-              Publish your work <ArrowRight className="size-4" aria-hidden="true" />
+              Đăng tác phẩm <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
         )}

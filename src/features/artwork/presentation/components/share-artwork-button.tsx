@@ -29,7 +29,7 @@ function safeFileName(title: string) {
 }
 
 const actionClass =
-  "inline-flex h-10 items-center gap-2 border-b border-white/18 px-0 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-white/42 transition hover:border-cyan-200/65 hover:text-white disabled:cursor-wait disabled:opacity-45";
+  "inline-flex h-10 items-center gap-2 border-b border-white/18 px-0 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-white/42 transition hover:border-amber-200/65 hover:text-white disabled:cursor-wait disabled:opacity-45";
 
 export function ShareArtworkButton({
   title,

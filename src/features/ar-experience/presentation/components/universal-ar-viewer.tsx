@@ -143,7 +143,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
       {(status === "idle" || status === "error") && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#050507]/90 px-6 text-center backdrop-blur-sm">
           <div className="mx-auto w-full max-w-md">
-            <ScanLine className="mx-auto size-9 text-violet-200/75" aria-hidden="true" />
+            <ScanLine className="mx-auto size-9 text-amber-200/75" aria-hidden="true" />
             <h1 className="mt-7 font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl">Scan the art.</h1>
             <p className="mx-auto mt-5 max-w-sm text-sm leading-6 text-white/52">
               Point your camera at a work on display. Everie recognizes the artwork and brings its AR layer to life.
@@ -167,7 +167,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
                   type="button"
                   disabled={!targetBundle}
                   onClick={startScanner}
-                  className="mt-6 h-12 rounded-[5px] bg-white px-7 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-violet-100 disabled:bg-white/10 disabled:text-white/40"
+                  className="mt-6 h-12 rounded-[5px] bg-white px-7 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-amber-100 disabled:bg-white/10 disabled:text-white/40"
                 >
                   {!targetBundle ? <LoaderCircle className="size-4 animate-spin" /> : <Camera className="size-4" />}
                   {!targetBundle ? `Preparing targets · ${compileProgress}%` : "Open camera"}
@@ -193,7 +193,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
 
       {status === "starting" && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/65">
-          <LoaderCircle className="size-8 animate-spin text-violet-200" aria-label="Starting AR camera" />
+          <LoaderCircle className="size-8 animate-spin text-amber-200" aria-label="Starting AR camera" />
         </div>
       )}
 
@@ -216,12 +216,12 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
               aria-label="Collapse artwork details"
               aria-expanded={!isSheetCollapsed}
               onClick={() => toggleRecognitionSheet(true)}
-              className="absolute left-1/2 top-0 z-10 flex h-9 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/95 text-white/80 shadow-lg backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-100"
+              className="absolute left-1/2 top-0 z-10 flex h-9 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/95 text-white/80 shadow-lg backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-100"
             >
               <ChevronDown aria-hidden="true" className="size-5" />
             </button>
             <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-cyan-100" />
+            <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-amber-100" />
             <div className="min-w-0 flex-1">
               <p className="font-serif text-2xl leading-none">{matched.title}</p>
               <p className="mt-1 text-xs text-white/45">by {matched.artistName}</p>
@@ -235,9 +235,9 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
               <div className="mt-4 flex flex-wrap gap-5 text-xs font-medium">
                 <Link href={`/art/${matched.slug}`} className="text-white/80 underline underline-offset-4">View work</Link>
                 {collectionNote === "sign-in" ? (
-                  <Link href="/login?next=%2Far" className="text-cyan-100 underline underline-offset-4">Sign in</Link>
+                  <Link href="/ar-login?next=%2Far" className="text-amber-100 underline underline-offset-4">Sign in</Link>
                 ) : collectionNote === "saved" ? (
-                  <Link href="/collection" className="text-cyan-100 underline underline-offset-4">Collection</Link>
+                  <Link href="/collection" className="text-amber-100 underline underline-offset-4">Collection</Link>
                 ) : null}
                 <button type="button" onClick={() => { activeArtworkRef.current = null; setMatched(null); setIsSheetCollapsed(false); setCollectionNote(null); void stop(); }} className="text-white/45 underline underline-offset-4 hover:text-white">Close camera</button>
               </div>
@@ -253,7 +253,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
             tabIndex={isSheetCollapsed ? 0 : -1}
             onClick={() => toggleRecognitionSheet(false)}
             className={[
-              "absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-11 w-16 -translate-x-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/90 text-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-[transform,opacity] duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-100 motion-reduce:transition-none",
+              "absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-30 flex h-11 w-16 -translate-x-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/90 text-white/85 shadow-[0_12px_35px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-[transform,opacity] duration-[360ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-100 motion-reduce:transition-none",
               isSheetCollapsed ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0",
             ].join(" ")}
           >
