@@ -16,7 +16,7 @@ WORKDIR /app
 
 # Copy package-related files first to leverage Docker's caching mechanism
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
-# npm postinstall adapts the pinned MindAR bundle before building.
+# The build script explicitly adapts the pinned MindAR bundle.
 COPY scripts/patch-mindar-three.mjs ./scripts/patch-mindar-three.mjs
 
 # Install project dependencies with frozen lockfile for reproducible builds
@@ -24,7 +24,7 @@ RUN --mount=type=cache,target=/root/.npm \
   --mount=type=cache,target=/usr/local/share/.cache/yarn \
   --mount=type=cache,target=/root/.local/share/pnpm/store \
   if [ -f package-lock.json ]; then \
-  npm ci --no-audit --no-fund; \
+  npm ci --ignore-scripts --no-audit --no-fund; \
   elif [ -f yarn.lock ]; then \
   corepack enable yarn && yarn install --frozen-lockfile --production=false; \
   elif [ -f pnpm-lock.yaml ]; then \

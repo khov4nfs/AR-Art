@@ -7,14 +7,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/patch-mindar-three.mjs && next dev",
+    "build": "node scripts/patch-mindar-three.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "npm run test && npm run lint && npm run typecheck && npm run build",
-    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts",
-    "postinstall": "node scripts/patch-mindar-three.mjs"
+    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
