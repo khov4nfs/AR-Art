@@ -233,7 +233,7 @@ export function ProductManagerModal({
               type="submit"
               form="studio-product-manager-form"
               disabled={!isValid || isSubmitting || deleteState.deleting}
-              className="bg-white text-black hover:bg-violet-100"
+              className="bg-white text-black hover:bg-amber-100"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -365,7 +365,7 @@ export function ProductManagerModal({
               <div className="mt-6 space-y-4 rounded-[5px] bg-white/[0.018] p-4">
                 <p className="text-[0.55rem] uppercase tracking-[0.15em] text-white/24">Public artwork link · view only</p>
                 <p className="mt-1 break-all text-xs leading-5 text-white/42">{publicPath}</p>
-                <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-violet-100/38">QR destination · AR camera</p>
+                <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-amber-100/38">QR destination · AR camera</p>
                 <p className="mt-1 break-all text-xs leading-5 text-white/42">{arPath}</p>
               </div>
               <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 pt-1">

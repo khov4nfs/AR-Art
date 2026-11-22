@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Orbit } from "lucide-react";
+import { Flower2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -20,13 +20,10 @@ export function EverieBrand({
 }: EverieBrandProps) {
   const content = (
     <>
-      <Orbit
-        aria-hidden="true"
-        className={cn("size-[1.05rem] shrink-0 text-white/42", iconClassName)}
-      />
+      <Flower2 aria-hidden="true" className={cn("size-[1.05rem] shrink-0 text-[#C5A880]", iconClassName)} />
       <span
         className={cn(
-          "whitespace-nowrap text-[0.78rem] font-semibold uppercase tracking-[0.2em] text-white/78 sm:text-[0.82rem]",
+          "whitespace-nowrap font-serif text-[1.08rem] font-medium uppercase tracking-[0.22em] text-white sm:text-[1.16rem]",
           textClassName,
         )}
       >

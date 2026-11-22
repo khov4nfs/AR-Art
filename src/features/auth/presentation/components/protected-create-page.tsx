@@ -21,7 +21,7 @@ export function ProtectedCreatePage() {
       if (!active) return;
 
       if (!user) {
-        router.replace("/login?next=%2Fcreate");
+        router.replace("/ar-login?next=%2Fcreate");
         return;
       }
 
@@ -29,7 +29,7 @@ export function ProtectedCreatePage() {
     }
 
     void verifyAccess().catch(() => {
-      if (active) router.replace("/login?next=%2Fcreate");
+      if (active) router.replace("/ar-login?next=%2Fcreate");
     });
 
     return () => {

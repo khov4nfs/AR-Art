@@ -1,3 +1,4 @@
+import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
 import { buildArtworkOverlay } from "@/features/ar-experience/application/build-artwork-overlay";
 import { selectScannerArtworks } from "@/features/ar-experience/domain/scanner-targets";
@@ -6,6 +7,8 @@ import { UniversalArViewer } from "@/features/ar-experience/presentation/compone
 export const dynamic = "force-dynamic";
 
 export default async function ArPage() {
+  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Scanner AR" />;
+
   const { listPublishedArtworks } = createArtworkServices();
   const published = await listPublishedArtworks.execute();
   const artworks = selectScannerArtworks(published).map((artwork) => ({

@@ -137,7 +137,7 @@ export function EditArtworkButton({
               type="submit"
               form="product-editor-form"
               disabled={!isValid || isSubmitting}
-              className="bg-white text-black hover:bg-violet-100"
+              className="bg-white text-black hover:bg-amber-100"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />

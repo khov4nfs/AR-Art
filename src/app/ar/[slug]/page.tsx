@@ -1,3 +1,4 @@
+import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import { notFound } from "next/navigation";
 
 import { buildArtworkOverlay } from "@/features/ar-experience/application/build-artwork-overlay";
@@ -11,6 +12,7 @@ export default async function PublishedArPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Trải nghiệm AR" />;
   const { slug } = await params;
   const { getPublishedArtwork } = createArtworkServices();
   const artwork = await getPublishedArtwork.execute(slug);

@@ -170,14 +170,14 @@ export function StudioApp({ view }: { view: StudioView }) {
     dispatch({ type: "loading" });
     const user = await getCurrentCollectionUser();
     if (!user) {
-      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+      router.replace(`/ar-login?next=${encodeURIComponent(pathname)}`);
       return;
     }
 
     const supabase = getSupabaseBrowserClient();
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
-      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+      router.replace(`/ar-login?next=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -262,7 +262,7 @@ export function StudioApp({ view }: { view: StudioView }) {
                 <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
                   <div>
                     <h1 className="max-w-4xl font-serif text-6xl font-normal leading-[0.86] tracking-[-0.055em] sm:text-8xl">
-                      Everything you publish,<br /><span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text italic text-transparent">in one place.</span>
+                      Everything you publish,<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">in one place.</span>
                     </h1>
                   </div>
 

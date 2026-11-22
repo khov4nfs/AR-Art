@@ -47,6 +47,6 @@ test("rejects unsafe next paths", () => {
 test("builds an auth redirect from the supplied request origin", () => {
   assert.equal(
     buildAuthRedirectUrl("https://request-origin.example/", "/create"),
-    "https://request-origin.example/login?next=%2Fcreate",
+    "https://request-origin.example/ar-login?next=%2Fcreate",
   );
 });
