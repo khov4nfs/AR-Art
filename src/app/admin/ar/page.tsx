@@ -24,7 +24,7 @@ export default function AdminArPage() {
           </Link>
         ))}
       </div>
-      <div className="flex gap-4 border-l-2 border-[#C5A880] bg-[#1B1A19] p-5"><ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#C5A880]" /><div><p className="text-sm font-semibold text-white">Tài khoản và dữ liệu hiện tại</p><p className="mt-2 text-xs leading-6 text-stone-400">Mọi chức năng EVERIE và AR dùng chung tài khoản, quyền hạn và phiên đăng nhập EVERIE. Supabase chỉ lưu ảnh, video, tác phẩm và Collection qua API xác thực ở server.</p></div></div>
+      <div className="flex gap-4 border-l-2 border-[#C5A880] bg-[#1B1A19] p-5"><ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#C5A880]" /><div><p className="text-sm font-semibold text-white">Tài khoản và dữ liệu hiện tại</p><p className="mt-2 text-xs leading-6 text-stone-400">Mọi chức năng EVERIE và AR dùng chung tài khoản, quyền hạn và phiên đăng nhập EVERIE. Ảnh/video/.mind được lưu trong public/uploads/ar; dữ liệu tác phẩm và Collection lưu riêng trong data/ của EVERIE.</p></div></div>
     </main>
   );
 }

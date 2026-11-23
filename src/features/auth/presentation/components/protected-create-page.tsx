@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 
 import { ArtworkCreateModal } from "@/features/artwork/presentation/components/artwork-create-modal";
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 
 type CreateAccessState = "checking" | "authenticated";
 

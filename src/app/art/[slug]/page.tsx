@@ -1,10 +1,9 @@
-import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import Link from "next/link";
 import { ArrowUpRight, Camera, Sparkles } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { EverieArHeader } from "@/components/everie-ar/everie-ar-header";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
 import { ArtworkArQrCode } from "@/features/artwork/presentation/components/artwork-ar-qr-code";
 import { EditArtworkButton } from "@/features/artwork/presentation/components/edit-artwork-button";
 import { ShareArtworkButton } from "@/features/artwork/presentation/components/share-artwork-button";
@@ -13,7 +12,6 @@ import { ArtworkViewTracker } from "@/features/gallery/presentation/components/a
 export const dynamic = "force-dynamic";
 
 export default async function ArtworkPage({ params }: { params: Promise<{ slug: string }> }) {
-  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Tác phẩm AR" />;
   const { slug } = await params;
   const { getPublishedArtwork } = createArtworkServices();
   const artwork = await getPublishedArtwork.execute(slug);

@@ -12,7 +12,7 @@ import { useArExperience } from "@/features/ar-experience/presentation/hooks/use
 import {
   collectArtwork,
   getCurrentCollectionUser,
-} from "@/features/collection/infrastructure/supabase/collection-repository";
+} from "@/features/collection/infrastructure/local/collection-repository";
 
 interface ArViewerProps {
   config: SingleArExperienceConfig;

@@ -13,7 +13,7 @@ import {
   conversionChunkCount,
 } from "@/features/artwork/domain/original-video";
 import { ARTWORK_UPLOAD_MAX_FILE_SIZE } from "@/features/artwork/domain/artwork-create-form-schema";
-import { getRequestUser } from "@/features/auth/infrastructure/supabase/request-user";
+import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 
 export const runtime = "nodejs";
 

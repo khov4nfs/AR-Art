@@ -7,8 +7,8 @@ import {
   type ArtworkArAssetType,
   type ArtworkArMode,
 } from "@/features/artwork/domain/artwork";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
-import { getRequestUser } from "@/features/auth/infrastructure/supabase/request-user";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
+import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 
 const imageExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 const videoExtensions = new Set(["mp4", "webm"]);

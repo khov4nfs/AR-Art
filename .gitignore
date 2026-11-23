@@ -59,3 +59,7 @@ connect.md
 /public/uploads/
 /everievn-main/
 /.npm-cache/
+
+# EVERIE AR private registry and archived provider metadata
+/data/ar-artworks.json
+/data/ar-artworks.bak-*.json

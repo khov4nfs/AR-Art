@@ -17,3 +17,14 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+
+      - name: AR HTTP end-to-end smoke
+        run: |
+          npm run start -- -p 3199 > /tmp/everie-e2e.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl --silent --fail http://127.0.0.1:3199/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run test:e2e

@@ -12,7 +12,7 @@ import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
 import { Modal } from "@/components/molecules/modal";
 import type { ArtworkStatus } from "@/features/artwork/domain/artwork";
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 import {
   studioProductSchema,
   type StudioProductFormValues,

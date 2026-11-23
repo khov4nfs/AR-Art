@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { EverieBrand } from "@/components/atoms/everie-brand";
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 
 const SECTION_IDS = ["how-it-works", "works", "artists"] as const;
 type SectionId = (typeof SECTION_IDS)[number];

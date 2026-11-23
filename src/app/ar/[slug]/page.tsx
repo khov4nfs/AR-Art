@@ -1,9 +1,8 @@
-import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import { notFound } from "next/navigation";
 
 import { buildArtworkOverlay } from "@/features/ar-experience/application/build-artwork-overlay";
 import { ArViewer } from "@/features/ar-experience/presentation/components/ar-viewer";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +11,6 @@ export default async function PublishedArPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Trải nghiệm AR" />;
   const { slug } = await params;
   const { getPublishedArtwork } = createArtworkServices();
   const artwork = await getPublishedArtwork.execute(slug);

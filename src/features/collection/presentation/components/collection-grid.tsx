@@ -12,7 +12,7 @@ import {
   getCurrentCollectionUser,
   listCollectedArtworkIds,
   removeCollectedArtwork,
-} from "@/features/collection/infrastructure/supabase/collection-repository";
+} from "@/features/collection/infrastructure/local/collection-repository";
 
 interface CollectionGridProps {
   artworks: PublishedArtwork[];

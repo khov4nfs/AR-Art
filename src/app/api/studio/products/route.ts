@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
-import { getRequestUser } from "@/features/auth/infrastructure/supabase/request-user";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
+import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 
 export async function GET(request: Request) {
   try {
