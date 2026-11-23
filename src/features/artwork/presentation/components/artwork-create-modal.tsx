@@ -23,7 +23,7 @@ export function ArtworkCreateModal({
       onClose={onClose}
       title={t("ar.create.modalTitle")}
       icon={<Plus className="size-4" />}
-      maxWidthClassName="max-w-6xl"
+      maxWidthClassName="max-w-2xl"
     >
       <div data-motion-skip>
         <ArtworkCreateForm embedded adminLayout onCreated={onCreated} onDone={onClose} />

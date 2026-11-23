@@ -430,11 +430,11 @@ export function ArtworkCreateForm({
               )}
             </h1>
 
-            <p className="mt-6 max-w-xl text-sm leading-7 text-white/46 sm:text-base">
-              {isPublished
-                ? t("ar.create.successDesc")
-                : t("ar.create.draftDesc")}
-            </p>
+            {!adminLayout && (
+              <p className="mt-6 max-w-xl text-sm leading-7 text-white/46 sm:text-base">
+                {isPublished ? t("ar.create.successDesc") : t("ar.create.draftDesc")}
+              </p>
+            )}
 
             {workflow.result.shareUrl ? (
               <p className="mt-5 max-w-xl break-all text-xs leading-5 text-white/28">{workflow.result.shareUrl}</p>
@@ -474,7 +474,7 @@ export function ArtworkCreateForm({
           </div>
 
           {isPublished && workflow.result.qrDataUrl ? (
-            <div className="creator-success-qr relative mx-auto w-full max-w-sm">
+            <div className={adminLayout ? "creator-success-qr relative w-full max-w-[12rem]" : "creator-success-qr relative mx-auto w-full max-w-sm"}>
               <div className="creator-success-qr-glow" aria-hidden="true" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={workflow.result.qrDataUrl} alt={t("ar.create.qrAlt")} className="relative aspect-square w-full rounded-[6px] bg-white p-3 shadow-[0_35px_120px_rgba(0,0,0,0.48)]" />
@@ -503,6 +503,7 @@ export function ArtworkCreateForm({
           {t("ar.create.headline")}<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">{t("ar.create.headlineEmphasis")}</span>
         </h1>
 
+        {!adminLayout && (
         <div className={`${embedded ? "mt-0" : "mt-12"} grid grid-cols-3 gap-5 pt-2`}>
           {[
             ["01", t("ar.create.details"), detailsReady],
@@ -523,6 +524,7 @@ export function ArtworkCreateForm({
             </div>
           ))}
         </div>
+        )}
 
         <form
           onSubmit={(event) => {
@@ -530,9 +532,9 @@ export function ArtworkCreateForm({
             void submitArtwork("publish");
           }}
           noValidate
-          className={adminLayout ? "mt-5 grid overflow-hidden rounded-xl border border-stone-800 bg-[#141417] lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]" : "mt-6 grid overflow-hidden rounded-[8px] bg-[#07070a]/68 shadow-[0_36px_120px_rgba(0,0,0,0.3)] ring-1 ring-inset ring-white/[0.06] lg:grid-cols-[1.05fr_0.95fr]"}
+          className={adminLayout ? "mt-0 overflow-hidden rounded-xl border border-stone-800 bg-[#141417]" : "mt-6 grid overflow-hidden rounded-[8px] bg-[#07070a]/68 shadow-[0_36px_120px_rgba(0,0,0,0.3)] ring-1 ring-inset ring-white/[0.06] lg:grid-cols-[1.05fr_0.95fr]"}
         >
-          <div className="space-y-9 p-5 sm:p-7 lg:p-8">
+          <div className={adminLayout ? "space-y-5 p-4 sm:p-5" : "space-y-9 p-5 sm:p-7 lg:p-8"}>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <label htmlFor="title" className="text-[0.62rem] uppercase tracking-[0.16em] text-white/34 transition-colors focus-within:text-amber-100/70">{t("ar.create.title")}</label>
@@ -551,7 +553,7 @@ export function ArtworkCreateForm({
               </div>
             </div>
 
-            <div className="space-y-7">
+            <div className={adminLayout ? "space-y-5" : "space-y-7"}>
               <div className="space-y-3">
                 <p className="text-[0.62rem] uppercase tracking-[0.19em] text-amber-100/65">{t("ar.create.imageRequired")}</p>
                 {!trackingReference ? (
@@ -559,7 +561,7 @@ export function ArtworkCreateForm({
                   <ImageIcon className="size-5 shrink-0 text-amber-100/75" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block font-serif text-2xl">{t("ar.create.uploadImage")}</span>
-                    <span className="mt-1 block text-xs leading-5 text-white/40">{t("ar.create.imageHint")}</span>
+                    {!adminLayout && (<span className="mt-1 block text-xs leading-5 text-white/40">{t("ar.create.imageHint")}</span>)}
                   </span>
                   <input type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-label={t("ar.create.imageAria")} className="sr-only"
                     onChange={(event) => { selectTrackingImage(event.currentTarget.files); event.currentTarget.value = ""; }} />
@@ -589,7 +591,7 @@ export function ArtworkCreateForm({
                   <Video className="size-5 shrink-0 text-amber-200/80" aria-hidden="true" />
                   <span className="min-w-0">
                     <span className="block font-serif text-2xl">{t("ar.create.uploadVideo")}</span>
-                    <span className="mt-1 block text-xs leading-5 text-white/40">{t("ar.create.videoHint")}</span>
+                    {!adminLayout && (<span className="mt-1 block text-xs leading-5 text-white/40">{t("ar.create.videoHint")}</span>)}
                   </span>
                   <input type="file" accept="video/quicktime,video/mp4,video/webm,.mov,.mp4,.webm" aria-label={t("ar.create.videoAria")} className="sr-only"
                     onChange={(event) => { selectVideo(event.currentTarget.files); event.currentTarget.value = ""; }} />
@@ -619,15 +621,18 @@ export function ArtworkCreateForm({
                   <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(errors.spatialLayers[0].file.message, language, t, "ar.create.errorVideo")}</p> : null}
               </div>
 
-              <p className="text-xs leading-6 text-white/45">
-                {t("ar.create.helpText")}
-              </p>
+
+              {!adminLayout && (
+                <p className="text-xs leading-6 text-white/45">{t("ar.create.helpText")}</p>
+              )}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-5 rounded-[5px] bg-white/[0.018] px-4 py-4">
-              <p className="max-w-sm text-xs leading-5 text-white/32">
-                {t("ar.create.publishHint")}
-              </p>
+            <div className={adminLayout ? "flex flex-wrap items-center justify-end gap-3 border-t border-stone-800 pt-4" : "flex flex-wrap items-center justify-between gap-5 rounded-[5px] bg-white/[0.018] px-4 py-4"}>
+              {!adminLayout && (
+                <p className="max-w-sm text-xs leading-5 text-white/32">
+                  {t("ar.create.publishHint")}
+                </p>
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
@@ -654,9 +659,18 @@ export function ArtworkCreateForm({
               </div>
             </div>
 
+            {adminLayout && isSubmitting && workflow.compilerProgress > 0 && workflow.compilerProgress < 100 ? (
+              <div role="status" className="text-xs text-amber-200">
+                {t("ar.create.preparingLabel")} · {workflow.compilerProgress}%
+                <div className="mt-2 h-1 overflow-hidden rounded bg-white/15">
+                  <div className="h-full bg-[#C5A880]" style={{ width: workflow.compilerProgress + "%" }} />
+                </div>
+              </div>
+            ) : null}
             {workflow.message ? <p className={`text-sm ${isSubmitting ? "text-white/40" : "text-rose-200/80"}`} role="status">{workflow.message.startsWith("ar.create.") ? t(workflow.message) : localizedArFormError(workflow.message, language, t, "ar.create.errorPublish")}</p> : null}
           </div>
 
+          {!adminLayout && (
           <aside className="relative min-h-[34rem] overflow-hidden bg-[#09090d] text-white">
             {targetImage ? (
               <ArCompositionPreview
@@ -677,6 +691,7 @@ export function ArtworkCreateForm({
               ) : null}
             </div>
           </aside>
+          )}
         </form>
       </section>
     </main>

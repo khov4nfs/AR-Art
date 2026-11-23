@@ -82,9 +82,9 @@ test("AR field errors are friendly in VN/EN without changing validation contract
 test("all AR translation keys referenced directly by UI are defined", () => {
   const files = [
     "src/app/(storefront)/page.tsx",
-    "src/app/gallery/page.tsx",
-    "src/app/art/[slug]/page.tsx",
-    "src/app/collection/page.tsx",
+    "src/app/(storefront)/gallery/page.tsx",
+    "src/app/(storefront)/art/[slug]/page.tsx",
+    "src/app/(storefront)/collection/page.tsx",
     "src/app/admin/ar/page.tsx",
     "src/components/everie-ar/everie-ar-header.tsx",
     "src/components/everie-ar/ar-language-switcher.tsx",
@@ -150,4 +150,41 @@ test("AR management shares the EVERIE dashboard component language", () => {
   assert.match(editModal, /variant="admin"/);
   assert.match(createForm, /adminLayout = false/);
   assert.match(modal, /variant = "default"/);
+});
+
+
+test("AR routes are part of one EVERIE storefront layout and use reusable page frame", () => {
+  const read = (file: string) => readFileSync(path.resolve(process.cwd(), file), "utf8");
+  const group = "src/app/(storefront)/";
+  const storefrontLayout = read(group + "layout.tsx");
+  const frame = read("src/components/hanoia/StorefrontPageFrame.tsx");
+  assert.match(storefrontLayout, /<SettingsProvider/);
+  assert.match(storefrontLayout, /<CartProvider/);
+  assert.match(storefrontLayout, /className="storefront-shell/);
+  assert.match(frame, /<Header \/>/);
+  assert.match(frame, /<Footer \/>/);
+  for (const route of ["page.tsx", "gallery/page.tsx", "art/[slug]/page.tsx", "collection/page.tsx", "demo-target/page.tsx"]) {
+    const source = read(group + route);
+    assert.match(source, /<StorefrontPageFrame/);
+    assert.doesNotMatch(source, /EverieArHeader/);
+  }
+  for (const route of ["ar/page.tsx", "ar/demo/page.tsx", "ar/[slug]/page.tsx", "create/page.tsx", "demo-target/page.tsx"]) {
+    assert.ok(read(group + route).length > 100, route);
+  }
+  const gallery = read(group + "gallery/page.tsx");
+  assert.match(gallery, /GalleryExplorer artworks=/);
+  assert.doesNotMatch(gallery, /<footer/);
+});
+
+test("AR create dialog is compact with no preview column or notes in admin mode", () => {
+  const read = (file: string) => readFileSync(path.resolve(process.cwd(), file), "utf8");
+  const modal = read("src/features/artwork/presentation/components/artwork-create-modal.tsx");
+  const form = read("src/features/artwork/presentation/components/artwork-create-form.tsx");
+  assert.match(modal, /maxWidthClassName="max-w-2xl"/);
+  assert.match(form, /adminLayout \? "mt-0 overflow-hidden/);
+  assert.match(form, /\{!adminLayout && \(\s*<aside/);
+  assert.match(form, /\{!adminLayout && \(\s*<div className=/);
+  assert.match(form, /\{!adminLayout && \(\s*<p className="max-w-sm text-xs/);
+  assert.ok(form.includes('!adminLayout && (<span className="mt-1 block text-xs'));
+  assert.match(form, /workflow.compilerProgress/);
 });
