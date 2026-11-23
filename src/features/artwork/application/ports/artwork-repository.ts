@@ -12,8 +12,9 @@ export interface ArtworkRepository {
   findPublishedBySlug(slug: string): Promise<Artwork | null>;
   listPublished(): Promise<Artwork[]>;
   listForOwner(ownerId: string): Promise<Artwork[]>;
-  updateForOwner(id: string, ownerId: string, input: UpdateArtworkInput): Promise<Artwork | null>;
-  deleteForOwner(id: string, ownerId: string): Promise<Artwork | null>;
+  listAll(): Promise<Artwork[]>;
+  updateForOwner(id: string, ownerId: string | null, input: UpdateArtworkInput): Promise<Artwork | null>;
+  deleteForOwner(id: string, ownerId: string | null): Promise<Artwork | null>;
   countPublished(): Promise<number>;
   markPublished(id: string): Promise<Artwork>;
 }

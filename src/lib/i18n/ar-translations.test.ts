@@ -114,3 +114,17 @@ test("all AR translation keys referenced directly by UI are defined", () => {
     }
   }
 });
+
+test("AR management stays in EVERIE admin without standalone studio navigation", () => {
+  const read = (file: string) => readFileSync(path.resolve(process.cwd(), file), "utf8");
+  const admin = read("src/app/admin/ar/page.tsx");
+  const manager = read("src/features/studio/presentation/components/studio-app.tsx");
+  assert.match(admin, /<StudioApp \/>/);
+  assert.doesNotMatch(admin, /href="\/(?:studio|create)"/);
+  assert.doesNotMatch(manager, /href="\/(?:studio|create)"/);
+  for (const route of ["src/app/studio/page.tsx", "src/app/studio/products/page.tsx"]) {
+    assert.match(read(route), /redirect\("\/admin\/ar"\)/);
+  }
+  assert.match(read("src/app/api/studio/products/route.ts"), /isAdminRole\(user\.role\)/);
+  assert.match(read("src/app/api/studio/products/[id]/route.ts"), /isAdminRole\(user\.role\)/);
+});

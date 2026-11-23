@@ -781,7 +781,7 @@ export default function ProductEditorForm({
 
           <div className="border-t border-stone-800 pt-6 space-y-3">
             <h3 className="text-sm font-semibold text-white">Trải nghiệm AR theo hình ảnh</h3>
-            <p className="text-xs leading-6 text-stone-400">Xuất bản cặp ảnh + video từ <a href="/studio/products" target="_blank" rel="noopener noreferrer" className="text-[#C5A880] underline">AR Studio</a>, sau đó nhập slug tác phẩm đã xuất bản để hiển thị nút AR trên trang sản phẩm.</p>
+            <p className="text-xs leading-6 text-stone-400">Xuất bản cặp ảnh + video trong <a href="/admin/ar" className="text-[#C5A880] underline">quản lý AR của EVERIE</a>, sau đó nhập slug tác phẩm đã xuất bản để hiển thị nút AR trên trang sản phẩm.</p>
             <label htmlFor="ar-artwork-slug" className="block text-xs font-semibold uppercase tracking-wide text-stone-300">Slug tác phẩm AR</label>
             <input id="ar-artwork-slug" type="text" value={formData.arArtworkSlug ?? ""}
               onChange={(event) => setFormData({ ...formData, arArtworkSlug: event.target.value.trim() || undefined })}

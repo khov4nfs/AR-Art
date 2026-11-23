@@ -458,7 +458,6 @@ export async function MarketingPage() {
             <p className="text-[0.6rem] uppercase tracking-[0.18em] text-white/28">Create</p>
             <div className="mt-4 flex flex-col gap-2.5 text-sm text-white/42">
               <Link href="/create" className="transition hover:text-white">Publish a work</Link>
-              <Link href="/studio" className="transition hover:text-white">Studio</Link>
               <Link href="/login" className="transition hover:text-white">Account</Link>
             </div>
           </div>

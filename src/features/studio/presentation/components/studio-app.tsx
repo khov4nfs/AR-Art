@@ -15,13 +15,9 @@ import {
 
 import { AmbientDivider } from "@/components/atoms/ambient-divider";
 import { useLanguage } from "@/context/LanguageContext";
-import { ArLanguageSwitcher } from "@/components/everie-ar/ar-language-switcher";
-import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
-import { EverieBrand } from "@/components/atoms/everie-brand";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
 import { ArtworkCreateModal } from "@/features/artwork/presentation/components/artwork-create-modal";
-import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
 import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 import { ProductManagerModal } from "@/features/studio/presentation/components/product-manager-modal";
 
@@ -84,14 +80,6 @@ function reducer(state: StudioState, action: StudioAction): StudioState {
   }
 }
 
-function navClass(active: boolean) {
-  return `group relative px-1 py-5 text-[0.62rem] font-semibold uppercase tracking-[0.15em] transition-colors duration-300 after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-center after:bg-white after:transition-transform after:duration-300 ${
-    active
-      ? "text-white after:scale-x-100"
-      : "text-white/34 after:scale-x-0 hover:text-white/72"
-  }`;
-}
-
 function productModeLabel(mode: PublishedArtwork["arMode"], t: (key: string) => string) {
   if (mode === "transparent_motion") return t("ar.studio.modeTransparent");
   if (mode === "spatial_layers") return t("ar.studio.modeLayers");
@@ -108,7 +96,7 @@ function ProductCard({
   const { t } = useLanguage();
   return (
     <article className="group relative">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] bg-black/60 shadow-[0_24px_70px_rgba(0,0,0,0.28)] ring-1 ring-inset ring-white/[0.05]">
+      <div className="ar-admin-artwork-image relative aspect-[4/5] overflow-hidden rounded-[6px] bg-black/60 shadow-[0_24px_70px_rgba(0,0,0,0.28)] ring-1 ring-inset ring-white/[0.05]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.targetImageUrl}
@@ -127,6 +115,8 @@ function ProductCard({
           {product.status === "published" ? (
             <Link
               href={`/art/${product.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex size-8 items-center justify-center rounded-full bg-black/38 text-white/58 backdrop-blur-md transition duration-300 hover:bg-white hover:text-black"
               aria-label={t("ar.studio.open", { title: product.title })}
             >
@@ -162,12 +152,13 @@ function ProductCard({
   );
 }
 
-export function StudioApp({ view }: { view: StudioView }) {
+export function StudioApp() {
   const { t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [createOpen, setCreateOpen] = useState(false);
+  const [adminView, setAdminView] = useState<StudioView>("overview");
 
   const load = useCallback(async () => {
     dispatch({ type: "loading" });
@@ -206,37 +197,15 @@ export function StudioApp({ view }: { view: StudioView }) {
     : null;
 
   return (
-    <main className="creator-studio creator-studio-immersive relative min-h-screen overflow-hidden bg-[#050507] text-white">
-      <div className="pointer-events-none fixed inset-0 opacity-38"><CreatorSpatialScene /></div>
-      <div className="pointer-events-none fixed inset-0 z-[1] bg-black/66" />
-
-      <div className="relative z-10 mx-auto min-h-screen w-full max-w-[94rem] px-5 sm:px-8 lg:px-12">
-        <header className="everie-nav-surface sticky top-0 z-30 bg-[#050507]/88 backdrop-blur-xl">
-          <div className="grid min-h-16 grid-cols-[1fr_auto] items-center gap-x-5 sm:grid-cols-[1fr_auto_1fr]">
-            <div className="flex min-w-0 items-center gap-4 sm:gap-5">
-              <BackLink href="/" className="shrink-0" />
-              <span className="hidden h-4 w-px bg-white/12 md:block" aria-hidden="true" />
-              <EverieBrand href="/studio" className="hidden opacity-90 md:inline-flex" />
-            </div>
-
-            <nav className="order-3 col-span-2 flex items-center justify-center gap-7 sm:order-none sm:col-span-1">
-              <Link href="/studio" scroll={false} className={navClass(view === "overview")}>{t("ar.studio.overview")}</Link>
-              <Link href="/studio/products" scroll={false} className={navClass(view === "products")}>{t("ar.studio.products")}</Link>
+    <section className="ar-admin-manager relative min-w-0">
+      <div className="relative w-full">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-800 pb-4">
+            <nav className="flex items-center gap-2" aria-label={t("ar.admin.manager")}>
+              <button type="button" onClick={() => setAdminView("overview")} aria-pressed={adminView === "overview"} className={adminView === "overview" ? "rounded-md bg-[#C5A880] px-4 py-2.5 text-sm text-black" : "rounded-md bg-stone-900 px-4 py-2.5 text-sm text-stone-300 transition hover:text-white"}>{t("ar.studio.overview")}</button>
+              <button type="button" onClick={() => setAdminView("products")} aria-pressed={adminView === "products"} className={adminView === "products" ? "rounded-md bg-[#C5A880] px-4 py-2.5 text-sm text-black" : "rounded-md bg-stone-900 px-4 py-2.5 text-sm text-stone-300 transition hover:text-white"}>{t("ar.studio.products")}</button>
             </nav>
-
-            <div className="flex items-center justify-self-end gap-3">
-              <ArLanguageSwitcher />
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="inline-flex items-center gap-2 border-b border-white/45 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-white/72 transition-[border-color,color] duration-300 hover:border-white hover:text-white"
-            >
-              <Plus className="size-3.5" />
-              {t("ar.studio.add")}
-            </button>
-            </div>
+            <button type="button" onClick={() => setCreateOpen(true)} className="inline-flex items-center gap-2 rounded-md bg-[#C5A880] px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-[#E3C89D]"><Plus className="size-4" />{t("ar.admin.publish")}</button>
           </div>
-        </header>
 
         {state.phase !== "ready" ? (
           <section className="flex min-h-[70vh] items-center justify-center">
@@ -254,13 +223,13 @@ export function StudioApp({ view }: { view: StudioView }) {
           </section>
         ) : (
           <>
-            {view === "overview" && (
-              <section className="studio-view-enter pb-16 pt-16 sm:pt-24">
-                <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+            {adminView === "overview" && (
+              <section className="studio-view-enter pb-10 pt-8">
+                <div className="grid items-end gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                   <div>
-                    <h1 className="max-w-4xl font-serif text-6xl font-normal leading-[0.86] tracking-[-0.055em] sm:text-8xl">
+                    <h2 className="max-w-4xl font-serif text-4xl font-normal leading-tight tracking-[-0.04em] sm:text-5xl">
                       {t("ar.studio.allPublished")}<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">{t("ar.studio.onePlace")}</span>
-                    </h1>
+                    </h2>
                   </div>
 
                   <div data-reveal className="lg:pl-8">
@@ -296,7 +265,7 @@ export function StudioApp({ view }: { view: StudioView }) {
                 <div className="pt-5">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-medium">{t("ar.studio.recent")}</h2>
-                    <Link href="/studio/products" scroll={false} className="text-xs text-white/50 transition-colors duration-300 hover:text-white">{t("ar.studio.viewAll")}</Link>
+                    <button type="button" onClick={() => setAdminView("products")} className="text-xs text-stone-400 transition-colors duration-300 hover:text-[#C5A880]">{t("ar.studio.viewAll")}</button>
                   </div>
                   <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {state.products.slice(0, 4).map((product) => (
@@ -316,10 +285,10 @@ export function StudioApp({ view }: { view: StudioView }) {
               </section>
             )}
 
-            {view === "products" && (
-              <section className="studio-view-enter pb-16 pt-14 sm:pt-20">
+            {adminView === "products" && (
+              <section className="studio-view-enter pb-10 pt-8">
                 <div className="flex flex-wrap items-end justify-between gap-5">
-                  <h1 className="font-serif text-6xl font-normal leading-none tracking-[-0.05em] sm:text-8xl">{t("ar.studio.products")}</h1>
+                  <h2 className="font-serif text-4xl font-normal tracking-[-0.04em] sm:text-5xl">{t("ar.studio.products")}</h2>
                   <button type="button" onClick={() => setCreateOpen(true)} className="inline-flex items-center gap-2 border-b border-white/45 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-white/72 transition-[border-color,color] duration-300 hover:border-white hover:text-white">
                     <Plus className="size-3.5" /> {t("ar.studio.new")}
                   </button>
@@ -358,6 +327,6 @@ export function StudioApp({ view }: { view: StudioView }) {
         onClose={() => setCreateOpen(false)}
         onCreated={() => void load()}
       />
-    </main>
+    </section>
   );
 }

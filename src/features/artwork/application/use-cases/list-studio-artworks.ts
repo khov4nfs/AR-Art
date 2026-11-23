@@ -8,8 +8,10 @@ export class ListStudioArtworks {
     private readonly storage: ArtworkStorage,
   ) {}
 
-  async execute(ownerId: string): Promise<PublishedArtwork[]> {
-    const artworks = await this.repository.listForOwner(ownerId);
+  async execute(ownerId: string, canManageAll = false): Promise<PublishedArtwork[]> {
+    const artworks = canManageAll
+      ? await this.repository.listAll()
+      : await this.repository.listForOwner(ownerId);
 
     return artworks.map((artwork) => ({
       ...artwork,

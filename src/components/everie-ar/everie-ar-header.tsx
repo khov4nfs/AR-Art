@@ -4,16 +4,19 @@ import Link from "next/link";
 
 import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { ArLanguageSwitcher } from "./ar-language-switcher";
 
 /** A lightweight header for immersive AR routes, matching Everie's storefront identity. */
 export function EverieArHeader({ active }: { active?: "gallery" | "scanner" | "studio" }) {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const canManageAr = user?.role === "SUPER_ADMIN" || user?.role === "CONTENT_EDITOR";
   const links = [
     { href: "/", label: t("ar.nav.home") },
     { href: "/gallery", label: t("ar.nav.gallery"), id: "gallery" },
     { href: "/ar", label: t("ar.nav.scan"), id: "scanner" },
-    { href: "/studio/products", label: t("ar.nav.studio"), id: "studio" },
+    ...(canManageAr ? [{ href: "/admin/ar", label: t("ar.nav.studio"), id: "studio" }] : []),
   ] as const;
 
   return (

@@ -67,10 +67,10 @@ serialized queue. Use a **single application writer** as the EVERIE CMS does.
 ### Features and URLs
 
 - / — EVERIE e-commerce, customer accounts, orders and checkout.
-- /admin, /admin/ar — shared EVERIE administration and AR hub.
+- /admin, /admin/ar — shared EVERIE administration; /admin/ar contains AR overview, all-creators product management, drafts, edit/delete, and in-place create/publish dialogs.
 - /gallery — published AR products, newest shelf, popular sorting and views.
 - /ar, /ar/[slug], /art/[slug] — AR camera, QR links, artwork details.
-- /create, /studio/products — artwork image + video publishing, owner management.
+- /create — public image + video publishing using the shared EVERIE session. Legacy /studio and /studio/products redirect to /admin/ar; no independent AR management UI remains.
 - /collection — saved AR discoveries under one EVERIE user account.
 - /api/artworks/uploads — server upload with signed EVERIE cookie, origin
   checks, owner checks, content sniffing, 6 MB limit and short-lived path token.

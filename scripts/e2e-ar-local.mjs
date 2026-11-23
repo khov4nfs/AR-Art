@@ -12,10 +12,24 @@ const request = async (route, options = {}) => {
   return res;
 };
 
-for (const route of ["/", "/gallery", "/ar", "/create", "/studio/products", "/collection"]) {
+for (const route of ["/", "/gallery", "/ar", "/create", "/collection"]) {
   const res = await request(route);
   assert.equal(res.status, 200, route);
   console.log("GET", route, res.status);
+}
+// The EVERIE admin is staff-only, even for users who have created public works.
+const protectedArAdmin = await request("/admin/ar");
+assert.equal(protectedArAdmin.status, 307);
+const adminLogin = new URL(protectedArAdmin.headers.get("location"), base);
+assert.equal(adminLogin.pathname, "/login");
+assert.equal(adminLogin.searchParams.get("next"), "/admin/ar");
+console.log("STAFF_PROTECTED_AR_ADMIN", protectedArAdmin.status);
+// Old studio bookmarks now land in the unified EVERIE admin page.
+for (const route of ["/studio", "/studio/products"]) {
+  const res = await request(route);
+  assert.equal(res.status, 307, route);
+  assert.equal(new URL(res.headers.get("location"), base).pathname, "/admin/ar");
+  console.log("REDIRECT_TO_EVERIE_AR_ADMIN", route);
 }
 // AR has no standalone login route, including old bookmarked deep links.
 const removedArLogin = await request("/ar-login?next=%2Far");

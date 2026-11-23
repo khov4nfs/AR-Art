@@ -35,11 +35,15 @@ export class LocalArtworkRepository implements ArtworkRepository {
     return (await readArData()).artworks.filter(x => x.status === "published")
       .sort((a, b) => (a.publishedAt ?? a.createdAt).localeCompare(b.publishedAt ?? b.createdAt));
   }
+  async listAll(): Promise<Artwork[]> {
+    return (await readArData()).artworks.slice()
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
   async listForOwner(ownerId: string): Promise<Artwork[]> {
     return (await readArData()).artworks.filter(x => x.ownerId === ownerId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
-  async updateForOwner(id: string, ownerId: string, input: UpdateArtworkInput): Promise<Artwork | null> {
+  async updateForOwner(id: string, ownerId: string | null, input: UpdateArtworkInput): Promise<Artwork | null> {
     return updateArData(data => {
       const current = data.artworks.find(x => x.id === id && x.ownerId === ownerId);
       if (!current) return null;
@@ -50,7 +54,7 @@ export class LocalArtworkRepository implements ArtworkRepository {
       return structuredClone(current);
     });
   }
-  async deleteForOwner(id: string, ownerId: string): Promise<Artwork | null> {
+  async deleteForOwner(id: string, ownerId: string | null): Promise<Artwork | null> {
     return updateArData(data => {
       const index = data.artworks.findIndex(x => x.id === id && x.ownerId === ownerId);
       if (index < 0) return null;
