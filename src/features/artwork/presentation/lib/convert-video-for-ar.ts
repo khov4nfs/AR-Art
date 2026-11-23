@@ -4,7 +4,8 @@ import {
   validateOriginalVideo,
 } from "@/features/artwork/domain/original-video";
 
-type AuthHeaders = { authorization: string };
+// The EVERIE signed session is transmitted by the browser as an HttpOnly cookie.
+type AuthHeaders = Record<string, string>;
 
 async function messageFromResponse(response: Response): Promise<string> {
   try {
