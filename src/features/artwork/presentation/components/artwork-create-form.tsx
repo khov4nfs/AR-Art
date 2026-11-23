@@ -101,10 +101,12 @@ function formatMb(bytes: number) {
 
 export function ArtworkCreateForm({
   embedded = false,
+  adminLayout = false,
   onCreated,
   onDone,
 }: {
   embedded?: boolean;
+  adminLayout?: boolean;
   onCreated?: (productId: string) => void;
   onDone?: () => void;
 }) {
@@ -406,7 +408,7 @@ export function ArtworkCreateForm({
     const isPublished = workflow.result.status === "published";
 
     return (
-      <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
+      <main className={embedded ? (adminLayout ? "admin-ar-create relative text-stone-200" : "relative text-white") : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
         <div className={embedded ? "hidden" : "pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
         <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
           <BackLink href="/admin/ar" label={t("ar.studio.products")} />
@@ -488,7 +490,7 @@ export function ArtworkCreateForm({
   }
 
   return (
-    <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
+    <main className={embedded ? (adminLayout ? "admin-ar-create relative text-stone-200" : "relative text-white") : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
       <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
       <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
         <BackLink href="/admin/ar" label={t("ar.create.backStudio")} />
@@ -528,7 +530,7 @@ export function ArtworkCreateForm({
             void submitArtwork("publish");
           }}
           noValidate
-          className="mt-6 grid overflow-hidden rounded-[8px] bg-[#07070a]/68 shadow-[0_36px_120px_rgba(0,0,0,0.3)] ring-1 ring-inset ring-white/[0.06] lg:grid-cols-[1.05fr_0.95fr]"
+          className={adminLayout ? "mt-5 grid overflow-hidden rounded-xl border border-stone-800 bg-[#141417] lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]" : "mt-6 grid overflow-hidden rounded-[8px] bg-[#07070a]/68 shadow-[0_36px_120px_rgba(0,0,0,0.3)] ring-1 ring-inset ring-white/[0.06] lg:grid-cols-[1.05fr_0.95fr]"}
         >
           <div className="space-y-9 p-5 sm:p-7 lg:p-8">
             <div className="grid gap-4 sm:grid-cols-2">

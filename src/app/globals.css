@@ -2074,3 +2074,114 @@ html:not(.dark) .admin-shell .ar-admin-manager .everie-modal-surface :is(
 ) {
   background-color: #ffffff !important;
 }
+
+
+/* AR management uses the same compact dashboard system as the other EVERIE admin sections.
+   Applied only to in-admin create/edit dialogs; the public AR experience stays unchanged. */
+.admin-shell .admin-ar-dialog .everie-modal-surface {
+  border-radius: 1rem;
+}
+.admin-shell .admin-ar-create > section > div.grid.grid-cols-3 {
+  gap: 0.75rem;
+}
+.admin-shell .admin-ar-create > section > div.grid.grid-cols-3 > div {
+  padding: 0.75rem 1rem;
+  border: 1px solid #292524;
+  border-radius: 0.75rem;
+  background-color: #17171a;
+}
+.admin-shell .admin-ar-create > section > div.grid.grid-cols-3 > div > p:nth-child(2) {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.admin-shell .admin-ar-create form {
+  box-shadow: none;
+}
+.admin-shell .admin-ar-create form > div:first-child {
+  padding: 1.5rem;
+}
+.admin-shell .admin-ar-create form label[for] {
+  color: #d6d3d1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.admin-shell .admin-ar-create form input:not([type="file"]) {
+  min-height: 2.75rem;
+  border: 1px solid #44403c;
+  border-radius: 0.5rem;
+  background-color: #1a1a1d;
+  color: #f5f5f4;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+}
+.admin-shell .admin-ar-create form label:has(input[type="file"]) {
+  border: 1px dashed #57534e;
+  border-radius: 0.75rem;
+  background: #1a1a1d;
+  padding: 1rem;
+}
+.admin-shell .admin-ar-create form label:has(input[type="file"]):hover {
+  border-color: #c5a880;
+}
+.admin-shell .admin-ar-create form label:has(input[type="file"]) .font-serif {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.admin-shell .admin-ar-create form > aside {
+  min-height: 25rem;
+  border-left: 1px solid #292524;
+  background-color: #0e0e10;
+}
+.admin-shell .admin-ar-create form button[type="submit"] {
+  border-radius: 0.5rem;
+  background: #c5a880;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.admin-shell .admin-ar-create form button[type="submit"]:hover:not(:disabled) {
+  background: #b59870;
+}
+.admin-shell .admin-ar-create form button[type="button"] {
+  border-radius: 0.5rem;
+}
+.admin-shell .admin-ar-create .creator-success-copy h1 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+html:not(.dark) .admin-shell .admin-ar-create form > aside {
+  background-color: #0e0e10 !important;
+  color: #fff !important;
+}
+html:not(.dark) .admin-shell .admin-ar-create form > aside [class*="text-white/"] {
+  color: rgb(255 255 255 / 0.8) !important;
+}
+html:not(.dark) .admin-shell .admin-ar-create > section > div.grid.grid-cols-3 > div {
+  border-color: #e4e4e7;
+  background-color: #f8f8fa;
+}
+html:not(.dark) .admin-shell .admin-ar-create form label[for] {
+  color: #3f3f46 !important;
+}
+html:not(.dark) .admin-shell .admin-ar-create form label:has(input[type="file"]) {
+  border-color: #d4d4d8;
+  background-color: #f8fafc;
+}
+html:not(.dark) .admin-shell .admin-ar-create form label:has(input[type="file"]):hover {
+  border-color: #c5a880;
+}
+@media (max-width: 1023px) {
+  .admin-shell .admin-ar-create form > aside {
+    min-height: 18rem;
+    border-left: 0;
+    border-top: 1px solid #292524;
+  }
+}
