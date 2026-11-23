@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CheckCircle2, RotateCcw, Settings, TriangleAlert, X } from "lucide-react";
 
 import { BackLink } from "@/components/atoms/back-link";
@@ -31,12 +30,11 @@ export function ArViewer({
   backHref = "/",
   artwork,
 }: ArViewerProps) {
-  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const autoStartedRef = useRef(false);
   const collectionSavedRef = useRef(false);
-  const viewerUserIdRef = useRef<string | null>(null);
   const [collectionSaved, setCollectionSaved] = useState(false);
+  const [collectionSignInRequired, setCollectionSignInRequired] = useState(false);
   const [collectionSaveError, setCollectionSaveError] = useState<string | null>(null);
 
   const stableConfig = useMemo(
@@ -57,57 +55,40 @@ export function ArViewer({
     dismissCameraPermissionHelp,
   } = useArExperience(stableConfig);
 
+  // Viewing a published AR work is public. Signing in is only required for
+  // mutations such as saving a recognized work to the EVERIE Collection.
   useEffect(() => {
     if (autoStartedRef.current) return;
+    const arContainer = containerRef.current;
+    if (!arContainer) return;
 
-    let active = true;
-
-    async function beginAr() {
-      if (artwork) {
-        const user = await getCurrentCollectionUser();
-        if (!active) return;
-
-        if (!user) {
-          const nextPath = `${window.location.pathname}${window.location.search}`;
-          router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
-          return;
-        }
-
-        viewerUserIdRef.current = user.id;
-      }
-
-      const arContainer = containerRef.current;
-      if (!active || !arContainer) return;
-
-      autoStartedRef.current = true;
-      await start(arContainer);
-    }
-
-    void beginAr();
-
+    autoStartedRef.current = true;
+    void start(arContainer);
     return () => {
-      active = false;
       void stop();
     };
-  }, [artwork, router, start, stop]);
+  }, [start, stop]);
 
   useEffect(() => {
-    if (
-      status !== "found" ||
-      !artwork?.id ||
-      (artwork.ownerId && artwork.ownerId === viewerUserIdRef.current) ||
-      collectionSavedRef.current
-    ) {
-      return;
-    }
+    if (status !== "found" || !artwork?.id || collectionSavedRef.current) return;
 
     collectionSavedRef.current = true;
 
-    void collectArtwork(artwork.id)
-      .then((result) => {
+    void getCurrentCollectionUser()
+      .then(async (user) => {
+        if (!user) {
+          setCollectionSignInRequired(true);
+          return;
+        }
+        if (artwork.ownerId && artwork.ownerId === user.id) return;
+
+        const result = await collectArtwork(artwork.id);
         if (result.collected) {
+          setCollectionSignInRequired(false);
           setCollectionSaveError(null);
           setCollectionSaved(true);
+        } else if (result.reason === "unauthenticated") {
+          setCollectionSignInRequired(true);
         }
       })
       .catch((cause) => {
@@ -219,6 +200,20 @@ export function ArViewer({
       {collectionSaveError && (
         <div className="absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-md border border-amber-300/15 bg-black/75 px-4 py-3 text-xs leading-5 text-amber-100/75 backdrop-blur-xl">
           {collectionSaveError}
+        </div>
+      )}
+
+      {collectionSignInRequired && artwork && !collectionSaved && (
+        <div className="absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center justify-between gap-4 border border-amber-100/15 bg-black/85 p-4 backdrop-blur-xl">
+          <p className="text-xs leading-5 text-white/70">
+            Đã nhận diện tác phẩm. Đăng nhập tài khoản EVERIE để lưu vào Collection.
+          </p>
+          <Link
+            href={"/login?next=" + encodeURIComponent("/ar/" + artwork.slug)}
+            className="shrink-0 text-xs font-medium text-amber-100 underline underline-offset-4"
+          >
+            Đăng nhập EVERIE
+          </Link>
         </div>
       )}
 

@@ -235,7 +235,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
               <div className="mt-4 flex flex-wrap gap-5 text-xs font-medium">
                 <Link href={`/art/${matched.slug}`} className="text-white/80 underline underline-offset-4">View work</Link>
                 {collectionNote === "sign-in" ? (
-                  <Link href="/ar-login?next=%2Far" className="text-amber-100 underline underline-offset-4">Sign in</Link>
+                  <Link href="/login?next=%2Far" className="text-amber-100 underline underline-offset-4">Sign in</Link>
                 ) : collectionNote === "saved" ? (
                   <Link href="/collection" className="text-amber-100 underline underline-offset-4">Collection</Link>
                 ) : null}
