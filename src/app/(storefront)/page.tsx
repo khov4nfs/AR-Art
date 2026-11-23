@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getDatabase } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
-import Header from "@/components/hanoia/Header";
+import { StorefrontPageFrame } from "@/components/hanoia/StorefrontPageFrame";
 import { ArText } from "@/components/everie-ar/ar-text";
 import HeroSlider from "@/components/hanoia/HeroSlider";
 import BestSellerSection from "@/components/hanoia/BestSellerSection";
@@ -14,7 +14,6 @@ import HeritageSection from "@/components/hanoia/HeritageSection";
 import PressMentions from "@/components/hanoia/PressMentions";
 import LookbookGallery from "@/components/hanoia/LookbookGallery";
 import NewsletterSection from "@/components/hanoia/NewsletterSection";
-import Footer from "@/components/hanoia/Footer";
 import { ScanLine, ArrowUpRight } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -77,10 +76,7 @@ export default async function Home() {
   const tagline = settings.siteTagline || "Vẻ đẹp ở lại cùng thời gian";
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-neutral-950 text-black dark:text-neutral-100 transition-colors duration-300">
-      <Header initialSettings={settings} />
-
-      <main className="flex-1 flex flex-col">
+    <StorefrontPageFrame mainClassName="flex flex-col">
         <HeroSlider />
 
         <section className="py-14 md:py-20 px-4 md:px-8 max-w-[1440px] mx-auto w-full text-center">
@@ -142,9 +138,6 @@ export default async function Home() {
         <LookbookGallery />
 
         <NewsletterSection />
-      </main>
-
-      <Footer initialSettings={settings} />
-    </div>
+    </StorefrontPageFrame>
   );
 }

@@ -90,7 +90,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
 
   if (loading) {
     return (
-      <div className="py-10 text-xs uppercase tracking-[0.16em] text-white/30">
+      <div className="py-10 text-xs uppercase tracking-[0.16em] text-neutral-500 dark:text-neutral-400">
         {t("ar.collection.loading")}
       </div>
     );
@@ -100,13 +100,13 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
     return (
       <section className="min-h-[28rem] py-14">
         <div className="max-w-2xl">
-          <ScanLine className="size-5 text-white/30" aria-hidden="true" />
+          <ScanLine className="size-5 text-neutral-500 dark:text-neutral-400" aria-hidden="true" />
           <h2 className="mt-6 font-serif text-5xl leading-[0.95] tracking-[-0.045em] sm:text-6xl">
-            {t("ar.collection.signInTitle")}<br /><span className="text-amber-100 italic">{t("ar.collection.signInEmphasis")}</span>
+            {t("ar.collection.signInTitle")}<br /><span className="text-[#94734C] dark:text-[#C5A880] italic">{t("ar.collection.signInEmphasis")}</span>
           </h2>
           <Link
             href="/login?next=%2Fcollection"
-            className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-amber-100"
+            className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-neutral-900 px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-white transition hover:bg-[#8C6D46]"
           >
             {t("ar.common.signIn")} <ArrowUpRight className="size-4" />
           </Link>
@@ -117,15 +117,15 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[5px] bg-white/[0.018] px-4 py-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[5px] bg-neutral-100 dark:bg-neutral-900 px-4 py-4">
         <div className="flex items-baseline gap-4">
-          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">{t("ar.collection.signedIn")}</span>
-          <span className="text-sm text-white/58">{userEmail}</span>
+          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">{t("ar.collection.signedIn")}</span>
+          <span className="text-sm text-neutral-600 dark:text-neutral-300">{userEmail}</span>
         </div>
         <button
           type="button"
           onClick={() => void signOut()}
-          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-white/38 transition hover:text-white"
+          className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400 transition hover:text-neutral-900 dark:hover:text-white"
         >
           <LogOut className="size-3.5" /> {t("ar.common.signOut")}
         </button>
@@ -142,7 +142,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
           {collectedArtworks.map((artwork, index) => (
             <article key={artwork.id} className={index % 3 === 1 ? "lg:mt-12" : ""}>
               <Link href={`/art/${artwork.slug}`} className="group block">
-                <div className="relative overflow-hidden rounded-[5px] bg-[#0a0a0d] ring-1 ring-inset ring-white/[0.05]">
+                <div className="relative overflow-hidden rounded-[5px] bg-[#0a0a0d] ring-1 ring-inset ring-neutral-200 dark:ring-neutral-800">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={artwork.targetImageUrl}
@@ -150,17 +150,17 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                     className="aspect-[4/5] w-full object-cover opacity-90 transition duration-700 group-hover:scale-[1.02] group-hover:opacity-100"
                   />
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-violet-950/20 via-transparent to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-                  <div className="absolute left-4 top-4 text-[0.62rem] tabular-nums tracking-[0.14em] text-white/65">
+                  <div className="absolute left-4 top-4 text-[0.62rem] tabular-nums tracking-[0.14em] text-white">
                     {String(index + 1).padStart(2, "0")}
                   </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-[1fr_auto] gap-5 pt-1">
                   <div>
-                    <h2 className="font-serif text-2xl leading-none text-white">{artwork.title}</h2>
-                    <p className="mt-2 text-xs uppercase tracking-[0.12em] text-white/35">{artwork.artistName}</p>
+                    <h2 className="font-serif text-2xl leading-none text-neutral-900 dark:text-white">{artwork.title}</h2>
+                    <p className="mt-2 text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">{artwork.artistName}</p>
                   </div>
-                  <ArrowUpRight className="mt-1 size-4 text-white/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-amber-100" />
+                  <ArrowUpRight className="mt-1 size-4 text-neutral-500 dark:text-neutral-400 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#94734C] dark:text-[#C5A880]" />
                 </div>
               </Link>
 
@@ -168,7 +168,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                 type="button"
                 disabled={removingId === artwork.id}
                 onClick={() => void removeArtwork(artwork.id)}
-                className="mt-4 inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.13em] text-white/30 transition hover:text-rose-200 disabled:cursor-wait disabled:opacity-50"
+                className="mt-4 inline-flex items-center gap-2 text-[0.62rem] uppercase tracking-[0.13em] text-neutral-500 dark:text-neutral-400 transition hover:text-rose-200 disabled:cursor-wait disabled:opacity-50"
               >
                 {removingId === artwork.id ? (
                   <LoaderCircle className="size-3.5 animate-spin" />
@@ -182,11 +182,11 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
         </div>
       ) : (
         <section className="flex min-h-[24rem] flex-col items-center justify-center px-6 text-center">
-          <div className="flex size-14 items-center justify-center rounded-full bg-white/[0.035] text-white/30">
+          <div className="flex size-14 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-900 text-neutral-500 dark:text-neutral-400">
             <ScanLine className="size-6" />
           </div>
           <h2 className="mt-6 font-serif text-4xl tracking-[-0.035em]">{t("ar.collection.empty")}</h2>
-          <p className="mt-3 max-w-md text-sm leading-6 text-white/38">
+          <p className="mt-3 max-w-md text-sm leading-6 text-neutral-500 dark:text-neutral-400">
             {t("ar.collection.emptyDesc")}
           </p>
         </section>

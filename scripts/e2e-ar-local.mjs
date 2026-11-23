@@ -50,6 +50,11 @@ for (const [locale, homeText, scannerText, galleryText] of [
     const html = await res.text();
     assert.ok(html.includes(text), `Expected ${text} on ${route} for ${locale}`);
     if (route === "/gallery") {
+      // Gallery must reuse the SAME header/menu/footer as the EVERIE homepage.
+      for (const href of ["/classic", "/themed", "/bespoke", "/heritage"]) {
+        assert.ok(html.includes('href="' + href + '"'), "Missing shared EVERIE navigation link " + href);
+      }
+      assert.ok(html.includes('storefront-shell'), "Gallery must live inside the storefront container");
       const shelf = locale === "vi" ? "01 / Sản phẩm mới nhất" : "01 / Latest products";
       assert.ok(html.includes(shelf), `Expected newest-product shelf ${shelf} for ${locale}`);
     }
