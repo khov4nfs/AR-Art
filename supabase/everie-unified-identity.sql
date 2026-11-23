@@ -23,3 +23,25 @@ ALTER TABLE public.everie_user_collection ENABLE ROW LEVEL SECURITY;
 -- Browser anon/authenticated tokens must not query this table directly.
 REVOKE ALL ON public.everie_user_collection FROM PUBLIC, anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.everie_user_collection TO service_role;
+
+-- Legacy Supabase-authenticated users must never see unpublished EVERIE-owned
+-- drafts or assets merely because their legacy owner_id is NULL.
+DROP POLICY IF EXISTS "Creators can view owned artworks" ON public.artworks;
+CREATE POLICY "Creators can view owned artworks" ON public.artworks
+  FOR SELECT TO authenticated
+  USING (
+    owner_id = (select auth.uid())
+    OR (owner_id IS NULL AND everie_owner_id IS NULL AND status = 'published')
+  );
+
+DROP POLICY IF EXISTS "Creators can view their own AR assets" ON public.artwork_ar_assets;
+CREATE POLICY "Creators can view their own AR assets" ON public.artwork_ar_assets
+  FOR SELECT TO authenticated
+  USING (EXISTS (
+    SELECT 1 FROM public.artworks a
+    WHERE a.id = artwork_ar_assets.artwork_id
+      AND (
+        a.owner_id = (select auth.uid())
+        OR (a.owner_id IS NULL AND a.everie_owner_id IS NULL AND a.status = 'published')
+      )
+  ));
