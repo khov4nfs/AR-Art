@@ -33,6 +33,7 @@ export default function Header({
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuList, setMenuList] = useState(megaMenuItems);
   const mounted = useMounted();
+  const compactHeader = mounted && isAuthenticated;
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const siteSettings = initialSettings
@@ -143,7 +144,7 @@ export default function Header({
       >
         <div className="max-w-[1440px] h-full mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
           {/* LEFT: Logo only — site name removed from header row to free nav space */}
-          <div className="logo__container shrink-0 pr-3 xl:pr-6 flex items-center">
+          <div className="logo__container shrink-0 pr-3 flex items-center">
             <Link
               href="/"
               className="flex items-center gap-2.5 group focus:outline-hidden"
@@ -167,8 +168,8 @@ export default function Header({
             </Link>
           </div>
 
-          {/* CENTER: Navigation — single line, no wrap */}
-          <nav className="hidden lg:flex flex-1 items-center justify-center h-full min-w-0 gap-x-3 xl:gap-x-5 2xl:gap-x-7">
+          {/* CENTER: Collapse sooner for signed-in users to make room for account controls. */}
+          <nav className={`hidden ${compactHeader ? "min-[1440px]:flex" : "xl:flex"} flex-1 items-center justify-center h-full min-w-0 gap-x-2 2xl:gap-x-4`}>
             {menuList.map((item) => {
               const hasDropdown = Boolean(item.columns || item.featuredImage);
               const isActive = activeMegaMenu === item.label;
@@ -262,11 +263,11 @@ export default function Header({
                 </div>
               );
             })}
-            <Link href="/ar" className="hidden xl:inline-flex shrink-0 items-center border border-[#C5A880] px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880] transition hover:bg-[#C5A880] hover:text-black">Trải nghiệm AR</Link>
+            <Link href="/ar" title="Trải nghiệm AR" className="hidden xl:inline-flex shrink-0 items-center whitespace-nowrap border border-[#C5A880] px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880] transition hover:bg-[#C5A880] hover:text-black">{mounted && isAuthenticated ? "AR" : "Trải nghiệm AR"}</Link>
           </nav>
 
-          {/* RIGHT SIDE: lookup, search, admin (if any), theme, language, cart */}
-          <div className="flex items-center space-x-4 md:space-x-5 xl:space-x-6 shrink-0">
+          {/* RIGHT SIDE: Smaller horizontal gaps keep lookup clear of the AR CTA at xl. */}
+          <div className="flex shrink-0 items-center space-x-3 sm:space-x-4 xl:space-x-2 2xl:space-x-3">
             <Link
               href="/lookup"
               className="hidden md:inline-block text-[11px] xl:text-[12px] font-medium tracking-[0.8px] uppercase text-black dark:text-neutral-200 hover:text-[#C5A880] transition-colors whitespace-nowrap"
@@ -414,7 +415,7 @@ export default function Header({
             {/* 5. Mobile Hamburger Menu Icon */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden flex flex-col justify-center items-center w-7 h-7 space-y-1 focus:outline-hidden cursor-pointer ml-1"
+              className={`${compactHeader ? "min-[1440px]:hidden" : "xl:hidden"} flex flex-col justify-center items-center w-7 h-7 space-y-1 focus:outline-hidden cursor-pointer ml-1`}
               aria-label="Mở Menu"
             >
               <span className="w-5 h-[1.5px] bg-black dark:bg-neutral-200 block" />
