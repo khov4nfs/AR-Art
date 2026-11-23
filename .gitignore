@@ -63,3 +63,15 @@ connect.md
 # EVERIE AR private registry and archived provider metadata
 /data/ar-artworks.json
 /data/ar-artworks.bak-*.json
+
+# Private Docker Compose variables and handoff backups.
+/deploy/.env
+/deploy/backups/
+
+# All env variants are private, except handoff templates.
+.env*
+!/.env.example
+!/deploy/.env.production.example
+
+# Ephemeral Docker build validation files.
+/.docker-handoff-config/

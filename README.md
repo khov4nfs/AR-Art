@@ -99,6 +99,13 @@ The offline script verifies all SHA-256 checksums, does not overwrite existing
 artworks, and never assigns legacy Supabase Auth ownership to an EVERIE user
 without a separate verified claim process.
 
+### Ready-to-run production handoff
+
+See [deploy/HANDOFF.md](deploy/HANDOFF.md) for the no-source-edit production
+configuration, preflight, automatic backup/deploy/smoke/rollback, and
+verification requirements. Existing production secrets, accounts and mounts
+are preserved. Run ./deploy/production.sh check before deployment.
+
 ### VPS deployment sequence
 
 1. Verify trusted SSH host key and access, then back up

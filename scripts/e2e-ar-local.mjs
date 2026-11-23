@@ -25,6 +25,10 @@ const everieLogin = await request("/login?next=%2Far");
 assert.equal(everieLogin.status, 200);
 console.log("SHARED_LOGIN_REDIRECT", legacyLogin.status);
 
+const health = await request("/api/health");
+assert.equal(health.status, 200, "Runtime must see readable data and writable uploads.");
+console.log("HEALTH", health.status);
+
 for (const route of ["/api/auth/me", "/api/ar/collection", "/api/studio/products"]) {
   const res = await request(route);
   assert.equal(res.status, 401, route);
