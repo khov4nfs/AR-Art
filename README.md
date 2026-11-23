@@ -48,7 +48,7 @@ npm run start       # Chạy server production
 
 The canonical Next.js application handles storefront, administration and AR.
 EVERIE's existing signed HttpOnly everie_session cookie authenticates all AR
-operations. The /ar-login legacy route redirects to the existing /login.
+operations. AR has no login route of its own; use the existing /login.
 
 ### Persistence — the same approach as the EVERIE CMS
 
