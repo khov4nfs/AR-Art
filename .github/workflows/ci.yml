@@ -20,6 +20,9 @@ jobs:
 
       - name: AR HTTP end-to-end smoke
         run: |
+          # Git excludes uploads; the image creates this directory at runtime.
+          # Reproduce the directory locally without bundling private media.
+          mkdir -p public/uploads
           npm run start -- -p 3199 > /tmp/everie-e2e.log 2>&1 &
           pid=$!
           trap 'kill "$pid" 2>/dev/null || true' EXIT
