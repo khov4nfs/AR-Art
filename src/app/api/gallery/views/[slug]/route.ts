@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { getSupabaseServerClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { updateArData } from "@/features/artwork/infrastructure/local/ar-data";
 
 export const runtime = "nodejs";
 
@@ -41,15 +41,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ counted: false }, { headers: { "cache-control": "no-store" } });
   }
 
-  const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase.rpc("increment_published_artwork_view", { p_slug: slug });
-  if (error) {
-    console.error("Gallery view count could not be updated:", error.message);
-    return NextResponse.json({ error: "View count unavailable." }, { status: 503 });
-  }
-  if (data === null || data === undefined) {
-    return NextResponse.json({ error: "Artwork not found." }, { status: 404 });
-  }
+  const found = await updateArData(data => {
+    const artwork = data.artworks.find(x => x.slug === slug && x.status === "published");
+    if (!artwork) return false;
+    artwork.viewCount = Math.max(0, Number(artwork.viewCount ?? 0)) + 1;
+    return true;
+  }).catch((cause) => {
+    console.error("Gallery view count could not be updated:", cause);
+    return null;
+  });
+  if (found === null) return NextResponse.json({ error: "View count unavailable." }, { status: 503 });
+  if (!found) return NextResponse.json({ error: "Artwork not found." }, { status: 404 });
 
   const response = NextResponse.json({ counted: true }, { headers: { "cache-control": "no-store" } });
   response.cookies.set(cookieName, "1", {

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, LayoutDashboard, LogIn, Plus, ScanLine } from "lucide-react";
 import * as THREE from "three";
 
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 
 type ArtworkPalette = {
   a: string;

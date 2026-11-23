@@ -14,7 +14,9 @@ const nextConfig: NextConfig = {
   // to a route that reads them from public/uploads.
   async rewrites() {
     return {
-      beforeFiles: [],
+      // Always use the API for AR media, including files present at build time.
+      // Safari playback requires RFC-compliant HTTP 206 Range responses.
+      beforeFiles: [{ source: "/uploads/ar/:path*", destination: "/api/uploads/ar/:path*" }],
       afterFiles: [],
       fallback: [{ source: "/uploads/:path*", destination: "/api/uploads/:path*" }],
     };

@@ -1,13 +1,11 @@
-import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import Link from "next/link";
 import { EverieArHeader } from "@/components/everie-ar/everie-ar-header";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
 import { CollectionGrid } from "@/features/collection/presentation/components/collection-grid";
 
 export const dynamic = "force-dynamic";
 
 export default async function CollectionPage() {
-  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Bộ sưu tập AR" />;
 
   const { listPublishedArtworks } = createArtworkServices();
   const artworks = await listPublishedArtworks.execute();

@@ -20,7 +20,7 @@ import { EverieBrand } from "@/components/atoms/everie-brand";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
 import { ArtworkCreateModal } from "@/features/artwork/presentation/components/artwork-create-modal";
 import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 import { ProductManagerModal } from "@/features/studio/presentation/components/product-manager-modal";
 
 type StudioView = "overview" | "products";

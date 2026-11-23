@@ -5,20 +5,14 @@ import { ListPublishedArtworks } from "@/features/artwork/application/use-cases/
 import { ListStudioArtworks } from "@/features/artwork/application/use-cases/list-studio-artworks";
 import { PublishArtwork } from "@/features/artwork/application/use-cases/publish-artwork";
 import { UpdateStudioArtwork } from "@/features/artwork/application/use-cases/update-studio-artwork";
-import { SupabaseArtworkRepository } from "@/features/artwork/infrastructure/supabase/supabase-artwork-repository";
-import { SupabaseArtworkStorage } from "@/features/artwork/infrastructure/supabase/supabase-artwork-storage";
-import { getArtworkBucketName } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { LocalArtworkRepository } from "./local-artwork-repository";
+import { LocalArtworkStorage } from "./local-artwork-storage";
 
 export function createArtworkServices() {
-  const repository = new SupabaseArtworkRepository();
-  const storage = new SupabaseArtworkStorage();
-
+  const repository = new LocalArtworkRepository();
+  const storage = new LocalArtworkStorage();
   return {
-    createUploadSession: new CreateArtworkUploadSession(
-      repository,
-      storage,
-      getArtworkBucketName(),
-    ),
+    createUploadSession: new CreateArtworkUploadSession(repository, storage, "everie-public-uploads"),
     publishArtwork: new PublishArtwork(repository, storage),
     getPublishedArtwork: new GetPublishedArtwork(repository, storage),
     listPublishedArtworks: new ListPublishedArtworks(repository, storage),

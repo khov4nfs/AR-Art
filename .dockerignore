@@ -39,6 +39,7 @@ CLAUDE.md
 docs
 scripts/*
 !scripts/patch-mindar-three.mjs
+!scripts/import-legacy-ar-backup.mjs
 
 # Docker files themselves (no need to copy into image)
 Dockerfile
@@ -52,7 +53,13 @@ CHANGELOG.md
 LICENSE
 
 # Personal CMS state is preserved only in mounted /opt/everievn/data, not in images.
-data/cms-store.json
+data/*
+!data/.gitkeep
 data_smaple/
 .npm-cache/
 everievn-main/
+
+# Never bake private AR data or user-uploaded media into images.
+data/ar-artworks.json
+data/ar-artworks.bak-*.json
+public/uploads/

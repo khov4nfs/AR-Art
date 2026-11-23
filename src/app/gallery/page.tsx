@@ -1,11 +1,11 @@
-import { ArBackendUnavailable, isArBackendConfigured } from "@/components/everie-ar/ar-backend-unavailable";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { EverieArHeader } from "@/components/everie-ar/everie-ar-header";
 import type { GalleryArtwork } from "@/features/gallery/domain/gallery-artwork";
 import { GalleryExplorer } from "@/features/gallery/presentation/components/gallery-explorer";
-import { getArtworkBucketName, getSupabaseServerClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { readArData } from "@/features/artwork/infrastructure/local/ar-data";
+import { arPublicMediaUrl } from "@/features/artwork/infrastructure/local/ar-media-path";
 
 export const dynamic = "force-dynamic";
 
@@ -14,54 +14,21 @@ export const metadata: Metadata = {
   description: "Explore the newest and most-viewed AR artworks published by artists in the Everie gallery.",
 };
 
-type GalleryRow = {
-  id: string;
-  slug: string;
-  title: string;
-  artist_name: string;
-  description: string;
-  target_image_path: string;
-  published_at: string | null;
-  created_at: string;
-  view_count: number | null;
-};
-
 async function loadGalleryArtworks(): Promise<GalleryArtwork[]> {
-  const client = getSupabaseServerClient();
-  const bucket = getArtworkBucketName();
-  const pageSize = 200;
-  const rows: GalleryRow[] = [];
-
-  // Paginate through all published artwork rather than the 10-item studio limit.
-  for (let offset = 0; ; offset += pageSize) {
-    const { data, error } = await client
-      .from("artworks")
-      .select("id,slug,title,artist_name,description,target_image_path,published_at,created_at,view_count")
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
-      .range(offset, offset + pageSize - 1)
-      .returns<GalleryRow[]>();
-
-    if (error) throw new Error(`Unable to load Gallery: ${error.message}`);
-    const batch = data ?? [];
-    rows.push(...batch);
-    if (batch.length < pageSize) break;
-  }
-
-  return rows.map((artwork) => ({
+  const data = await readArData();
+  return data.artworks.filter(artwork => artwork.status === "published").map(artwork => ({
     id: artwork.id,
     slug: artwork.slug,
     title: artwork.title,
-    artistName: artwork.artist_name,
+    artistName: artwork.artistName,
     description: artwork.description,
-    imageUrl: client.storage.from(bucket).getPublicUrl(artwork.target_image_path).data.publicUrl,
-    publishedAt: artwork.published_at ?? artwork.created_at,
-    viewCount: Math.max(0, Number(artwork.view_count ?? 0)),
+    imageUrl: arPublicMediaUrl(artwork.targetImagePath),
+    publishedAt: artwork.publishedAt ?? artwork.createdAt,
+    viewCount: Math.max(0, Number(artwork.viewCount ?? 0)),
   }));
 }
 
 export default async function GalleryPage() {
-  if (!isArBackendConfigured()) return <ArBackendUnavailable area="Thư viện AR" />;
 
   const artworks = await loadGalleryArtworks();
   const artists = new Set(artworks.map((artwork) => artwork.artistName).filter(Boolean)).size;

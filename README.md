@@ -44,43 +44,75 @@ npm run build       # Build production
 npm run start       # Chạy server production
 ```
 
-## EVERIE Digital Atelier (AR integrated)
+## EVERIE + AR: one application, one account
 
-`everievn-main` is the canonical Next.js storefront/admin source. AR Art is integrated as an internal feature module (`src/features/{ar-experience,artwork,auth,collection,gallery,studio}`) with separate Supabase persistence. The product catalog, orders, customer accounts and CMS remain the original EVERIE file-backed application.
+The canonical Next.js application handles storefront, administration and AR.
+EVERIE's existing signed HttpOnly everie_session cookie authenticates all AR
+operations. The /ar-login legacy route redirects to the existing /login.
 
-| Route | Function |
-| --- | --- |
-| `/` | Original EVERIE storefront and product discovery |
-| `/admin` | Existing EVERIE CMS/admin (unchanged login/session) |
-| `/admin/ar` | AR hub in EVERIE admin |
-| `/gallery` | Public AR gallery, newest and most viewed |
-| `/ar` | Universal image scanner |
-| `/ar/[slug]` | Single image-tracked AR animation (QR destination) |
-| `/art/[slug]` | Public artwork details and QR |
-| `/studio/products` | AR artwork publishing/management |
-| `/create` | Upload target image and animation, generate `.mind` and QR |
-| `/ar-login` | Legacy redirect to the shared EVERIE `/login` |
+### Persistence — the same approach as the EVERIE CMS
 
-**Product linkage:** Admin > Products > editing a product > AR artwork slug. It is a reference to an already published AR artwork slug and exposes a “Trải nghiệm AR” CTA on the public product detail page. Existing GLB 3D configurator remains independent.
+| Data | Private/public container path | Persistent VPS mount |
+| --- | --- | --- |
+| EVERIE CMS, users and orders | data/cms-store.json | /opt/everievn/data |
+| AR artworks, views and collections | data/ar-artworks.json | /opt/everievn/data |
+| EVERIE public media | public/uploads/ | /opt/everievn/public/uploads |
+| AR images, .mind, MP4/WebM and GLB files | public/uploads/ar/<artwork-uuid>/ | /opt/everievn/public/uploads |
 
-### AR setup
+**Do not place credentials, passwords, user collections or database JSON in
+public/**. Files under public/ are web-accessible; only intentionally public
+AR media belongs there. Private AR JSON is atomically written in data/ with a
+serialized queue. Use a **single application writer** as the EVERIE CMS does.
 
-Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as environment secrets. Use the existing `supabase/schema.sql` and migrations for new installs. Never expose the service-role key to the browser. In production, ensure these public values exist at **Docker build time** via Compose build args and at runtime. AR publishing and collection use the same HttpOnly `everie_session` as storefront, checkout and admin. Supabase Auth is not used for new AR logins.
+### Features and URLs
 
-The AR video-conversion server uses `ffmpeg` and `ffprobe`; both are installed in the VPS Docker runner image. Preserve the existing `/opt/everievn/data` and `/opt/everievn/public/uploads` volume mounts. Do not commit `data/cms-store.json`, sample user uploads, or local session secrets. A local copy of runtime data may be needed when migrating an existing installation.
+- / — EVERIE e-commerce, customer accounts, orders and checkout.
+- /admin, /admin/ar — shared EVERIE administration and AR hub.
+- /gallery — published AR products, newest shelf, popular sorting and views.
+- /ar, /ar/[slug], /art/[slug] — AR camera, QR links, artwork details.
+- /create, /studio/products — artwork image + video publishing, owner management.
+- /collection — saved AR discoveries under one EVERIE user account.
+- /api/artworks/uploads — server upload with signed EVERIE cookie, origin
+  checks, owner checks, content sniffing, 6 MB limit and short-lived path token.
+- /uploads/ar/... — public media, including .mind and HTTP Range for video.
 
-### Validation
+Product linking, storefront CMS and GLB configurator remain unchanged.
 
-`npm run check` runs AR domain tests plus ESLint, TypeScript and Next production build. After deploying, perform physical camera tests on iOS Safari and Android Chrome to validate video/image scale, stabilisation, and alpha playback. Production deployment requires applying `supabase/everie-unified-identity.sql`, configuring server Supabase credentials in `deploy/.env`, backing up VPS data, and validating mobile camera tracking before switching traffic.
+### Supabase archives (no runtime dependency)
 
-### Three.js compatibility
+Supabase SDK, runtime credentials, repository and deployment dependencies have
+been removed. Prior SQL and migrations are preserved under
+docs/legacy/ar-supabase/ only, outside active source.
 
-EVERIE keeps Three.js 0.183 for the advanced GLB configurator. `mind-ar@1.2.5` embeds a legacy renderer call; the pinned `scripts/patch-mindar-three.mjs` postinstall adapter converts the removed `sRGBEncoding`/`outputEncoding` names to `SRGBColorSpace`/`outputColorSpace`. The browser-only `node-fetch` shim prevents bundling Node HTTP/FS modules through MindAR's TensorFlow dependency. `npm run dev` and `npm run build` explicitly run the compatibility adapter, because the optional native `canvas` dependency is not required for browser AR and dependency installation scripts are disabled for portable CI/Docker installs. The adapter fails closed if the pinned MindAR bundle changes unexpectedly. Validate on physical mobile cameras before production cutover.
+The existing remote Supabase project is **not deleted**. A backup containing
+one historical published work was written to the developer's private
+data/ar-artworks.bak-supabase-20261123.json, with three media files and SHA-256
+checksums under public/uploads/ar/. These assets are excluded from Git
+and Docker images. They must be copied to the VPS persistent volumes before
+the existing artwork can appear on the deployed site.
 
-### Unified EVERIE login for AR
+After deploying the new image and copying both backup and media into the existing volumes, import in the single EVERIE container with:
 
-AR Studio, scanner Collection and checkout share the original EVERIE account. The browser never receives Supabase server credentials. AR writes require the signed `everie_session` cookie plus same-origin verification, while AR asset uploads use short-lived signed URLs. Only the Next.js server may access `everie_user_collection` via the server key.
+    docker exec everievn-web node scripts/import-legacy-ar-backup.mjs data/ar-artworks.bak-supabase-20261123.json
 
-The additive migration at `supabase/everie-unified-identity.sql` adds `artworks.everie_owner_id` and `everie_user_collection`, leaving older Supabase Auth-owned artworks untouched and publicly visible. Do **not** silently map existing Supabase Auth creators to EVERIE by unverified email; a separate proof-of-ownership/administrator reconciliation is required. Never delete legacy Supabase users or media during cutover.
+The offline script verifies all SHA-256 checksums, does not overwrite existing
+artworks, and never assigns legacy Supabase Auth ownership to an EVERIE user
+without a separate verified claim process.
 
-The VPS Compose config now **refuses to start** without `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `SUPABASE_SERVICE_ROLE_KEY`. Put them exclusively in the private VPS `deploy/.env` (mode 0600), not in the repository or browser. Verify `docker compose --env-file deploy/.env -f deploy/docker-compose.vps.yml config --quiet` after backing up the existing `/opt/everievn/data` and `/opt/everievn/public/uploads` volumes, and keep a rollback image/tag.
+### VPS deployment sequence
+
+1. Verify trusted SSH host key and access, then back up
+   /opt/everievn/data and /opt/everievn/public/uploads.
+2. Copy the private AR archive and media to the existing VPS volume paths,
+   then run the offline importer, checking file counts and checksums.
+3. Keep the existing SESSION_SECRET and other EVERIE settings in the private
+   deploy/.env. No Supabase variables are necessary.
+4. Run docker compose --env-file deploy/.env -f deploy/docker-compose.vps.yml config --quiet.
+5. Build and deploy the single app container using existing vms_edge network
+   and original EVERIE volumes.
+6. Smoke-test shop, login/logout, Gallery, create/publish, Studio ownership,
+   collection/view counters and /uploads/ar/ on HTTP Range. Validate physical
+   camera tracking and video sync in Safari iOS and Chrome Android.
+
+Maintain a rollback image and a private backup. ffmpeg/ffprobe for source MOV
+conversion are included in the Docker runner. Before deployment, run npm run check.

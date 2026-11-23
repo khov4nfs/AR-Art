@@ -1,7 +1,7 @@
-// Keep aligned with the 6 MB Supabase signed-upload limit.
+// Keep aligned with the 6 MB EVERIE server-upload limit.
 const AR_VIDEO_READY_MAX_SIZE = 6 * 1024 * 1024;
 
-/** Cloudflare-friendly chunks; the original MOV is never uploaded to Supabase. */
+/** Cloudflare-friendly chunks; the original MOV is only used for conversion. */
 export const AR_VIDEO_CHUNK_SIZE = 8 * 1024 * 1024;
 export const AR_VIDEO_MAX_SOURCE_SIZE = 240 * 1024 * 1024;
 

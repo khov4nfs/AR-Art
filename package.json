@@ -2,7 +2,7 @@
   "name": "everievn",
   "version": "1.0.0",
   "private": true,
-  "description": "EVERIE — handmade ceramic flowers (Classic, Themed, Bespoke)",
+  "description": "EVERIE \u2014 handmade ceramic flowers (Classic, Themed, Bespoke)",
   "engines": {
     "node": ">=22"
   },
@@ -13,7 +13,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "npm run test && npm run lint && npm run typecheck && npm run build",
-    "test": "node --test src/features/collection/domain/collection.test.ts src/features/auth/domain/auth-form-schema.test.ts src/features/auth/domain/auth-confirmation.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts src/features/auth/domain/everie-request-origin.test.ts"
+    "test": "node --test src/features/collection/domain/collection.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts src/features/auth/domain/everie-request-origin.test.ts src/features/artwork/infrastructure/local/ar-media-path.test.ts",
+    "test:e2e": "node scripts/e2e-ar-local.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
@@ -21,25 +22,24 @@
     "@gltf-transform/extensions": "^4.5.1",
     "@gltf-transform/functions": "^4.5.1",
     "@google/model-viewer": "^4.3.1",
+    "@hookform/resolvers": "^5.9.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.6.0",
     "meshoptimizer": "^1.3.0",
+    "mind-ar": "1.2.5",
     "next": "16.3.5",
     "nodemailer": "^7.0.13",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-hook-form": "^7.89.0",
     "shadcn": "^4.1.0",
     "sharp": "^0.35.5",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2",
     "tw-animate-css": "^1.4.0",
-    "@hookform/resolvers": "^5.9.1",
-    "@supabase/supabase-js": "2.117.2",
-    "mind-ar": "1.2.5",
-    "react-hook-form": "^7.89.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

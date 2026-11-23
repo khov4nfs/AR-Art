@@ -14,7 +14,7 @@ import { AmbientDivider } from "@/components/atoms/ambient-divider";
 import { EverieBrand } from "@/components/atoms/everie-brand";
 import { ImmersiveGalleryShowcase } from "@/components/organisms/immersive-gallery-showcase";
 import { SiteHeader } from "@/components/organisms/site-header";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
 
 const CAPABILITIES = [
   "Animated artwork",

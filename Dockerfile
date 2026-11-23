@@ -39,12 +39,6 @@ RUN --mount=type=cache,target=/root/.npm \
 
 FROM node:${NODE_VERSION} AS builder
 
-# Public Supabase config must also be available at bundle/build time.
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
-
 # Set working directory
 WORKDIR /app
 
@@ -103,6 +97,7 @@ ENV HOSTNAME="0.0.0.0"
 # Copy production assets
 COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/data ./data
+COPY --from=builder --chown=node:node /app/scripts/import-legacy-ar-backup.mjs ./scripts/import-legacy-ar-backup.mjs
 
 # Set the correct permissions for runtime writes
 RUN mkdir -p .next public/uploads data && chown -R node:node .next public/uploads data

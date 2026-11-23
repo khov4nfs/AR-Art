@@ -7,8 +7,6 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_VERSION: 24-slim
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?set Supabase URL in deploy/.env}
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?set publishable key in deploy/.env}
     image: everievn-web:latest
     container_name: everievn-web
     restart: unless-stopped
@@ -20,10 +18,6 @@ services:
       - "SESSION_SECRET=${SESSION_SECRET:?set SESSION_SECRET in deploy/.env}"
       - SITE_URL=https://everievn.com
       - NEXT_PUBLIC_SITE_URL=https://everievn.com
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:?set Supabase URL in deploy/.env}
-      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?set publishable key in deploy/.env}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:?set server secret key in deploy/.env}
-      - SUPABASE_ASSET_BUCKET=${SUPABASE_ASSET_BUCKET:-ar-art-assets}
     volumes:
       - /opt/everievn/data:/app/data
       - /opt/everievn/public/uploads:/app/public/uploads

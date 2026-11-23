@@ -9,7 +9,7 @@ import { Button } from "@/components/atoms/button";
 import type { ArOverlay } from "@/features/ar-experience/domain/ar-experience";
 import { useArExperience } from "@/features/ar-experience/presentation/hooks/use-ar-experience";
 import { compileMindTargetImages } from "@/features/artwork/presentation/lib/compile-mind-target";
-import { collectArtwork, getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { collectArtwork, getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 
 type ScannerArtwork = {
   id: string;
