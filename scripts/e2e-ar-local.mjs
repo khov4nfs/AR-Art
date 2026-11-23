@@ -27,13 +27,18 @@ console.log("AR_LOGIN_REMOVED", removedArLogin.status);
 // The server receives the same language cookie as the storefront; public AR
 // views and both homepage AR buttons render the matching locale.
 for (const [locale, homeText, scannerText, galleryText] of [
-  ["vi", "Mở camera AR", "Quét tác phẩm.", "Thư viện"],
-  ["en", "Open AR camera", "Scan the art.", "Gallery"],
+  ["vi", "Mở camera AR", "Quét ảnh để xem AR.", "Thư viện"],
+  ["en", "Open AR camera", "Scan an image to see AR.", "Gallery"],
 ]) {
   for (const [route, text] of [["/", homeText], ["/ar", scannerText], ["/gallery", galleryText]]) {
     const res = await fetch(base + route, { headers: { cookie: `hanoia_language=${locale}` } });
     assert.equal(res.status, 200, `${route}: ${locale}`);
-    assert.ok((await res.text()).includes(text), `Expected ${text} on ${route} for ${locale}`);
+    const html = await res.text();
+    assert.ok(html.includes(text), `Expected ${text} on ${route} for ${locale}`);
+    if (route === "/gallery") {
+      const shelf = locale === "vi" ? "01 / Sản phẩm mới nhất" : "01 / Latest products";
+      assert.ok(html.includes(shelf), `Expected newest-product shelf ${shelf} for ${locale}`);
+    }
     console.log("AR_LOCALE", locale, route, res.status);
   }
 }

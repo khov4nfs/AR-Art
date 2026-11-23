@@ -128,7 +128,7 @@ function ProductCard({
             <Link
               href={`/art/${product.slug}`}
               className="flex size-8 items-center justify-center rounded-full bg-black/38 text-white/58 backdrop-blur-md transition duration-300 hover:bg-white hover:text-black"
-              aria-label={`Open ${product.title}`}
+              aria-label={t("ar.studio.open", { title: product.title })}
             >
               <ArrowUpRight className="size-4" />
             </Link>
