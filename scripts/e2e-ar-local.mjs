@@ -17,6 +17,14 @@ for (const route of ["/", "/gallery", "/ar", "/create", "/studio/products", "/co
   assert.equal(res.status, 200, route);
   console.log("GET", route, res.status);
 }
+// Old AR-login deep links are compatibility redirects, never a second login form.
+const legacyLogin = await request("/ar-login?next=%2Far");
+assert.equal(legacyLogin.status, 307);
+assert.equal(legacyLogin.headers.get("location"), "/login?next=%2Far");
+const everieLogin = await request("/login?next=%2Far");
+assert.equal(everieLogin.status, 200);
+console.log("SHARED_LOGIN_REDIRECT", legacyLogin.status);
+
 for (const route of ["/api/auth/me", "/api/ar/collection", "/api/studio/products"]) {
   const res = await request(route);
   assert.equal(res.status, 401, route);
