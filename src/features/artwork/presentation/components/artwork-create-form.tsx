@@ -18,6 +18,7 @@ import {
 
 import { BackLink } from "@/components/atoms/back-link";
 import { useLanguage } from "@/context/LanguageContext";
+import { localizedArFormError } from "@/lib/i18n/ar-form-errors";
 import { ArLanguageSwitcher } from "@/components/everie-ar/ar-language-switcher";
 import { ARTWORK_VIDEO_PLANE_DEPTH } from "@/features/ar-experience/domain/video-plane-fit";
 import { Button } from "@/components/atoms/button";
@@ -490,7 +491,7 @@ export function ArtworkCreateForm({
     <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
       <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
       <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
-        <BackLink href="/studio/products" label="Studio" />
+        <BackLink href="/studio/products" label={t("ar.create.backStudio")} />
         <EverieBrand />
         <div className="justify-self-end"><ArLanguageSwitcher /></div>
       </header>
@@ -536,7 +537,7 @@ export function ArtworkCreateForm({
                 <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.title ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-amber-200/24"}`}>
                   <Input id="title" maxLength={120} aria-invalid={Boolean(errors.title)} placeholder={t("ar.create.titlePlaceholder")} {...register("title")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
                 </div>
-                {errors.title?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.title.message}</p> : null}
+                {errors.title?.message ? <p className="px-1 text-xs text-rose-200/80">{localizedArFormError(errors.title.message, language, t, "ar.create.errorPublish")}</p> : null}
               </div>
 
               <div className="grid gap-2">
@@ -544,7 +545,7 @@ export function ArtworkCreateForm({
                 <div className={`rounded-[6px] bg-white/[0.028] shadow-[inset_0_1px_0_rgba(255,255,255,0.025)] ring-1 ring-inset transition duration-300 focus-within:bg-white/[0.045] ${errors.artistName ? "ring-rose-300/24" : "ring-white/[0.06] focus-within:ring-amber-200/24"}`}>
                   <Input id="artistName" maxLength={120} aria-invalid={Boolean(errors.artistName)} placeholder={t("ar.create.artistPlaceholder")} {...register("artistName")} className="h-13 rounded-[6px] border-0 bg-transparent px-4 text-[0.98rem] text-white shadow-none placeholder:text-white/20 focus-visible:ring-0" />
                 </div>
-                {errors.artistName?.message ? <p className="px-1 text-xs text-rose-200/80">{errors.artistName.message}</p> : null}
+                {errors.artistName?.message ? <p className="px-1 text-xs text-rose-200/80">{localizedArFormError(errors.artistName.message, language, t, "ar.create.errorPublish")}</p> : null}
               </div>
             </div>
 
@@ -574,9 +575,9 @@ export function ArtworkCreateForm({
                   </div>
                 ) : null}
                 {targetPreparing ? <p role="status" className="text-xs text-amber-200/75">{t("ar.create.preparingTarget")}</p> : null}
-                {submitAttempted && targetError ? <p role="alert" className="text-xs text-rose-200/80">{targetError}</p> : null}
+                {submitAttempted && targetError ? <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(targetError, language, t, "ar.create.errorImage")}</p> : null}
                 {submitAttempted && errors.targetImage?.message && !targetPreparing && !targetError ?
-                  <p role="alert" className="text-xs text-rose-200/80">{errors.targetImage.message}</p> : null}
+                  <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(errors.targetImage.message, language, t, "ar.create.errorImage")}</p> : null}
               </div>
 
               <div className="space-y-3">
@@ -609,11 +610,11 @@ export function ArtworkCreateForm({
                   );
                 })}
                 {conversionMessage ? <p role="status" className="text-xs text-amber-200/75">{language === "vi" ? t("ar.create.preparing") : conversionMessage}</p> : null}
-                {submitAttempted && conversionError ? <p role="alert" className="text-xs text-rose-200/80">{conversionError}</p> : null}
+                {submitAttempted && conversionError ? <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(conversionError, language, t, "ar.create.errorVideo")}</p> : null}
                 {submitAttempted && errors.spatialLayers?.message ?
-                  <p role="alert" className="text-xs text-rose-200/80">{errors.spatialLayers.message}</p> : null}
+                  <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(errors.spatialLayers.message, language, t, "ar.create.errorVideo")}</p> : null}
                 {submitAttempted && errors.spatialLayers?.[0]?.file?.message ?
-                  <p role="alert" className="text-xs text-rose-200/80">{errors.spatialLayers[0].file.message}</p> : null}
+                  <p role="alert" className="text-xs text-rose-200/80">{localizedArFormError(errors.spatialLayers[0].file.message, language, t, "ar.create.errorVideo")}</p> : null}
               </div>
 
               <p className="text-xs leading-6 text-white/45">
@@ -651,7 +652,7 @@ export function ArtworkCreateForm({
               </div>
             </div>
 
-            {workflow.message ? <p className={`text-sm ${isSubmitting ? "text-white/40" : "text-rose-200/80"}`} role="status">{workflow.message.startsWith("ar.create.") ? t(workflow.message) : workflow.message}</p> : null}
+            {workflow.message ? <p className={`text-sm ${isSubmitting ? "text-white/40" : "text-rose-200/80"}`} role="status">{workflow.message.startsWith("ar.create.") ? t(workflow.message) : localizedArFormError(workflow.message, language, t, "ar.create.errorPublish")}</p> : null}
           </div>
 
           <aside className="relative min-h-[34rem] overflow-hidden bg-[#09090d] text-white">

@@ -4,6 +4,7 @@ import path from "node:path";
 import { test } from "node:test";
 
 import { arTranslations } from "./ar-translations.ts";
+import { localizedArFormError } from "./ar-form-errors.ts";
 
 const vi = arTranslations.vi;
 const en = arTranslations.en;
@@ -30,8 +31,52 @@ test("AR main buttons, navigation and scanner react to global language", () => {
     assert.ok(en[key]);
     assert.notEqual(vi[key], en[key], key);
   }
-  assert.equal(en["ar.scanner.preparing"].replace("{progress}", "42"), "Preparing targets · 42%");
-  assert.equal(vi["ar.scanner.preparing"].replace("{progress}", "42"), "Đang chuẩn bị nhận diện · 42%");
+  assert.equal(en["ar.scanner.preparing"].replace("{progress}", "42"), "Getting images ready to scan · 42%");
+  assert.equal(vi["ar.scanner.preparing"].replace("{progress}", "42"), "Đang chuẩn bị ảnh để quét · 42%");
+});
+
+test("latest gallery shelf describes products, not an internal studio", () => {
+  assert.equal(vi["ar.gallery.newShelf"], "01 / Sản phẩm mới nhất");
+  assert.equal(en["ar.gallery.newShelf"], "01 / Latest products");
+  assert.doesNotMatch(vi["ar.gallery.newShelf"], /studio/i);
+  assert.doesNotMatch(en["ar.gallery.newShelf"], /studio/i);
+  assert.match(vi["ar.gallery.newDesc"], /sản phẩm/);
+  assert.match(en["ar.gallery.newDesc"], /products/);
+});
+
+test("friendly AR instructions preserve scan-based collection and required media constraints", () => {
+  for (const locale of [vi, en]) {
+    const help = locale["ar.create.helpText"];
+    const collection = locale["ar.collection.description"];
+    assert.match(help, /video/);
+    assert.match(collection, /camera/);
+    assert.match(locale["ar.create.imageHint"], /6 MB/);
+    assert.match(locale["ar.create.videoHint"], /240 MB/);
+    assert.ok(locale["ar.create.publishHint"].includes(locale === vi ? "đăng nhập" : "Signed-in"));
+  }
+});
+
+test("AR field errors are friendly in VN/EN without changing validation contracts", () => {
+  const tVi = (key: string) => vi[key];
+  const tEn = (key: string) => en[key];
+
+  assert.equal(
+    localizedArFormError("Artwork title is required.", "vi", tVi, "ar.create.errorPublish"),
+    "Hãy đặt tên cho sản phẩm nhé.",
+  );
+  assert.equal(
+    localizedArFormError("Upload the animation video.", "en", tEn, "ar.create.errorVideo"),
+    "Please add an animation video.",
+  );
+  assert.equal(
+    localizedArFormError("Unexpected processing error", "vi", tVi, "ar.create.errorVideo"),
+    vi["ar.create.errorVideo"],
+  );
+  assert.equal(
+    localizedArFormError("Unexpected processing error", "en", tEn, "ar.create.errorVideo"),
+    "Unexpected processing error",
+  );
+  assert.equal(localizedArFormError(undefined, "vi", tVi, "ar.create.errorVideo"), undefined);
 });
 
 test("all AR translation keys referenced directly by UI are defined", () => {

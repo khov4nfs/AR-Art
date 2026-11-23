@@ -131,7 +131,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_32%,rgba(0,0,0,0.45))]" />
 
       <div className="absolute inset-x-5 top-[max(1.25rem,env(safe-area-inset-top))] z-30 flex items-start justify-between gap-4 sm:inset-x-8">
-        <BackLink href="/" label={t("ar.common.gallery")} className="rounded-[4px] bg-black/45 px-3 py-2 text-white/75 backdrop-blur-md hover:text-white" />
+        <BackLink href="/" label={t("ar.nav.home")} className="rounded-[4px] bg-black/45 px-3 py-2 text-white/75 backdrop-blur-md hover:text-white" />
         <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center"><span className="rounded-[4px] bg-black/40 px-3 py-2 text-[0.64rem] uppercase tracking-[0.14em] text-white/70 backdrop-blur-md">
           {status === "scanning" ? t("ar.scanner.statusLooking") : status === "found" ? t("ar.scanner.statusFound") : "EVERIE AR"}
         </span><ArLanguageSwitcher /></div>

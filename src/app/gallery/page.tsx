@@ -11,8 +11,8 @@ import { arPublicMediaUrl } from "@/features/artwork/infrastructure/local/ar-med
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Gallery — Everie",
-  description: "Explore the newest and most-viewed AR artworks published by artists in the Everie gallery.",
+  title: "AR Gallery — EVERIE",
+  description: "Discover the latest and most-viewed AR products from EVERIE.",
 };
 
 async function loadGalleryArtworks(): Promise<GalleryArtwork[]> {
