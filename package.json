@@ -11,9 +11,10 @@
     "build": "node scripts/patch-mindar-three.mjs && next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "check": "npm run test && npm run lint && npm run typecheck && npm run build",
-    "test": "node --test src/features/collection/domain/collection.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts src/features/auth/domain/everie-request-origin.test.ts src/features/artwork/infrastructure/local/ar-media-path.test.ts deploy/verify-production.test.mjs",
+    "test": "node --test src/lib/i18n/ar-translations.test.ts src/features/collection/domain/collection.test.ts src/features/artwork/domain/artwork-create-form-schema.test.ts src/features/ar-experience/domain/scanner-targets.test.ts src/features/artwork/domain/original-video.test.ts src/features/gallery/domain/gallery-artwork.test.ts src/features/ar-experience/domain/video-plane-fit.test.ts src/features/ar-experience/infrastructure/mindar/anchor-pose-smoother.test.ts src/features/auth/domain/everie-request-origin.test.ts src/features/artwork/infrastructure/local/ar-media-path.test.ts deploy/verify-production.test.mjs",
     "test:e2e": "node scripts/e2e-ar-local.mjs"
   },
   "dependencies": {

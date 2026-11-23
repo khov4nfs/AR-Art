@@ -395,7 +395,7 @@ export default function ProductDetailView({
                 {product.arArtworkSlug && (
                   <Link href={`/ar/${encodeURIComponent(product.arArtworkSlug)}`}
                     className="inline-flex min-h-12 items-center gap-3 self-start border border-[#C5A880] px-5 text-xs font-semibold uppercase tracking-widest text-[#8C6D46] transition hover:bg-[#C5A880] hover:text-black dark:text-[#C5A880]">
-                    <Box className="size-4" aria-hidden="true" /> Trải nghiệm AR của sản phẩm
+                    <Box className="size-4" aria-hidden="true" /> {t("ar.art.experience")}
                   </Link>
                 )}
 

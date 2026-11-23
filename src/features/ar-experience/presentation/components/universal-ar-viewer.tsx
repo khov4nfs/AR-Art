@@ -5,6 +5,8 @@ import { Camera, CheckCircle2, ChevronDown, ChevronUp, LoaderCircle, RotateCcw, 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { BackLink } from "@/components/atoms/back-link";
+import { ArLanguageSwitcher } from "@/components/everie-ar/ar-language-switcher";
+import { useLanguage } from "@/context/LanguageContext";
 import { Button } from "@/components/atoms/button";
 import type { ArOverlay } from "@/features/ar-experience/domain/ar-experience";
 import { useArExperience } from "@/features/ar-experience/presentation/hooks/use-ar-experience";
@@ -24,6 +26,7 @@ type ScannerArtwork = {
 type CollectionNote = "saved" | "sign-in" | "own" | "error" | null;
 
 export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) {
+  const { t, language } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const savedRef = useRef(new Set<string>());
   const activeArtworkRef = useRef<string | null>(null);
@@ -128,10 +131,10 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_32%,rgba(0,0,0,0.45))]" />
 
       <div className="absolute inset-x-5 top-[max(1.25rem,env(safe-area-inset-top))] z-30 flex items-start justify-between gap-4 sm:inset-x-8">
-        <BackLink href="/" label="Gallery" className="rounded-[4px] bg-black/45 px-3 py-2 text-white/75 backdrop-blur-md hover:text-white" />
-        <span className="rounded-[4px] bg-black/40 px-3 py-2 text-[0.64rem] uppercase tracking-[0.14em] text-white/70 backdrop-blur-md">
-          {status === "scanning" ? "Looking for artwork" : status === "found" ? "Artwork recognized" : "Everie AR"}
-        </span>
+        <BackLink href="/" label={t("ar.common.gallery")} className="rounded-[4px] bg-black/45 px-3 py-2 text-white/75 backdrop-blur-md hover:text-white" />
+        <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center"><span className="rounded-[4px] bg-black/40 px-3 py-2 text-[0.64rem] uppercase tracking-[0.14em] text-white/70 backdrop-blur-md">
+          {status === "scanning" ? t("ar.scanner.statusLooking") : status === "found" ? t("ar.scanner.statusFound") : "EVERIE AR"}
+        </span><ArLanguageSwitcher /></div>
       </div>
 
       {status === "scanning" && (
@@ -144,24 +147,24 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#050507]/90 px-6 text-center backdrop-blur-sm">
           <div className="mx-auto w-full max-w-md">
             <ScanLine className="mx-auto size-9 text-amber-200/75" aria-hidden="true" />
-            <h1 className="mt-7 font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl">Scan the art.</h1>
+            <h1 className="mt-7 font-serif text-5xl leading-none tracking-[-0.05em] sm:text-6xl">{t("ar.scanner.title")}</h1>
             <p className="mx-auto mt-5 max-w-sm text-sm leading-6 text-white/52">
-              Point your camera at a work on display. Everie recognizes the artwork and brings its AR layer to life.
+              {t("ar.scanner.description")}
             </p>
 
             {artworks.length === 0 ? (
-              <p className="mt-8 text-sm text-white/50">There are no published artworks available to scan yet.</p>
+              <p className="mt-8 text-sm text-white/50">{t("ar.scanner.noWorks")}</p>
             ) : compileError ? (
               <div className="mt-8 space-y-4">
-                <p role="alert" className="text-sm leading-6 text-rose-200/85">{compileError}</p>
+                <p role="alert" className="text-sm leading-6 text-rose-200/85">{language === "vi" ? t("ar.scanner.compileError") : compileError}</p>
                 <Button type="button" onClick={retryPreparation} className="h-12 bg-white px-6 text-black">
-                  <RotateCcw className="size-4" /> Retry preparation
+                  <RotateCcw className="size-4" /> {t("ar.scanner.retryPrepare")}
                 </Button>
               </div>
             ) : (
               <>
                 <p className="mt-7 text-xs text-white/36">
-                  {artworks.length} {artworks.length === 1 ? "artwork" : "artworks"} ready for discovery
+                  {t("ar.scanner.countReady", { count: artworks.length })}
                 </p>
                 <Button
                   type="button"
@@ -170,7 +173,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
                   className="mt-6 h-12 rounded-[5px] bg-white px-7 text-xs font-semibold uppercase tracking-[0.12em] text-black hover:bg-amber-100 disabled:bg-white/10 disabled:text-white/40"
                 >
                   {!targetBundle ? <LoaderCircle className="size-4 animate-spin" /> : <Camera className="size-4" />}
-                  {!targetBundle ? `Preparing targets · ${compileProgress}%` : "Open camera"}
+                  {!targetBundle ? t("ar.scanner.preparing", { progress: compileProgress }) : t("ar.scanner.openCamera")}
                 </Button>
               </>
             )}
@@ -178,14 +181,14 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
             {status === "error" && error && (
               <div role="alert" className="mt-6 text-sm leading-6 text-amber-100/80">
                 <TriangleAlert className="mx-auto mb-2 size-5" />
-                {error}
+                {language === "vi" ? t("ar.viewer.cameraError") : error}
                 {cameraPermissionIssue ? (
-                  <p className="mt-3 text-xs text-white/50">On iPhone, open this page directly in Safari and allow Camera in Website Settings.</p>
+                  <p className="mt-3 text-xs text-white/50">{t("ar.scanner.iphoneHelp")}</p>
                 ) : null}
               </div>
             )}
             <p className="mt-8 text-xs leading-5 text-white/32">
-              Camera access requires your permission. Recognition, not opening the camera, unlocks a Collection entry.
+              {t("ar.scanner.permissionNote")}
             </p>
           </div>
         </div>
@@ -193,7 +196,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
 
       {status === "starting" && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/65">
-          <LoaderCircle className="size-8 animate-spin text-amber-200" aria-label="Starting AR camera" />
+          <LoaderCircle className="size-8 animate-spin text-amber-200" aria-label={t("ar.scanner.starting")} />
         </div>
       )}
 
@@ -213,7 +216,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
             <button
               ref={collapseButtonRef}
               type="button"
-              aria-label="Collapse artwork details"
+              aria-label={t("ar.scanner.collapse")}
               aria-expanded={!isSheetCollapsed}
               onClick={() => toggleRecognitionSheet(true)}
               className="absolute left-1/2 top-0 z-10 flex h-9 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-[#08080c]/95 text-white/80 shadow-lg backdrop-blur-xl transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-100"
@@ -224,22 +227,22 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
             <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-amber-100" />
             <div className="min-w-0 flex-1">
               <p className="font-serif text-2xl leading-none">{matched.title}</p>
-              <p className="mt-1 text-xs text-white/45">by {matched.artistName}</p>
+              <p className="mt-1 text-xs text-white/45">{t("ar.common.by", { name: matched.artistName })}</p>
               <p className="mt-3 text-xs leading-5 text-white/60">
-                {collectionNote === "saved" ? "Recognized and saved to your Collection." :
-                  collectionNote === "own" ? "Your artwork is recognized." :
-                  collectionNote === "sign-in" ? "Recognized. Sign in to save it to your Collection." :
-                  collectionNote === "error" ? collectionError :
-                  "Artwork recognized. Checking Collection…"}
+                {collectionNote === "saved" ? t("ar.scanner.saved") :
+                  collectionNote === "own" ? t("ar.scanner.own") :
+                  collectionNote === "sign-in" ? t("ar.scanner.signInToSave") :
+                  collectionNote === "error" ? (language === "vi" ? t("ar.scanner.collectionError") : collectionError) :
+                  t("ar.scanner.checking")}
               </p>
               <div className="mt-4 flex flex-wrap gap-5 text-xs font-medium">
-                <Link href={`/art/${matched.slug}`} className="text-white/80 underline underline-offset-4">View work</Link>
+                <Link href={`/art/${matched.slug}`} className="text-white/80 underline underline-offset-4">{t("ar.common.viewWork")}</Link>
                 {collectionNote === "sign-in" ? (
-                  <Link href="/login?next=%2Far" className="text-amber-100 underline underline-offset-4">Sign in</Link>
+                  <Link href="/login?next=%2Far" className="text-amber-100 underline underline-offset-4">{t("ar.common.signIn")}</Link>
                 ) : collectionNote === "saved" ? (
-                  <Link href="/collection" className="text-amber-100 underline underline-offset-4">Collection</Link>
+                  <Link href="/collection" className="text-amber-100 underline underline-offset-4">{t("ar.common.collection")}</Link>
                 ) : null}
-                <button type="button" onClick={() => { activeArtworkRef.current = null; setMatched(null); setIsSheetCollapsed(false); setCollectionNote(null); void stop(); }} className="text-white/45 underline underline-offset-4 hover:text-white">Close camera</button>
+                <button type="button" onClick={() => { activeArtworkRef.current = null; setMatched(null); setIsSheetCollapsed(false); setCollectionNote(null); void stop(); }} className="text-white/45 underline underline-offset-4 hover:text-white">{t("ar.scanner.closeCamera")}</button>
               </div>
             </div>
           </div>
@@ -247,7 +250,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
           <button
             ref={expandButtonRef}
             type="button"
-            aria-label="Expand artwork details"
+            aria-label={t("ar.scanner.expand")}
             aria-expanded={!isSheetCollapsed}
             aria-hidden={!isSheetCollapsed}
             tabIndex={isSheetCollapsed ? 0 : -1}

@@ -47,7 +47,7 @@ export default function MobileMenu() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden flex">
+    <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/60 transition-opacity"
@@ -141,8 +141,8 @@ export default function MobileMenu() {
         </div>
 
         <div className="px-5 pb-5 space-y-3">
-          <Link href="/ar" onClick={() => setMobileMenuOpen(false)} className="block border border-[#C5A880] px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880]">Quét AR</Link>
-          <Link href="/gallery" onClick={() => setMobileMenuOpen(false)} className="block text-center text-xs uppercase tracking-widest text-neutral-600 dark:text-neutral-300">Thư viện AR</Link>
+          <Link href="/ar" onClick={() => setMobileMenuOpen(false)} className="block border border-[#C5A880] px-4 py-3 text-center text-xs font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880]">{t("ar.nav.scan")}</Link>
+          <Link href="/gallery" onClick={() => setMobileMenuOpen(false)} className="block text-center text-xs uppercase tracking-widest text-neutral-600 dark:text-neutral-300">{t("ar.nav.gallery")}</Link>
         </div>
 
         {/* Drawer Footer: admin (if any) + support + language */}

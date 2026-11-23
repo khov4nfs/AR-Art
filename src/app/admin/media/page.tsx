@@ -7,7 +7,6 @@ import {
   UploadCloud,
   Copy,
   Check,
-  Trash2,
   RefreshCw,
   Search,
   ExternalLink,

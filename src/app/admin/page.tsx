@@ -2,23 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
   TrendingUp,
   ShoppingCart,
   Package,
-  Users,
   Palette,
-  ArrowUpRight,
-  Clock,
-  CheckCircle,
-  Truck,
-  XCircle,
-  ExternalLink,
   Plus,
   RefreshCw,
   HardDrive,
-  Sparkles,
   ArrowRight,
   CreditCard,
 } from "lucide-react";

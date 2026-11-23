@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { AmbientDivider } from "@/components/atoms/ambient-divider";
+import { useLanguage } from "@/context/LanguageContext";
+import { ArLanguageSwitcher } from "@/components/everie-ar/ar-language-switcher";
 import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
 import { EverieBrand } from "@/components/atoms/everie-brand";
@@ -90,10 +92,10 @@ function navClass(active: boolean) {
   }`;
 }
 
-function productModeLabel(mode: PublishedArtwork["arMode"]) {
-  if (mode === "transparent_motion") return "Transparent motion";
-  if (mode === "spatial_layers") return "Layered AR";
-  return "Animated artwork";
+function productModeLabel(mode: PublishedArtwork["arMode"], t: (key: string) => string) {
+  if (mode === "transparent_motion") return t("ar.studio.modeTransparent");
+  if (mode === "spatial_layers") return t("ar.studio.modeLayers");
+  return t("ar.studio.modeAnimated");
 }
 
 function ProductCard({
@@ -103,6 +105,7 @@ function ProductCard({
   product: PublishedArtwork;
   onManage: () => void;
 }) {
+  const { t } = useLanguage();
   return (
     <article className="group relative">
       <div className="relative aspect-[4/5] overflow-hidden rounded-[6px] bg-black/60 shadow-[0_24px_70px_rgba(0,0,0,0.28)] ring-1 ring-inset ring-white/[0.05]">
@@ -115,11 +118,11 @@ function ProductCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
         <span className={`absolute left-4 top-4 inline-flex items-center gap-2 text-[0.56rem] font-medium uppercase tracking-[0.16em] ${product.status === "published" ? "text-emerald-100/82" : "text-white/58"}`}>
           <span className={`size-1.5 rounded-full ${product.status === "published" ? "bg-emerald-200" : "bg-white/45"}`} />
-          {product.status === "published" ? "Live" : "Draft"}
+          {t(product.status === "published" ? "ar.studio.live" : "ar.common.draft")}
         </span>
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4">
           <p className="text-[0.56rem] uppercase tracking-[0.15em] text-white/48">
-            {productModeLabel(product.arMode)}
+            {productModeLabel(product.arMode, t)}
           </p>
           {product.status === "published" ? (
             <Link
@@ -136,7 +139,7 @@ function ProductCard({
         <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
           <div className="min-w-0">
             <h3 className="truncate text-base font-medium text-white">{product.title}</h3>
-            <p className="mt-1 truncate text-xs text-white/38">by {product.artistName}</p>
+            <p className="mt-1 truncate text-xs text-white/38">{t("ar.common.by", { name: product.artistName })}</p>
           </div>
           <button
             type="button"
@@ -144,14 +147,14 @@ function ProductCard({
             className="group/manage inline-flex items-center gap-2 justify-self-start pb-1 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-white/48 transition-colors duration-300 hover:text-white sm:justify-self-end"
           >
             <Pencil className="size-3.5" />
-            Manage
+            {t("ar.studio.manage")}
             <span className="h-px w-5 bg-white/24 transition-all duration-300 group-hover/manage:w-8 group-hover/manage:bg-white/70" />
           </button>
         </div>
         <div className="mt-3 flex items-center justify-between gap-4 text-[0.56rem] uppercase tracking-[0.13em] text-white/24">
-          <span>{product.status === "published" ? "Published" : "Draft workspace"}</span>
+          <span>{t(product.status === "published" ? "ar.studio.statusPublished" : "ar.studio.statusDraft")}</span>
           <span className="text-right text-white/34">
-            {product.status === "published" ? "QR ready" : "Continue editing"}
+            {t(product.status === "published" ? "ar.studio.qrReady" : "ar.studio.continueEditing")}
           </span>
         </div>
       </div>
@@ -160,6 +163,7 @@ function ProductCard({
 }
 
 export function StudioApp({ view }: { view: StudioView }) {
+  const { t } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -180,7 +184,7 @@ export function StudioApp({ view }: { view: StudioView }) {
       error?: string;
     };
     if (!productsResponse.ok || !productsPayload.products) {
-      throw new Error(productsPayload.error ?? "Unable to load studio products.");
+      throw new Error(productsPayload.error ?? "ar.studio.loadProductsError");
     }
 
     dispatch({ type: "ready", products: productsPayload.products });
@@ -190,7 +194,7 @@ export function StudioApp({ view }: { view: StudioView }) {
     void load().catch((cause) => {
       dispatch({
         type: "error",
-        message: cause instanceof Error ? cause.message : "Unable to load Studio.",
+        message: cause instanceof Error ? cause.message : "ar.studio.loadError",
       });
     });
   }, [load]);
@@ -216,18 +220,21 @@ export function StudioApp({ view }: { view: StudioView }) {
             </div>
 
             <nav className="order-3 col-span-2 flex items-center justify-center gap-7 sm:order-none sm:col-span-1">
-              <Link href="/studio" scroll={false} className={navClass(view === "overview")}>OVERVIEW</Link>
-              <Link href="/studio/products" scroll={false} className={navClass(view === "products")}>PRODUCTS</Link>
+              <Link href="/studio" scroll={false} className={navClass(view === "overview")}>{t("ar.studio.overview")}</Link>
+              <Link href="/studio/products" scroll={false} className={navClass(view === "products")}>{t("ar.studio.products")}</Link>
             </nav>
 
+            <div className="flex items-center justify-self-end gap-3">
+              <ArLanguageSwitcher />
             <button
               type="button"
               onClick={() => setCreateOpen(true)}
-              className="justify-self-end inline-flex items-center gap-2 border-b border-white/45 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-white/72 transition-[border-color,color] duration-300 hover:border-white hover:text-white"
+              className="inline-flex items-center gap-2 border-b border-white/45 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-white/72 transition-[border-color,color] duration-300 hover:border-white hover:text-white"
             >
               <Plus className="size-3.5" />
-              Add product
+              {t("ar.studio.add")}
             </button>
+            </div>
           </div>
         </header>
 
@@ -235,13 +242,13 @@ export function StudioApp({ view }: { view: StudioView }) {
           <section className="flex min-h-[70vh] items-center justify-center">
             {state.phase === "error" ? (
               <div className="max-w-md rounded-[5px] bg-rose-300/[0.035] px-5 py-6 text-center">
-                <p className="text-sm text-rose-200">{state.error}</p>
-                <Button onClick={() => void load()} className="mt-4 bg-white text-black">Try again</Button>
+                <p className="text-sm text-rose-200">{state.error?.startsWith("ar.") ? t(state.error) : state.error}</p>
+                <Button onClick={() => void load()} className="mt-4 bg-white text-black">{t("ar.common.retry")}</Button>
               </div>
             ) : (
               <div className="flex items-center gap-3 text-sm text-white/45">
                 <LoaderCircle className="size-4 animate-spin" />
-                Loading your studio…
+                {t("ar.studio.loading")}
               </div>
             )}
           </section>
@@ -252,16 +259,16 @@ export function StudioApp({ view }: { view: StudioView }) {
                 <div className="grid items-end gap-10 lg:grid-cols-[1.1fr_0.9fr]">
                   <div>
                     <h1 className="max-w-4xl font-serif text-6xl font-normal leading-[0.86] tracking-[-0.055em] sm:text-8xl">
-                      Everything you publish,<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">in one place.</span>
+                      {t("ar.studio.allPublished")}<br /><span className="bg-gradient-to-r from-amber-200 to-amber-200 bg-clip-text italic text-transparent">{t("ar.studio.onePlace")}</span>
                     </h1>
                   </div>
 
                   <div data-reveal className="lg:pl-8">
                     <div className="grid grid-cols-3">
                       {[
-                        [state.products.length, "Products", Boxes],
-                        [published, "Live", CircleDot],
-                        [drafts, "Drafts", ImageIcon],
+                        [state.products.length, t("ar.studio.products"), Boxes],
+                        [published, t("ar.studio.live"), CircleDot],
+                        [drafts, t("ar.studio.drafts"), ImageIcon],
                       ].map(([value, label, Icon], index) => {
                         const MetricIcon = Icon as typeof Boxes;
                         return (
@@ -288,8 +295,8 @@ export function StudioApp({ view }: { view: StudioView }) {
                 <AmbientDivider className="mt-10" />
                 <div className="pt-5">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-medium">Recent products</h2>
-                    <Link href="/studio/products" scroll={false} className="text-xs text-white/50 transition-colors duration-300 hover:text-white">View all →</Link>
+                    <h2 className="text-xl font-medium">{t("ar.studio.recent")}</h2>
+                    <Link href="/studio/products" scroll={false} className="text-xs text-white/50 transition-colors duration-300 hover:text-white">{t("ar.studio.viewAll")}</Link>
                   </div>
                   <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     {state.products.slice(0, 4).map((product) => (
@@ -301,7 +308,7 @@ export function StudioApp({ view }: { view: StudioView }) {
                     ))}
                     {state.products.length === 0 && (
                       <p className="col-span-full p-8 text-center text-sm text-white/35">
-                        No products yet. Add your first AR product.
+                        {t("ar.studio.empty")}
                       </p>
                     )}
                   </div>
@@ -312,9 +319,9 @@ export function StudioApp({ view }: { view: StudioView }) {
             {view === "products" && (
               <section className="studio-view-enter pb-16 pt-14 sm:pt-20">
                 <div className="flex flex-wrap items-end justify-between gap-5">
-                  <h1 className="font-serif text-6xl font-normal leading-none tracking-[-0.05em] sm:text-8xl">Products</h1>
+                  <h1 className="font-serif text-6xl font-normal leading-none tracking-[-0.05em] sm:text-8xl">{t("ar.studio.products")}</h1>
                   <button type="button" onClick={() => setCreateOpen(true)} className="inline-flex items-center gap-2 border-b border-white/45 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-white/72 transition-[border-color,color] duration-300 hover:border-white hover:text-white">
-                    <Plus className="size-3.5" /> New product
+                    <Plus className="size-3.5" /> {t("ar.studio.new")}
                   </button>
                 </div>
                 <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -328,7 +335,7 @@ export function StudioApp({ view }: { view: StudioView }) {
                   {state.products.length === 0 && (
                     <div className="p-12 text-center text-white/35 sm:col-span-2 lg:col-span-3">
                       <ImageIcon className="mx-auto size-6" />
-                      <p className="mt-3 text-sm">No products yet.</p>
+                      <p className="mt-3 text-sm">{t("ar.studio.noProducts")}</p>
                     </div>
                   )}
                 </div>

@@ -4,22 +4,17 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ShoppingCart,
   Search,
-  Filter,
   Eye,
   CheckCircle,
   Clock,
   Truck,
   XCircle,
-  FileSpreadsheet,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown,
   CreditCard,
   User,
-  MapPin,
 } from "lucide-react";
 import { OrderItem } from "@/lib/store";
 import CustomSelect from "@/components/admin/CustomSelect";
