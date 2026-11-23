@@ -12,7 +12,8 @@ import { getSupabaseServerClient } from "@/features/artwork/infrastructure/supab
 
 type ArtworkRow = {
   id: string;
-  owner_id: string | null;
+  owner_id: string | null; // legacy Supabase Auth owner: retained, never reassigned implicitly
+  everie_owner_id: string | null;
   slug: string;
   title: string;
   artist_name: string;
@@ -32,7 +33,7 @@ type ArtworkRow = {
 function mapArtwork(row: ArtworkRow): Artwork {
   return {
     id: row.id,
-    ownerId: row.owner_id,
+    ownerId: row.everie_owner_id,
     slug: row.slug,
     title: row.title,
     artistName: row.artist_name,
@@ -57,7 +58,8 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
       .from("artworks")
       .insert({
         id: input.id,
-        owner_id: input.ownerId,
+        owner_id: null,
+        everie_owner_id: input.ownerId,
         slug: input.slug,
         title: input.title,
         artist_name: input.artistName,
@@ -139,7 +141,7 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
     const { data, error } = await supabase
       .from("artworks")
       .select("*")
-      .eq("owner_id", ownerId)
+      .eq("everie_owner_id", ownerId)
       .order("created_at", { ascending: false })
       .limit(EVERIE_MVP_MAX_PRODUCTS)
       .returns<ArtworkRow[]>();
@@ -154,7 +156,7 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
       .from("artworks")
       .select("published_at")
       .eq("id", id)
-      .eq("owner_id", ownerId)
+      .eq("everie_owner_id", ownerId)
       .maybeSingle<{ published_at: string | null }>();
 
     if (currentError) throw new Error(`Unable to update artwork: ${currentError.message}`);
@@ -173,7 +175,7 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
             : null,
       })
       .eq("id", id)
-      .eq("owner_id", ownerId)
+      .eq("everie_owner_id", ownerId)
       .select("*")
       .maybeSingle<ArtworkRow>();
 
@@ -187,7 +189,7 @@ export class SupabaseArtworkRepository implements ArtworkRepository {
       .from("artworks")
       .delete()
       .eq("id", id)
-      .eq("owner_id", ownerId)
+      .eq("everie_owner_id", ownerId)
       .select("*")
       .maybeSingle<ArtworkRow>();
 
