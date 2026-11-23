@@ -42,7 +42,7 @@ export default async function GalleryPage() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_73%_38%,rgba(197,168,128,0.12),transparent_50%)]" />
           <div className="relative mx-auto grid max-w-[1440px] gap-12 px-5 py-20 md:px-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-end lg:py-28">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#C5A880]">EVERIE / DIGITAL ATELIER</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#C5A880]">EVERIE</p>
               <h1 className="mt-7 font-serif text-[clamp(4.2rem,10vw,9rem)] font-normal leading-[0.9] tracking-[-0.06em]">
                 <ArText id="ar.gallery.heading" /> <span className="italic text-[#C5A880]">AR.</span>
               </h1>
@@ -63,7 +63,7 @@ export default async function GalleryPage() {
         <GalleryExplorer artworks={artworks} />
       </main>
       <footer className="border-t border-white/10 px-5 py-8 text-[11px] uppercase tracking-widest text-stone-500 md:px-8">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-4"><span>© EVERIE · Digital Atelier</span><Link href="/" className="hover:text-[#C5A880]"><ArText id="ar.gallery.backShop" /></Link></div>
+        <div className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-4"><span>© EVERIE</span><Link href="/" className="hover:text-[#C5A880]"><ArText id="ar.gallery.backShop" /></Link></div>
       </footer>
     </div>
   );

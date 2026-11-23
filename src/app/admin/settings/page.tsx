@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Settings,
   Save,
   CheckCircle,
   Globe,
@@ -60,7 +59,7 @@ export default function AdminSettingsPage() {
       } else {
         alert("Lưu thất bại: " + data.error);
       }
-    } catch (err) {
+    } catch {
       alert("Lỗi khi lưu cài đặt");
     } finally {
       setSaving(false);
@@ -435,6 +434,7 @@ export default function AdminSettingsPage() {
               <div className="border border-stone-800 rounded-lg overflow-hidden bg-[#121214]">
                 <div className="relative aspect-[1.91/1] w-full bg-stone-900 overflow-hidden flex items-center justify-center">
                   {settings.seoOgImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={settings.seoOgImage}
                       alt="OG Preview"

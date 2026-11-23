@@ -1,5 +1,5 @@
 import type { ArtworkRepository } from "@/features/artwork/application/ports/artwork-repository";
-import type { Artwork, ArtworkArAssetInput, CreateArtworkDraftInput, UpdateArtworkInput } from "@/features/artwork/domain/artwork";
+import type { Artwork, CreateArtworkDraftInput, UpdateArtworkInput } from "@/features/artwork/domain/artwork";
 import { readArData, updateArData, type StoredArtwork } from "./ar-data";
 
 export class LocalArtworkRepository implements ArtworkRepository {
@@ -22,7 +22,7 @@ export class LocalArtworkRepository implements ArtworkRepository {
     });
   }
 
-  async createArAssets(_inputs: ArtworkArAssetInput[]): Promise<void> {
+  async createArAssets(): Promise<void> {
     // Layer metadata is embedded in artwork.arConfig.layers.
   }
   async findById(id: string): Promise<Artwork | null> {

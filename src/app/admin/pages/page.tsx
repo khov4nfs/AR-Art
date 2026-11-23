@@ -1,33 +1,24 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight,
   Building2,
   CheckCircle,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  Clock,
-  Copy,
   ExternalLink,
   Eye,
   FileText,
-  Gift,
   Globe2,
   Home,
   Layers,
   Lock,
   Mail,
-  MapPin,
   Monitor,
-  Navigation,
   Phone,
   Plus,
   RefreshCw,
-  RotateCcw,
   Save,
   Search,
   Send,
@@ -35,7 +26,6 @@ import {
   Smartphone,
   Sparkles,
   Trash2,
-  Truck,
   X,
 } from "lucide-react";
 import type { PageContent, PageSection, PageSectionItem, PageSectionType } from "@/lib/store";
@@ -1010,7 +1000,6 @@ function SectionEditor({
   updateItem,
   addItem,
   removeItem,
-  moveSection,
   onPreviewClick,
 }: {
   section: PageSection;
@@ -1026,7 +1015,7 @@ function SectionEditor({
   ) => void;
   addItem: (section: PageSection) => void;
   removeItem: (section: PageSection, itemId: string) => void;
-  moveSection: (id: string, direction: -1 | 1) => void;
+  moveSection?: (id: string, direction: -1 | 1) => void;
   onPreviewClick: () => void;
 }) {
   const typeConfig =

@@ -40,7 +40,7 @@ export default function AdminArPage() {
     <main className="mx-auto max-w-6xl space-y-10 px-5 py-10 text-stone-200 sm:px-8">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.27em] text-[#C5A880]">
-          EVERIE / Digital Atelier
+          EVERIE
         </p>
         <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">
           <ArText id="ar.admin.title" />

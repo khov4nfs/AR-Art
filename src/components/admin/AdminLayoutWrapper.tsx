@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ThemeToggle from "@/components/common/ThemeToggle";
@@ -54,17 +54,20 @@ export default function AdminLayoutWrapper({
   const authChecked = ready;
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const adminUser =
-    isAuthenticated && user && isAdminRole(user.role)
-      ? {
-        id: user.id,
-        fullName: user.name,
-        email: user.email,
-        role: user.role as "SUPER_ADMIN" | "CONTENT_EDITOR",
-        tier: user.tier,
-        avatar: user.avatar,
-      }
-      : null;
+  const adminUser = useMemo(
+    () =>
+      isAuthenticated && user && isAdminRole(user.role)
+        ? {
+          id: user.id,
+          fullName: user.name,
+          email: user.email,
+          role: user.role as "SUPER_ADMIN" | "CONTENT_EDITOR",
+          tier: user.tier,
+          avatar: user.avatar,
+        }
+        : null,
+    [isAuthenticated, user],
+  );
 
   useEffect(() => {
     try {
@@ -129,7 +132,7 @@ export default function AdminLayoutWrapper({
       icon: Package,
     },
     {
-      title: "AR / Digital Atelier",
+      title: "AR",
       href: "/admin/ar",
       icon: ScanLine,
     },

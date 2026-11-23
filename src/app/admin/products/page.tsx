@@ -4,19 +4,14 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Package,
   Plus,
   Search,
-  Filter,
-  Eye,
   Edit,
   Trash2,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Sparkles,
-  Tag,
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
@@ -31,7 +26,7 @@ export default function AdminProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [stockFilter, setStockFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(10);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchProducts = async () => {
@@ -64,7 +59,7 @@ export default function AdminProductsPage() {
       } else {
         alert("Xóa thất bại: " + data.error);
       }
-    } catch (err) {
+    } catch {
       alert("Lỗi khi xóa sản phẩm");
     } finally {
       setDeletingId(null);

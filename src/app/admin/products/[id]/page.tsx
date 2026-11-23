@@ -26,7 +26,7 @@ export default function AdminProductDetailPage() {
         } else {
           setError("Không tìm thấy sản phẩm này");
         }
-      } catch (err) {
+      } catch {
         setError("Lỗi kết nối khi tải sản phẩm");
       } finally {
         setLoading(false);

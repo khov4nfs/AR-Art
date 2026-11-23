@@ -19,8 +19,8 @@ interface ProductCardProps {
 export default function ProductCard({
   product,
   showQuickAdd = true,
-  onRemoveFromWishlist,
-  showWishlistRemove = false,
+  // onRemoveFromWishlist,
+  // showWishlistRemove = false,
   priority = false,
 }: ProductCardProps) {
   const {

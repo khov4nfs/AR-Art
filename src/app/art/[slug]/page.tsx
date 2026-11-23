@@ -29,7 +29,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={artwork.targetImageUrl} alt={artwork.title} className="mx-auto aspect-[4/5] max-h-[72svh] w-full object-contain" />
           </div>
-          <p className="mt-4 flex justify-between text-[10px] uppercase tracking-[0.2em] text-stone-500"><span>EVERIE / Digital Atelier</span><span className="text-[#C5A880]"><ArText id="ar.art.enabled" /></span></p>
+          <p className="mt-4 flex justify-between text-[10px] uppercase tracking-[0.2em] text-stone-500"><span>EVERIE</span><span className="text-[#C5A880]"><ArText id="ar.art.enabled" /></span></p>
         </div>
         <div className="lg:pl-8">
           <Link href="/gallery" className="text-[11px] uppercase tracking-widest text-stone-400 transition hover:text-[#C5A880]"><ArText id="ar.art.backGallery" /></Link>
