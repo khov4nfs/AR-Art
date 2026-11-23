@@ -1,6 +1,7 @@
 "use client";
 
-import { EverieBrand } from "@/components/atoms/everie-brand";
+import { Plus } from "lucide-react";
+
 import { useLanguage } from "@/context/LanguageContext";
 import { Modal } from "@/components/molecules/modal";
 import { ArtworkCreateForm } from "@/features/artwork/presentation/components/artwork-create-form";
@@ -18,13 +19,14 @@ export function ArtworkCreateModal({
   return (
     <Modal
       open={open}
+      variant="admin"
       onClose={onClose}
       title={t("ar.create.modalTitle")}
-      headerContent={<EverieBrand href={null} className="opacity-80" />}
-      maxWidthClassName="max-w-[92rem]"
+      icon={<Plus className="size-4" />}
+      maxWidthClassName="max-w-6xl"
     >
       <div data-motion-skip>
-        <ArtworkCreateForm embedded onCreated={onCreated} onDone={onClose} />
+        <ArtworkCreateForm embedded adminLayout onCreated={onCreated} onDone={onClose} />
       </div>
     </Modal>
   );

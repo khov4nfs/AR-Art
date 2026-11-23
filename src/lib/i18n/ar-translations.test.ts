@@ -128,3 +128,26 @@ test("AR management stays in EVERIE admin without standalone studio navigation",
   assert.match(read("src/app/api/studio/products/route.ts"), /isAdminRole\(user\.role\)/);
   assert.match(read("src/app/api/studio/products/[id]/route.ts"), /isAdminRole\(user\.role\)/);
 });
+
+
+test("AR management shares the EVERIE dashboard component language", () => {
+  const read = (file: string) => readFileSync(path.resolve(process.cwd(), file), "utf8");
+  const manager = read("src/features/studio/presentation/components/studio-app.tsx");
+  const createModal = read("src/features/artwork/presentation/components/artwork-create-modal.tsx");
+  const editModal = read("src/features/studio/presentation/components/product-manager-modal.tsx");
+  const createForm = read("src/features/artwork/presentation/components/artwork-create-form.tsx");
+  const modal = read("src/components/molecules/modal.tsx");
+
+  assert.match(manager, /p-4 sm:p-6 lg:p-8/);
+  assert.ok(manager.includes("rounded-2xl border border-stone-800 bg-[#141417]"));
+  assert.match(manager, /<table/);
+  assert.match(manager, /type="search"/);
+  assert.match(manager, /<ProductManagerModal/);
+  assert.match(manager, /<ArtworkCreateModal/);
+  assert.doesNotMatch(manager, /setAdminView|studio-view-enter|AmbientDivider/);
+  assert.match(createModal, /variant="admin"/);
+  assert.match(createModal, /<ArtworkCreateForm embedded adminLayout/);
+  assert.match(editModal, /variant="admin"/);
+  assert.match(createForm, /adminLayout = false/);
+  assert.match(modal, /variant = "default"/);
+});

@@ -184,9 +184,10 @@ export function ProductManagerModal({
   return (
     <Modal
       open
+      variant="admin"
       onClose={onClose}
       title={product.title}
-      maxWidthClassName="max-w-6xl"
+      maxWidthClassName="max-w-5xl"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -197,8 +198,8 @@ export function ProductManagerModal({
               onClick={() => void removeProduct()}
               className={
                 deleteState.confirming
-                  ? "h-9 px-0 text-rose-200 hover:bg-transparent hover:text-rose-100"
-                  : "h-9 px-0 text-white/38 hover:bg-transparent hover:text-rose-200"
+                  ? "h-9 px-2 text-rose-400 hover:bg-red-950/40 hover:text-rose-300"
+                  : "h-9 px-2 text-stone-400 hover:bg-stone-800 hover:text-rose-400"
               }
             >
               {deleteState.deleting ? (
@@ -212,7 +213,7 @@ export function ProductManagerModal({
               <button
                 type="button"
                 onClick={() => dispatchDelete("cancel")}
-                className="text-xs text-white/40 transition hover:text-white"
+                className="text-xs text-stone-400 transition hover:text-white"
               >
                 {t("ar.common.cancel")}
               </button>
@@ -224,7 +225,7 @@ export function ProductManagerModal({
               type="button"
               variant="ghost"
               onClick={onClose}
-              className="px-3 text-white/50 hover:bg-transparent hover:text-white"
+              className="rounded-lg border border-stone-700 bg-stone-800 px-3 text-stone-300 hover:bg-stone-700 hover:text-white"
             >
               {t("ar.common.close")}
             </Button>
@@ -232,7 +233,7 @@ export function ProductManagerModal({
               type="submit"
               form="studio-product-manager-form"
               disabled={!isValid || isSubmitting || deleteState.deleting}
-              className="bg-white text-black hover:bg-amber-100"
+              className="rounded-lg bg-[#C5A880] text-black hover:bg-[#b59870]"
             >
               {isSubmitting ? (
                 <LoaderCircle className="size-4 animate-spin" />
@@ -245,27 +246,27 @@ export function ProductManagerModal({
         </div>
       }
     >
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(21rem,0.72fr)]">
-        <form id="studio-product-manager-form" onSubmit={submit} className="space-y-7">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.75fr)]">
+        <form id="studio-product-manager-form" onSubmit={submit} className="space-y-5">
           <div className="grid gap-2">
-            <Label htmlFor="manage-product-title" className="text-white/68">
+            <Label htmlFor="manage-product-title" className="text-xs font-medium text-stone-300">
               {t("ar.manager.productName")}
             </Label>
             <Input
               id="manage-product-title"
-              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
+              className="h-10 rounded-lg border border-stone-700 bg-[#1A1A1D] px-3 text-sm text-stone-200 focus-visible:border-[#C5A880] focus-visible:ring-0"
               {...register("title")}
             />
             {errors.title ? <p className="text-xs text-rose-300">{errors.title.message}</p> : null}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="manage-product-artist" className="text-white/68">
+            <Label htmlFor="manage-product-artist" className="text-xs font-medium text-stone-300">
               {t("ar.manager.creator")}
             </Label>
             <Input
               id="manage-product-artist"
-              className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
+              className="h-10 rounded-lg border border-stone-700 bg-[#1A1A1D] px-3 text-sm text-stone-200 focus-visible:border-[#C5A880] focus-visible:ring-0"
               {...register("artistName")}
             />
             {errors.artistName ? (
@@ -274,13 +275,13 @@ export function ProductManagerModal({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="manage-product-description" className="text-white/68">
+            <Label htmlFor="manage-product-description" className="text-xs font-medium text-stone-300">
               {t("ar.manager.description")}
             </Label>
             <Textarea
               id="manage-product-description"
               rows={5}
-              className="rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
+              className="rounded-lg border border-stone-700 bg-[#1A1A1D] px-3 py-2 text-sm text-stone-200 focus-visible:border-[#C5A880] focus-visible:ring-0"
               {...register("description")}
             />
             {errors.description ? (
@@ -289,17 +290,17 @@ export function ProductManagerModal({
           </div>
 
           <div>
-            <Label className="text-white/68">{t("ar.manager.visibility")}</Label>
-            <div className="mt-2 flex gap-6">
+            <Label className="text-xs font-medium text-stone-300">{t("ar.manager.visibility")}</Label>
+            <div className="mt-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() =>
                   setValue("status", "draft", { shouldValidate: true, shouldDirty: true })
                 }
-                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
+                className={`rounded-lg border px-3.5 py-2 text-xs font-medium transition-colors ${
                   currentStatus === "draft"
-                    ? "text-white after:scale-x-100 after:bg-white"
-                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
+                    ? "border-[#C5A880]/50 bg-[#C5A880]/15 text-[#C5A880]"
+                    : "border-stone-700 bg-stone-800 text-stone-400 hover:bg-stone-700 hover:text-white"
                 }`}
               >
                 {t("ar.manager.draft")}
@@ -309,10 +310,10 @@ export function ProductManagerModal({
                 onClick={() =>
                   setValue("status", "published", { shouldValidate: true, shouldDirty: true })
                 }
-                className={`relative py-3 text-sm transition after:absolute after:inset-x-0 after:-bottom-px after:h-px after:transition-transform ${
+                className={`rounded-lg border px-3.5 py-2 text-xs font-medium transition-colors ${
                   currentStatus === "published"
-                    ? "text-white after:scale-x-100 after:bg-white"
-                    : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
+                    ? "border-[#C5A880]/50 bg-[#C5A880]/15 text-[#C5A880]"
+                    : "border-stone-700 bg-stone-800 text-stone-400 hover:bg-stone-700 hover:text-white"
                 }`}
               >
                 {t("ar.studio.live")}
@@ -325,13 +326,13 @@ export function ProductManagerModal({
           ) : null}
         </form>
 
-        <aside className="pt-3 lg:pl-4 lg:pt-0">
+        <aside className="rounded-xl border border-stone-800 bg-[#17171A] p-4">
           <div className="flex items-center justify-between gap-4 pb-2">
             <div>
-              <p className="text-[0.62rem] uppercase tracking-[0.16em] text-white/28">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
                 {t("ar.manager.distribution")}
               </p>
-              <p className="mt-1 text-sm text-white/58">
+              <p className="mt-1 text-xs text-stone-400">
                 {t(product.status === "published" ? "ar.manager.public" : "ar.manager.private")} · {arModeLabel(product.arMode, t)}
               </p>
             </div>
@@ -343,7 +344,7 @@ export function ProductManagerModal({
 
           {product.status === "published" && publicPath ? (
             <div className="pt-6">
-              <p className="mb-6 max-w-md text-xs leading-5 text-white/38">
+              <p className="mb-5 max-w-md text-xs leading-5 text-stone-400">
                 {t("ar.manager.qrHelp")}
               </p>
               {qrDataUrl ? (
@@ -361,7 +362,7 @@ export function ProductManagerModal({
                 </div>
               )}
 
-              <div className="mt-6 space-y-4 rounded-[5px] bg-white/[0.018] p-4">
+              <div className="mt-5 space-y-3 rounded-lg border border-stone-800 bg-[#141417] p-4">
                 <p className="text-[0.55rem] uppercase tracking-[0.15em] text-white/24">{t("ar.manager.publicLink")}</p>
                 <p className="mt-1 break-all text-xs leading-5 text-white/42">{publicPath}</p>
                 <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-amber-100/38">{t("ar.manager.destination")}</p>
