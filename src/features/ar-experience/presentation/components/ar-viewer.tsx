@@ -69,7 +69,7 @@ export function ArViewer({
 
         if (!user) {
           const nextPath = `${window.location.pathname}${window.location.search}`;
-          router.replace(`/ar-login?next=${encodeURIComponent(nextPath)}`);
+          router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
           return;
         }
 

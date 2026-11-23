@@ -27,7 +27,6 @@ import {
   artworkCreateFormSchema,
   type ArtworkCreateFormValues,
 } from "@/features/artwork/domain/artwork-create-form-schema";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
 import { isPackedAlphaVideoName, validateOriginalVideo, videoNeedsConversion } from "@/features/artwork/domain/original-video";
 import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-video-for-ar";
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
@@ -180,15 +179,8 @@ export function ArtworkCreateForm({
     return () => { active = false; };
   }, [trackingReference, canExtractTarget, setValue]);
 
-  async function getAuthHeaders() {
-    const supabase = getSupabaseBrowserClient();
-    const { data, error } = await supabase.auth.getSession();
-    if (error || !data.session) {
-      throw new Error("Your session has expired. Please sign in again.");
-    }
-
-    return { authorization: `Bearer ${data.session.access_token}` };
-  }
+  // The server uses the shared HttpOnly EVERIE session cookie.
+  async function getAuthHeaders() { return {}; }
 
   async function createSession(
     values: ArtworkCreateFormValues,

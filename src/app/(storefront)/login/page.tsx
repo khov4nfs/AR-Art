@@ -18,7 +18,11 @@ function isAdminRole(role?: string) {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/";
+  const requestedNext = searchParams.get("next") || "/";
+  // Never redirect a signed-in user off-site via an untrusted next parameter.
+  const nextPath = requestedNext.startsWith("/") && !requestedNext.startsWith("//")
+    && !requestedNext.startsWith("/\\") && !requestedNext.startsWith("/login")
+    ? requestedNext : "/";
   const { login, user, isAuthenticated, logout, lastError } = useAuth();
   const { showToast } = useCart();
   const { t } = useLanguage();

@@ -1,72 +1,48 @@
 "use client";
 
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
 import { normalizeCollectionArtworkIds } from "@/features/collection/domain/collection";
 
-export async function getCurrentCollectionUser() {
-  const supabase = getSupabaseBrowserClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+type EverieIdentity = { id: string; email?: string; role?: string };
 
-  if (error) return null;
-  return user;
+export async function getCurrentCollectionUser(): Promise<EverieIdentity | null> {
+  const response = await fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" });
+  if (!response.ok) return null;
+  const payload = (await response.json()) as { success?: boolean; data?: EverieIdentity };
+  return payload.success && payload.data?.id ? payload.data : null;
 }
 
-export async function listCollectedArtworkIds() {
-  const supabase = getSupabaseBrowserClient();
-  const user = await getCurrentCollectionUser();
-  if (!user) return [] as string[];
-
-  const { data, error } = await supabase
-    .from("user_collection")
-    .select("artwork_id")
-    .eq("user_id", user.id)
-    .order("collected_at", { ascending: false });
-
-  if (error) {
-    throw new Error(`Unable to load collection: ${error.message}`);
-  }
-
-  return normalizeCollectionArtworkIds(data);
+export async function listCollectedArtworkIds(): Promise<string[]> {
+  const response = await fetch("/api/ar/collection", { cache: "no-store", credentials: "same-origin" });
+  if (response.status === 401) return [];
+  const payload = (await response.json()) as { artworkIds?: string[]; error?: string };
+  if (!response.ok) throw new Error(payload.error ?? "Unable to load collection.");
+  return normalizeCollectionArtworkIds((payload.artworkIds ?? []).map((artwork_id) => ({ artwork_id })));
 }
 
 export async function collectArtwork(artworkId: string) {
-  const supabase = getSupabaseBrowserClient();
-  const user = await getCurrentCollectionUser();
-
-  if (!user) {
+  const response = await fetch("/api/ar/collection", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ artworkId }),
+  });
+  if (response.status === 401) {
     return { collected: false, reason: "unauthenticated" as const };
   }
-
-  const { error } = await supabase.from("user_collection").insert({
-    user_id: user.id,
-    artwork_id: artworkId,
-  });
-
-  if (error && error.code !== "23505") {
-    throw new Error(`Unable to save collection item: ${error.message}`);
-  }
-
-  return { collected: true, reason: null };
+  const payload = (await response.json()) as { collected?: boolean; error?: string };
+  if (!response.ok) throw new Error(payload.error ?? "Unable to save collection item.");
+  return { collected: payload.collected === true, reason: null };
 }
 
 export async function removeCollectedArtwork(artworkId: string) {
-  const supabase = getSupabaseBrowserClient();
-  const user = await getCurrentCollectionUser();
-
-  if (!user) {
-    throw new Error("Please sign in again to update your collection.");
-  }
-
-  const { error } = await supabase
-    .from("user_collection")
-    .delete()
-    .eq("user_id", user.id)
-    .eq("artwork_id", artworkId);
-
-  if (error) {
-    throw new Error(`Unable to remove collection item: ${error.message}`);
+  const response = await fetch("/api/ar/collection", {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ artworkId }),
+  });
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(payload?.error ?? "Unable to remove collection item.");
   }
 }

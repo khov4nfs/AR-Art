@@ -12,7 +12,6 @@ import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
 import { Modal } from "@/components/molecules/modal";
 import type { ArtworkStatus } from "@/features/artwork/domain/artwork";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
 import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
 import {
   studioProductSchema,
@@ -72,19 +71,10 @@ export function EditArtworkButton({
 
   const submit = handleSubmit(async (values) => {
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        setError("root", { message: "Please sign in again to edit this product." });
-        return;
-      }
-
       const response = await fetch(`/api/studio/products/${id}`, {
         method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${data.session.access_token}`,
-        },
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
         body: JSON.stringify(values),
       });
       const payload = (await response.json()) as { error?: string };

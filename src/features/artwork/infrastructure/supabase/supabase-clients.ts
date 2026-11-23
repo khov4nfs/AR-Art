@@ -34,9 +34,11 @@ export function getSupabaseBrowserClient() {
 
   browserClient = createClient(url, publishableKey, {
     auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
+      // EVERIE owns authentication. Supabase browser client is used only for
+      // uploading to short-lived, server-issued signed storage URLs.
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
     },
   });
 
