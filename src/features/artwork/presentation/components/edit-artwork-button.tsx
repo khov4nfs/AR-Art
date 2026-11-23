@@ -84,7 +84,7 @@ export function EditArtworkButton({
 
       setOpen(false);
       if (values.status === "draft") {
-        router.push("/studio/products");
+        router.push("/admin/ar");
         return;
       }
       router.refresh();

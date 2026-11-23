@@ -2056,3 +2056,21 @@ html.route-leaving main {
   .everie-modal-backdrop,
   .everie-modal-surface { animation: none; }
 }
+
+/* EVERIE AR admin: keep studio controls and dialogs legible in the existing light dashboard. */
+html:not(.dark) .admin-shell .ar-admin-manager [class*="text-white/"] {
+  color: #52525b !important;
+}
+html:not(.dark) .admin-shell .ar-admin-manager .ar-admin-artwork-image [class*="text-white/"] {
+  color: rgba(255, 255, 255, 0.82) !important;
+}
+html:not(.dark) .admin-shell .ar-admin-manager .everie-modal-surface {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+}
+html:not(.dark) .admin-shell .ar-admin-manager .everie-modal-surface :is(
+  [class*="bg-[#07070a]"],
+  [class*="bg-[#09090d]"]
+) {
+  background-color: #ffffff !important;
+}

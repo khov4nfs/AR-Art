@@ -20,6 +20,7 @@ function sectionLinkClass(active: boolean) {
 
 export function SiteHeader() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [canManageAr, setCanManageAr] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<SectionId | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -28,7 +29,10 @@ export function SiteHeader() {
     let active = true;
     void getCurrentCollectionUser()
       .then((user) => {
-        if (active) setAuthenticated(Boolean(user));
+        if (active) {
+          setAuthenticated(Boolean(user));
+          setCanManageAr(user?.role === "SUPER_ADMIN" || user?.role === "CONTENT_EDITOR");
+        }
       })
       .catch(() => {
         if (active) setAuthenticated(false);
@@ -117,8 +121,8 @@ export function SiteHeader() {
           </Link>
           <span className="inline-flex justify-end sm:min-w-[3.8rem]">
             {authenticated === true ? (
-              <Link href="/studio" className="text-white/46 transition-opacity duration-300 hover:text-white">
-                Studio
+              <Link href={canManageAr ? "/admin/ar" : "/account"} className="text-white/46 transition-opacity duration-300 hover:text-white">
+                {canManageAr ? "Manage AR" : "Account"}
               </Link>
             ) : authenticated === false ? (
               <Link href="/login" className="text-white/46 transition-opacity duration-300 hover:text-white">

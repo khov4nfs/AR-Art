@@ -1,6 +1,5 @@
-import { StudioApp } from "@/features/studio/presentation/components/studio-app";
+import { redirect } from "next/navigation";
 
 export default function StudioPage() {
-
-  return <StudioApp view="overview" />;
+  redirect("/admin/ar");
 }

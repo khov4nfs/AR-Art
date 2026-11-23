@@ -53,7 +53,7 @@ export function ProtectedCreatePage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_50%_110%,rgba(124,58,237,0.12),transparent_38%)]" />
-      <ArtworkCreateModal open onClose={() => router.push("/studio/products")} />
+      <ArtworkCreateModal open onClose={() => router.push("/gallery")} />
     </main>
   );
 }

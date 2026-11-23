@@ -12,9 +12,10 @@ export class UpdateStudioArtwork {
     id: string,
     ownerId: string,
     input: UpdateArtworkInput,
+    canManageAll = false,
   ): Promise<PublishedArtwork | null> {
     const existing = await this.repository.findById(id);
-    if (!existing || existing.ownerId !== ownerId) return null;
+    if (!existing || (!canManageAll && existing.ownerId !== ownerId)) return null;
 
     if (existing.status === "draft" && input.status === "published") {
       const publishedCount = await this.repository.countPublished();
@@ -26,7 +27,7 @@ export class UpdateStudioArtwork {
       await this.storage.assertAssetsExist(existing);
     }
 
-    const artwork = await this.repository.updateForOwner(id, ownerId, input);
+    const artwork = await this.repository.updateForOwner(id, existing.ownerId, input);
     if (!artwork) return null;
 
     return {

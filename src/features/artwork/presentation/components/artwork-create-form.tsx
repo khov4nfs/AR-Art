@@ -409,7 +409,7 @@ export function ArtworkCreateForm({
       <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
         <div className={embedded ? "hidden" : "pointer-events-none absolute right-[8%] top-24 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
         <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
-          <BackLink href="/studio/products" label={t("ar.studio.products")} />
+          <BackLink href="/admin/ar" label={t("ar.studio.products")} />
           <EverieBrand />
           <div className="justify-self-end"><ArLanguageSwitcher /></div>
         </header>
@@ -464,7 +464,7 @@ export function ArtworkCreateForm({
                   {t("ar.create.backStudio")}
                 </button>
               ) : (
-                <Link href="/studio/products" className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-amber-100">
+                <Link href="/admin/ar" className="inline-flex h-12 items-center rounded-[4px] bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-amber-100">
                   {t("ar.create.backStudio")}
                 </Link>
               )}
@@ -491,7 +491,7 @@ export function ArtworkCreateForm({
     <main className={embedded ? "relative text-white" : "relative min-h-screen overflow-hidden bg-[#050507] text-white"}>
       <div className={embedded ? "hidden" : "pointer-events-none absolute right-[12%] top-28 size-80 rounded-full bg-amber-900/7 blur-[130px]"} />
       <header className={embedded ? "hidden" : "relative mx-auto grid w-full max-w-[94rem] grid-cols-[1fr_auto_1fr] items-center everie-nav-surface px-5 py-5 sm:px-8 lg:px-12"}>
-        <BackLink href="/studio/products" label={t("ar.create.backStudio")} />
+        <BackLink href="/admin/ar" label={t("ar.create.backStudio")} />
         <EverieBrand />
         <div className="justify-self-end"><ArLanguageSwitcher /></div>
       </header>

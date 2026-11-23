@@ -1,76 +1,37 @@
 import Link from "next/link";
+import { ArrowUpRight, Images, ScanLine } from "lucide-react";
+
 import { ArText } from "@/components/everie-ar/ar-text";
-import {
-  ArrowUpRight,
-  Camera,
-  ImagePlus,
-  Images,
-  ScanLine,
-} from "lucide-react";
+import { StudioApp } from "@/features/studio/presentation/components/studio-app";
 
-const entries = [
-  {
-    href: "/ar",
-    title: "ar.nav.scan",
-    description: "ar.admin.scannerDesc",
-    icon: ScanLine,
-  },
-  {
-    href: "/gallery",
-    title: "ar.nav.gallery",
-    description: "ar.admin.galleryDesc",
-    icon: Images,
-  },
-  {
-    href: "/studio/products",
-    title: "ar.admin.manager",
-    description: "ar.admin.managerDesc",
-    icon: Camera,
-  },
-  {
-    href: "/create",
-    title: "ar.admin.publish",
-    description: "ar.admin.publishDesc",
-    icon: ImagePlus,
-  },
-] as const;
-
+/** AR is one workspace inside the existing EVERIE administration shell. */
 export default function AdminArPage() {
   return (
-    <main className="mx-auto max-w-6xl space-y-10 px-5 py-10 text-stone-200 sm:px-8">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.27em] text-[#C5A880]">
-          EVERIE
-        </p>
-        <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">
-          <ArText id="ar.admin.title" />
-        </h1>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-400">
-          <ArText id="ar.admin.desc" />
-        </p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {entries.map(({ href, title, description, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="group flex min-h-48 flex-col justify-between border border-stone-800 bg-[#18181A] p-6 transition-colors hover:border-[#C5A880]/70"
-          >
-            <div className="flex items-start justify-between">
-              <Icon className="size-7 text-[#C5A880]" strokeWidth={1.4} />
-              <ArrowUpRight className="size-4 text-stone-500 transition group-hover:text-[#C5A880]" />
-            </div>
-            <div>
-              <h2 className="font-serif text-2xl text-white">
-                <ArText id={title} />
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-stone-400">
-                <ArText id={description} />
-              </p>
-            </div>
+    <div className="mx-auto w-full max-w-7xl space-y-8 px-5 py-8 sm:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-6 border-b border-stone-800 pb-7">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.27em] text-[#C5A880]">
+            EVERIE / AR
+          </p>
+          <h1 className="mt-3 font-serif text-3xl text-white sm:text-4xl">
+            <ArText id="ar.admin.manager" />
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-400">
+            <ArText id="ar.admin.managerDesc" />
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/gallery" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-md border border-stone-700 px-4 py-2.5 text-xs text-stone-300 transition hover:border-[#C5A880] hover:text-white">
+            <Images className="size-4" /><ArText id="ar.nav.gallery" /><ArrowUpRight className="size-3" />
           </Link>
-        ))}
+          <Link href="/ar" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-md border border-stone-700 px-4 py-2.5 text-xs text-stone-300 transition hover:border-[#C5A880] hover:text-white">
+            <ScanLine className="size-4" /><ArText id="ar.nav.scan" /><ArrowUpRight className="size-3" />
+          </Link>
+        </div>
       </div>
-    </main>
+      <StudioApp />
+    </div>
   );
 }
