@@ -71,6 +71,11 @@ RUN if [ -f package-lock.json ]; then \
   echo "No lockfile found." && exit 1; \
   fi
 
+# Do NOT ship build-time default accounts/JSON/session secrets in any final
+# runtime layer. Next.js can seed a sample CMS while collecting page data.
+# Clean the builder output before the runner copies it, not in the runner.
+RUN rm -rf /app/data /app/.next/standalone/data && mkdir -p /app/data /app/.next/standalone/data
+
 # ============================================
 # Stage 3: Run Next.js application
 # ============================================
@@ -96,7 +101,6 @@ ENV HOSTNAME="0.0.0.0"
 
 # Copy production assets
 COPY --from=builder --chown=node:node /app/public ./public
-COPY --from=builder --chown=node:node /app/data ./data
 COPY --from=builder --chown=node:node /app/scripts/import-legacy-ar-backup.mjs ./scripts/import-legacy-ar-backup.mjs
 
 # Set the correct permissions for runtime writes
@@ -106,6 +110,7 @@ RUN mkdir -p .next public/uploads data && chown -R node:node .next public/upload
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+
 
 # If you want to persist the fetch cache generated during the build so that
 # cached responses are available immediately on startup, uncomment this line:

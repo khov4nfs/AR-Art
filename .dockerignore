@@ -14,10 +14,9 @@ dist
 .git
 .gitignore
 
-# Environment files (pass via docker-compose env_file or runtime env vars)
-.env
-.env.local
-.env.*.local
+# Environment files are always injected at RUNTIME, never copied into image.
+.env*
+**/.env*
 
 # Editor / OS
 .vscode
@@ -63,3 +62,6 @@ everievn-main/
 data/ar-artworks.json
 data/ar-artworks.bak-*.json
 public/uploads/
+
+# Local build verification and Docker CLI state must never enter the image.
+.docker-handoff-config/
