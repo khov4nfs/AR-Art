@@ -21,7 +21,6 @@ import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
 import { Modal } from "@/components/molecules/modal";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
 import {
   studioProductSchema,
   type StudioProductFormValues,
@@ -43,10 +42,8 @@ function arModeLabel(mode: PublishedArtwork["arMode"]) {
 }
 
 async function authHeaders() {
-  const supabase = getSupabaseBrowserClient();
-  const { data } = await supabase.auth.getSession();
-  if (!data.session) throw new Error("Please sign in again to manage this product.");
-  return { authorization: `Bearer ${data.session.access_token}` };
+  // Both EVERIE storefront and AR Studio use everie_session.
+  return {};
 }
 
 export function ProductManagerModal({

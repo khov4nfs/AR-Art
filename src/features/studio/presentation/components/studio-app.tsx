@@ -18,7 +18,6 @@ import { BackLink } from "@/components/atoms/back-link";
 import { Button } from "@/components/atoms/button";
 import { EverieBrand } from "@/components/atoms/everie-brand";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
 import { ArtworkCreateModal } from "@/features/artwork/presentation/components/artwork-create-modal";
 import { CreatorSpatialScene } from "@/features/artwork/presentation/components/creator-spatial-scene";
 import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
@@ -170,20 +169,11 @@ export function StudioApp({ view }: { view: StudioView }) {
     dispatch({ type: "loading" });
     const user = await getCurrentCollectionUser();
     if (!user) {
-      router.replace(`/ar-login?next=${encodeURIComponent(pathname)}`);
+      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
       return;
     }
 
-    const supabase = getSupabaseBrowserClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      router.replace(`/ar-login?next=${encodeURIComponent(pathname)}`);
-      return;
-    }
-
-    const productsResponse = await fetch("/api/studio/products", {
-      headers: { authorization: `Bearer ${sessionData.session.access_token}` },
-    });
+    const productsResponse = await fetch("/api/studio/products", { credentials: "same-origin" });
 
     const productsPayload = (await productsResponse.json()) as {
       products?: PublishedArtwork[];
