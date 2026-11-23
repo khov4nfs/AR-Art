@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isTrustedEverieOrigin } from "./everie-request-origin";
+import { isTrustedEverieOrigin } from "./everie-request-origin.ts";
 
 test("permits the exact EVERIE origin", () => {
   assert.equal(isTrustedEverieOrigin("https://everievn.com", "https://everievn.com"), true);
