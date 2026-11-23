@@ -21,7 +21,6 @@ export function EverieArHeader({ active }: { active?: "gallery" | "scanner" | "s
       <div className="mx-auto flex min-h-[72px] max-w-[1440px] flex-wrap items-center justify-between gap-4 px-5 py-4 md:px-8">
         <Link href="/" aria-label={"EVERIE – " + t("ar.nav.home")} className="flex items-center gap-3">
           <span className="font-serif text-2xl tracking-[0.22em]">EVERIE</span>
-          <span className="hidden border-l border-[#C5A880]/50 pl-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C5A880] sm:block">Digital Atelier</span>
         </Link>
         <nav aria-label={t("ar.nav.experience")} className="flex flex-wrap items-center gap-4 md:gap-7">
           {links.map((link) => (

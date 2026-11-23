@@ -1444,6 +1444,7 @@ export default function AdminCustomizePage() {
                     <div className="max-w-md mx-auto border border-stone-800 rounded-xl overflow-hidden bg-[#121215] shadow-lg">
                       <div className="relative aspect-[1.91/1] w-full bg-stone-900 overflow-hidden flex items-center justify-center">
                         {settings.seoOgImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={settings.seoOgImage}
                             alt="OG Preview"

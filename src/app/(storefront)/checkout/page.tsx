@@ -25,7 +25,7 @@ type PaymentMethod = "transfer" | "cod";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartTotal, clearCart, formatPrice, showToast } = useCart();
+  const { cart, cartTotal, clearCart, formatPrice } = useCart();
   const { t, language } = useLanguage();
   const { settings } = useSettings();
   const mounted = useMounted();

@@ -111,7 +111,7 @@ export default async function Home() {
         <section aria-labelledby="everie-ar-heading" className="border-y border-[#E6DED0] bg-[#F6F3ED] px-5 py-16 text-[#171717] dark:border-neutral-800 dark:bg-[#171719] dark:text-white md:px-8 lg:py-24">
           <div className="mx-auto grid max-w-[1440px] gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8C6D46] dark:text-[#C5A880]">EVERIE · Digital Atelier</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8C6D46] dark:text-[#C5A880]">EVERIE</p>
               <h2 id="everie-ar-heading" className="mt-5 max-w-3xl font-serif text-4xl font-normal leading-tight md:text-6xl"><ArText id="ar.home.heading1" /> <span className="italic text-[#8C6D46] dark:text-[#C5A880]"><ArText id="ar.home.heading2" /></span></h2>
               <p className="mt-6 max-w-xl text-sm leading-8 text-neutral-600 dark:text-neutral-400"><ArText id="ar.home.desc" /></p>
               <div className="mt-9 flex flex-wrap gap-3">

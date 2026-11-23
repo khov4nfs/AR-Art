@@ -6,7 +6,6 @@ import {
   ImagePlus,
   Images,
   ScanLine,
-  ShieldCheck,
 } from "lucide-react";
 
 const entries = [
@@ -41,7 +40,7 @@ export default function AdminArPage() {
     <main className="mx-auto max-w-6xl space-y-10 px-5 py-10 text-stone-200 sm:px-8">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.27em] text-[#C5A880]">
-          EVERIE / Digital Atelier
+          EVERIE
         </p>
         <h1 className="mt-4 font-serif text-4xl text-white sm:text-5xl">
           <ArText id="ar.admin.title" />
@@ -71,17 +70,6 @@ export default function AdminArPage() {
             </div>
           </Link>
         ))}
-      </div>
-      <div className="flex gap-4 border-l-2 border-[#C5A880] bg-[#1B1A19] p-5">
-        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#C5A880]" />
-        <div>
-          <p className="text-sm font-semibold text-white">
-            <ArText id="ar.admin.account" />
-          </p>
-          <p className="mt-2 text-xs leading-6 text-stone-400">
-            <ArText id="ar.admin.accountDesc" />
-          </p>
-        </div>
       </div>
     </main>
   );

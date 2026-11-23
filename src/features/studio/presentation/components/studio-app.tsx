@@ -216,7 +216,7 @@ export function StudioApp({ view }: { view: StudioView }) {
             <div className="flex min-w-0 items-center gap-4 sm:gap-5">
               <BackLink href="/" className="shrink-0" />
               <span className="hidden h-4 w-px bg-white/12 md:block" aria-hidden="true" />
-              <EverieBrand href="/studio" suffix="Studio" className="hidden opacity-90 md:inline-flex" />
+              <EverieBrand href="/studio" className="hidden opacity-90 md:inline-flex" />
             </div>
 
             <nav className="order-3 col-span-2 flex items-center justify-center gap-7 sm:order-none sm:col-span-1">

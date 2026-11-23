@@ -7,7 +7,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Camera,
-  Check,
   ChevronDown,
   Clock,
   Gift,

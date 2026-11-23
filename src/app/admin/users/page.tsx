@@ -30,7 +30,7 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [tierFilter, setTierFilter] = useState("ALL");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(10);
 
   // Modal State for Create/Edit User
   const [isModalOpen, setIsModalOpen] = useState(false);
