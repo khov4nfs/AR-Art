@@ -188,3 +188,15 @@ test("AR create dialog is compact with no preview column or notes in admin mode"
   assert.ok(form.includes('!adminLayout && (<span className="mt-1 block text-xs'));
   assert.match(form, /workflow.compilerProgress/);
 });
+
+test("AR create buttons stay in one row on mobile and preserve translations", () => {
+  const form = readFileSync(path.resolve(process.cwd(), "src/features/artwork/presentation/components/artwork-create-form.tsx"), "utf8");
+  const css = readFileSync(path.resolve(process.cwd(), "src/app/globals.css"), "utf8");
+  assert.match(form, /admin-ar-create-actions grid w-full min-w-0 grid-cols-\[minmax\(0,2fr\)_minmax\(0,3fr\)\]/);
+  assert.match(form, /sm:flex sm:w-auto sm:flex-nowrap/);
+  assert.ok(form.includes('t("ar.create.saveDraft")'));
+  assert.ok(form.includes('t("ar.create.publishQR")'));
+  assert.match(css, /\.admin-ar-create \.admin-ar-create-actions > button \{/);
+  assert.match(css, /white-space: normal;/);
+  assert.match(css, /max-height: calc\(100dvh - 1rem\)/);
+});

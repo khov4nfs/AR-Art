@@ -633,7 +633,7 @@ export function ArtworkCreateForm({
                   {t("ar.create.publishHint")}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className={adminLayout ? "admin-ar-create-actions grid w-full min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-stretch gap-2 sm:flex sm:w-auto sm:flex-nowrap sm:items-center" : "flex flex-wrap items-center gap-2"}>
                 <Button
                   type="button"
                   variant="outline"
