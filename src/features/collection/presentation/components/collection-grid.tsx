@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, LoaderCircle, LogOut, ScanLine, Trash2 } from "lucide-react";
 
+import { AmbientDivider } from "@/components/atoms/ambient-divider";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   getCurrentCollectionUser,
   listCollectedArtworkIds,
   removeCollectedArtwork,
-} from "@/features/collection/infrastructure/supabase/collection-repository";
+} from "@/features/collection/infrastructure/local/collection-repository";
 
 interface CollectionGridProps {
   artworks: PublishedArtwork[];
@@ -19,6 +21,8 @@ interface CollectionGridProps {
 
 export function CollectionGrid({ artworks }: CollectionGridProps) {
   const router = useRouter();
+  const { logout } = useAuth();
+  const { t } = useLanguage();
   const [collectedArtworkIds, setCollectedArtworkIds] = useState<string[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +48,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
         if (active) setCollectedArtworkIds(artworkIds);
       } catch (cause) {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "Unable to load your collection.");
+          setError(cause instanceof Error ? cause.message : "ar.collection.loadError");
         }
       } finally {
         if (active) setLoading(false);
@@ -66,9 +70,8 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
     .filter((artwork): artwork is PublishedArtwork => Boolean(artwork));
 
   async function signOut() {
-    const supabase = getSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    router.replace("/login?next=/collection");
+    await logout();
+    router.replace("/login?next=%2Fcollection");
     router.refresh();
   }
 
@@ -79,7 +82,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
       await removeCollectedArtwork(artworkId);
       setCollectedArtworkIds((current) => current.filter((id) => id !== artworkId));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to remove this work.");
+      setError(cause instanceof Error ? cause.message : "ar.collection.removeError");
     } finally {
       setRemovingId(null);
     }
@@ -87,28 +90,25 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
 
   if (loading) {
     return (
-      <div className="border-y border-white/12 py-10 text-xs uppercase tracking-[0.16em] text-white/30">
-        Loading your collection…
+      <div className="py-10 text-xs uppercase tracking-[0.16em] text-white/30">
+        {t("ar.collection.loading")}
       </div>
     );
   }
 
   if (!userEmail) {
     return (
-      <section className="grid min-h-[28rem] items-center border-y border-white/12 py-14 lg:grid-cols-[0.7fr_1.3fr]">
-        <div className="hidden lg:block">
-          <span className="text-[0.68rem] uppercase tracking-[0.22em] text-white/30">Personal collection</span>
-        </div>
+      <section className="min-h-[28rem] py-14">
         <div className="max-w-2xl">
           <ScanLine className="size-5 text-white/30" aria-hidden="true" />
           <h2 className="mt-6 font-serif text-5xl leading-[0.95] tracking-[-0.045em] sm:text-6xl">
-            Sign in to keep<br /><span className="text-violet-100 italic">what you discover.</span>
+            {t("ar.collection.signInTitle")}<br /><span className="text-amber-100 italic">{t("ar.collection.signInEmphasis")}</span>
           </h2>
           <Link
-            href="/login?next=/collection"
-            className="mt-9 inline-flex items-center gap-3 bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-violet-100"
+            href="/login?next=%2Fcollection"
+            className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-amber-100"
           >
-            Sign in <ArrowUpRight className="size-4" />
+            {t("ar.common.signIn")} <ArrowUpRight className="size-4" />
           </Link>
         </div>
       </section>
@@ -117,9 +117,9 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
 
   return (
     <div>
-      <div className="mb-12 flex flex-wrap items-center justify-between gap-4 border-y border-white/12 py-4">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[5px] bg-white/[0.018] px-4 py-4">
         <div className="flex items-baseline gap-4">
-          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">Signed in</span>
+          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">{t("ar.collection.signedIn")}</span>
           <span className="text-sm text-white/58">{userEmail}</span>
         </div>
         <button
@@ -127,12 +127,14 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
           onClick={() => void signOut()}
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-white/38 transition hover:text-white"
         >
-          <LogOut className="size-3.5" /> Sign out
+          <LogOut className="size-3.5" /> {t("ar.common.signOut")}
         </button>
       </div>
 
+      <AmbientDivider compact className="mb-7" />
+
       {error ? (
-        <div className="mb-8 border-l-2 border-rose-300/60 py-1 pl-4 text-sm text-rose-200/80">{error}</div>
+        <div className="mb-8 rounded-[5px] bg-rose-300/[0.035] px-4 py-3 text-sm text-rose-200/80">{error.startsWith("ar.") ? t(error) : error}</div>
       ) : null}
 
       {collectedArtworks.length > 0 ? (
@@ -140,7 +142,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
           {collectedArtworks.map((artwork, index) => (
             <article key={artwork.id} className={index % 3 === 1 ? "lg:mt-12" : ""}>
               <Link href={`/art/${artwork.slug}`} className="group block">
-                <div className="relative overflow-hidden border border-white/8 bg-[#0a0a0d]">
+                <div className="relative overflow-hidden rounded-[5px] bg-[#0a0a0d] ring-1 ring-inset ring-white/[0.05]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={artwork.targetImageUrl}
@@ -153,13 +155,12 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-[1fr_auto] gap-5 border-t border-white/12 pt-3">
+                <div className="mt-4 grid grid-cols-[1fr_auto] gap-5 pt-1">
                   <div>
-                    <p className="text-[0.62rem] uppercase tracking-[0.15em] text-cyan-100/55">Collected</p>
-                    <h2 className="mt-2 font-serif text-2xl leading-none text-white">{artwork.title}</h2>
+                    <h2 className="font-serif text-2xl leading-none text-white">{artwork.title}</h2>
                     <p className="mt-2 text-xs uppercase tracking-[0.12em] text-white/35">{artwork.artistName}</p>
                   </div>
-                  <ArrowUpRight className="mt-1 size-4 text-white/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-100" />
+                  <ArrowUpRight className="mt-1 size-4 text-white/35 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-amber-100" />
                 </div>
               </Link>
 
@@ -174,19 +175,19 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                 ) : (
                   <Trash2 className="size-3.5" />
                 )}
-                {removingId === artwork.id ? "Removing…" : "Remove from collection"}
+                {t(removingId === artwork.id ? "ar.collection.removing" : "ar.collection.remove")}
               </button>
             </article>
           ))}
         </div>
       ) : (
-        <section className="flex min-h-[24rem] flex-col items-center justify-center border-y border-dashed border-white/12 px-6 text-center">
-          <div className="flex size-16 items-center justify-center border border-white/15 text-white/30">
+        <section className="flex min-h-[24rem] flex-col items-center justify-center px-6 text-center">
+          <div className="flex size-14 items-center justify-center rounded-full bg-white/[0.035] text-white/30">
             <ScanLine className="size-6" />
           </div>
-          <h2 className="mt-6 font-serif text-4xl tracking-[-0.035em]">Nothing collected yet.</h2>
+          <h2 className="mt-6 font-serif text-4xl tracking-[-0.035em]">{t("ar.collection.empty")}</h2>
           <p className="mt-3 max-w-md text-sm leading-6 text-white/38">
-            Scan and view a published artwork. Everie will add it here automatically.
+            {t("ar.collection.emptyDesc")}
           </p>
         </section>
       )}

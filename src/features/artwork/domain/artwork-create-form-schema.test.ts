@@ -1,127 +1,78 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { ARTWORK_UPLOAD_MAX_FILE_SIZE, artworkCreateFormSchema } from "./artwork-create-form-schema.ts";
 
-import {
-  ARTWORK_UPLOAD_MAX_FILE_SIZE,
-  artworkCreateFormSchema,
-} from "./artwork-create-form-schema.ts";
-
-function makeFile(name: string, type: string, size = 16) {
-  return new File([new Uint8Array(size)], name, { type });
+function makeFile(name: string, mime: string, size = 16) {
+  return new File([new Uint8Array(size)], name, { type: mime });
 }
-
-function baseValues() {
+function videoLayer(name: string, mime = "video/mp4", size = 16) {
+  return { file: makeFile(name, mime, size), animation: "none", blendMode: "normal", x: 0, y: 0, depth: 0.05, scale: 1 };
+}
+function pairedValues() {
   return {
-    title: "  Neon Rift  ",
-    artistName: "  Everie Studio  ",
-    targetImage: makeFile("target.png", "image/png"),
-    spatialLayers: [],
+    title: "  Calla Lily  ",
+    artistName: "  Studio  ",
+    targetImage: makeFile("tracking-from-image.png", "image/png", 184304),
+    arMode: "spatial_layers",
+    spatialLayers: [videoLayer("animation.mp4")],
   };
 }
-
-test("accepts motion extract and trims text", () => {
-  const result = artworkCreateFormSchema.parse({
-    ...baseValues(),
-    arMode: "motion_extract",
-    overlayVideo: makeFile("overlay.mp4", "video/mp4"),
-  });
-
-  assert.equal(result.title, "Neon Rift");
-  assert.equal(result.artistName, "Everie Studio");
-  assert.equal(result.arMode, "motion_extract");
+test("one image tracking target and one video form one published AR artwork", () => {
+  const values = artworkCreateFormSchema.parse(pairedValues());
+  assert.equal(values.title, "Calla Lily");
+  assert.equal(values.artistName, "Studio");
+  assert.equal(values.spatialLayers.length, 1);
+  assert.equal(values.spatialLayers[0].file.type, "video/mp4");
+  assert.equal(values.targetImage.type, "image/png");
 });
-
-test("accepts transparent motion video", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "transparent_motion",
-    overlayVideo: makeFile("motion.webm", "video/webm"),
-  });
-
-  assert.equal(result.success, true);
-});
-
-test("accepts layered AR with image and GLB assets", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "spatial_layers",
-    spatialLayers: [
-      {
-        file: makeFile("glow.png", "image/png"),
-        animation: "pulse",
-        blendMode: "additive",
-        x: 0,
-        y: 0,
-        depth: 0.05,
-        scale: 0.4,
-      },
-      {
-        file: makeFile("orb.glb", "model/gltf-binary"),
-        animation: "rotate",
-        blendMode: "normal",
-        x: 0,
-        y: 0,
-        depth: 0.12,
-        scale: 0.25,
-      },
-    ],
-  });
-
-  assert.equal(result.success, true);
-});
-
-test("requires a motion video outside layered AR", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "motion_extract",
-  });
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.ok(
-      result.error.issues.some(
-        (issue) => issue.message === "AR motion video is required for this mode.",
-      ),
-    );
+test("accepts either converted MP4 or WebM animation", () => {
+  for (const [name, type] of [["animation.mp4", "video/mp4"], ["animation.webm", "video/webm"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers: [videoLayer(name, type)],
+    }).success, true);
   }
 });
-
-test("rejects unsupported artwork and motion mime types", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "transparent_motion",
-    targetImage: makeFile("target.gif", "image/gif"),
-    overlayVideo: makeFile("overlay.mov", "video/quicktime"),
-  });
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    const messages = result.error.issues.map((issue) => issue.message);
-    assert.ok(messages.includes("Target image must be JPG, PNG, or WebP."));
-    assert.ok(messages.includes("AR motion must be MP4 or WebM."));
+test("rejects missing artwork image even if animation exists", () => {
+  const parsed = artworkCreateFormSchema.safeParse({ ...pairedValues(), targetImage: undefined });
+  assert.equal(parsed.success, false);
+});
+test("rejects missing animation even if artwork image exists", () => {
+  const parsed = artworkCreateFormSchema.safeParse({ ...pairedValues(), spatialLayers: [] });
+  assert.equal(parsed.success, false);
+  if (!parsed.success) assert.ok(parsed.error.issues.some(issue => issue.message === "Upload the animation video."));
+});
+test("a static image alone cannot replace an animation", () => {
+  for (const [name, type] of [["Calla Lily.png","image/png"], ["printed.jpg","image/jpeg"], ["art.webp","image/webp"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers: [videoLayer(name, type)],
+    }).success, false, name);
   }
 });
-
-test("rejects files larger than the MVP upload limit", () => {
-  const result = artworkCreateFormSchema.safeParse({
-    ...baseValues(),
-    arMode: "motion_extract",
-    targetImage: makeFile(
-      "target.png",
-      "image/png",
-      ARTWORK_UPLOAD_MAX_FILE_SIZE + 1,
-    ),
-    overlayVideo: makeFile("overlay.mp4", "video/mp4"),
+test("only one animation video can be paired with the image", () => {
+  const parsed = artworkCreateFormSchema.safeParse({
+    ...pairedValues(), spatialLayers: [videoLayer("one.mp4"), videoLayer("two.webm", "video/webm")],
   });
-
-  assert.equal(result.success, false);
-  if (!result.success) {
-    assert.ok(
-      result.error.issues.some(
-        (issue) =>
-          issue.message ===
-          "Each uploaded file must be 6 MB or smaller for this MVP.",
-      ),
-    );
+  assert.equal(parsed.success, false);
+});
+test("MOV originals require conversion first and unsupported models are rejected", () => {
+  for (const [name,type] of [["animation.mov", "video/quicktime"],["model.glb","model/gltf-binary"],["print.pdf","application/pdf"]]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers: [videoLayer(name,type)],
+    }).success, false, name);
   }
+});
+test("rejects empty or oversized finished media and tracking image", () => {
+  for (const size of [0,ARTWORK_UPLOAD_MAX_FILE_SIZE+1]) {
+    assert.equal(artworkCreateFormSchema.safeParse({
+      ...pairedValues(), spatialLayers:[videoLayer("animation.mp4","video/mp4",size)],
+    }).success,false);
+  }
+  assert.equal(artworkCreateFormSchema.safeParse({
+    ...pairedValues(),targetImage:makeFile("tracking.png","image/png",ARTWORK_UPLOAD_MAX_FILE_SIZE+1),
+  }).success,false);
+});
+test("non-spatial AR publishing is not permitted in paired workflow", () => {
+  assert.equal(artworkCreateFormSchema.safeParse({
+    ...pairedValues(), arMode:"motion_extract",
+  }).success,false);
 });

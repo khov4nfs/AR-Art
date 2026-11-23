@@ -7,8 +7,10 @@ export class DeleteStudioArtwork {
     private readonly storage: ArtworkStorage,
   ) {}
 
-  async execute(id: string, ownerId: string) {
-    const artwork = await this.repository.deleteForOwner(id, ownerId);
+  async execute(id: string, ownerId: string, canManageAll = false) {
+    const existing = await this.repository.findById(id);
+    if (!existing || (!canManageAll && existing.ownerId !== ownerId)) return false;
+    const artwork = await this.repository.deleteForOwner(id, existing.ownerId);
     if (!artwork) return false;
 
     try {

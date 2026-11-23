@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { fitVideoPlaneInTarget } from "@/features/ar-experience/domain/video-plane-fit";
 
 import type {
   ArLayerAnimation,
@@ -72,7 +73,7 @@ export class ThreeArOverlayScene {
       for (let index = 0; index < layers.length; index += 1) {
         const layer = layers[index];
         if (!layer) continue;
-        group.add(await this.createSpatialLayer(layer, index * 0.73));
+        group.add(await this.createSpatialLayer(layer, index * 0.73, overlay.targetAspectRatio));
       }
       return group;
     }
@@ -277,7 +278,7 @@ export class ThreeArOverlayScene {
     });
   }
 
-  private async createSpatialLayer(layer: ArSceneLayer, phase: number) {
+  private async createSpatialLayer(layer: ArSceneLayer, phase: number, targetAspectRatio: number) {
     let object: THREE.Object3D;
 
     if (layer.type === "image") {
@@ -298,17 +299,44 @@ export class ThreeArOverlayScene {
     } else if (layer.type === "video") {
       const video = this.createVideo(layer.url);
       const texture = this.createVideoTexture(video);
-      const material = this.registerMaterial(
-        new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: layer.transparent ?? true,
-          depthWrite: false,
-          blending: blendingFor(layer.blendMode),
-          side: THREE.DoubleSide,
-        }),
-      );
+      const material = layer.alphaPacking === "side-by-side"
+        ? this.registerMaterial(new THREE.ShaderMaterial({
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.NormalBlending,
+            side: THREE.DoubleSide,
+            uniforms: { uPackedVideo: { value: texture } },
+            vertexShader: `
+              varying vec2 vUv;
+              void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+              }
+            `,
+            fragmentShader: `
+              uniform sampler2D uPackedVideo;
+              varying vec2 vUv;
+              void main() {
+                vec3 color = texture2D(uPackedVideo, vec2(vUv.x * 0.5, vUv.y)).rgb;
+                vec3 matte = texture2D(uPackedVideo, vec2(0.5 + vUv.x * 0.5, vUv.y)).rgb;
+                float alpha = clamp((dot(matte, vec3(0.299, 0.587, 0.114)) - 0.02) / 0.96, 0.0, 1.0);
+                if (alpha < 0.01) discard;
+                gl_FragColor = vec4(color, alpha);
+              }
+            `,
+          }))
+        : this.registerMaterial(new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: layer.transparent ?? true,
+            depthWrite: false,
+            blending: blendingFor(layer.blendMode),
+            side: THREE.DoubleSide,
+          }));
+      const dimensions = layer.fitToTarget
+        ? fitVideoPlaneInTarget(layer.aspectRatio, targetAspectRatio)
+        : { width: 1, height: 1 / Math.max(layer.aspectRatio, 0.05) };
       const geometry = this.registerGeometry(
-        new THREE.PlaneGeometry(1, 1 / Math.max(layer.aspectRatio, 0.05)),
+        new THREE.PlaneGeometry(dimensions.width, dimensions.height),
       );
       object = new THREE.Mesh(geometry, material);
     } else if (layer.type === "model") {

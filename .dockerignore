@@ -1,10 +1,67 @@
-.git
-.github
-.next
+# Dependencies (reinstalled inside Docker)
 node_modules
+pnpm-debug.log*
 npm-debug.log*
-.env
-.env.*
-!.env.example
-Dockerfile*
+yarn-debug.log*
+
+# Build output
+.next
+out
+build
+dist
+
+# Git
+.git
+.gitignore
+
+# Environment files are always injected at RUNTIME, never copied into image.
+.env*
+**/.env*
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Agent / AI tool configs (not needed at runtime)
+.agents
+.claude
+.cursor
+.opencode
+AGENTS.md
+CLAUDE.md
+
+# Docs / research (large, not needed at runtime)
+docs
+scripts/*
+!scripts/patch-mindar-three.mjs
+!scripts/import-legacy-ar-backup.mjs
+
+# Docker files themselves (no need to copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Misc
+*.tsbuildinfo
 README.md
+CHANGELOG.md
+LICENSE
+
+# Personal CMS state is preserved only in mounted /opt/everievn/data, not in images.
+data/*
+!data/.gitkeep
+data_smaple/
+.npm-cache/
+everievn-main/
+
+# Never bake private AR data or user-uploaded media into images.
+data/ar-artworks.json
+data/ar-artworks.bak-*.json
+public/uploads/
+
+# Local build verification and Docker CLI state must never enter the image.
+.docker-handoff-config/

@@ -1,0 +1,43 @@
+# Defaults match the existing EVERIE VPS; override via deploy/.env only.
+name: ${EVERIE_COMPOSE_PROJECT:-everievn}
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION: 24-slim
+    image: ${EVERIE_IMAGE:-everievn-web:latest}
+    container_name: ${EVERIE_CONTAINER_NAME:-everievn-web}
+    restart: unless-stopped
+    env_file:
+      - ${EVERIE_RUNTIME_ENV_FILE:-.env}
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      SESSION_SECRET: ${SESSION_SECRET:?Set the existing EVERIE SESSION_SECRET in deploy/.env}
+      SITE_URL: ${SITE_URL:?Set SITE_URL in deploy/.env}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:?Set SITE_URL in deploy/.env}
+    volumes:
+      - ${EVERIE_DATA_DIR:-/opt/everievn/data}:/app/data
+      - ${EVERIE_UPLOAD_DIR:-/opt/everievn/public/uploads}:/app/public/uploads
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+networks:
+  edge:
+    name: ${EVERIE_DOCKER_NETWORK:-vms_edge}
+    external: true

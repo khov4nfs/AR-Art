@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { isAdminRole } from "@/lib/adminSession";
 
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
-import { getRequestUser } from "@/features/auth/infrastructure/supabase/request-user";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
+import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 import { studioProductSchema } from "@/features/studio/domain/studio-product-schema";
 
 export async function PATCH(
@@ -24,7 +25,7 @@ export async function PATCH(
 
     const { id } = await context.params;
     const { updateStudioArtwork } = createArtworkServices();
-    const product = await updateStudioArtwork.execute(id, user.id, payload.data);
+    const product = await updateStudioArtwork.execute(id, user.id, payload.data, isAdminRole(user.role));
 
     if (!product) {
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
@@ -49,7 +50,7 @@ export async function DELETE(
 
     const { id } = await context.params;
     const { deleteStudioArtwork } = createArtworkServices();
-    const deleted = await deleteStudioArtwork.execute(id, user.id);
+    const deleted = await deleteStudioArtwork.execute(id, user.id, isAdminRole(user.role));
     if (!deleted) {
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
     }

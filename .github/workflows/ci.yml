@@ -1,21 +1,33 @@
 name: CI
-
 on:
   pull_request:
   push:
     branches: [main]
-
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run test
-      - run: npm run typecheck
       - run: npm run lint
+      - run: npm run typecheck
       - run: npm run build
+
+      - name: AR HTTP end-to-end smoke
+        run: |
+          # Git excludes uploads; the image creates this directory at runtime.
+          # Reproduce the directory locally without bundling private media.
+          mkdir -p public/uploads
+          npm run start -- -p 3199 > /tmp/everie-e2e.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl --silent --fail http://127.0.0.1:3199/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run test:e2e

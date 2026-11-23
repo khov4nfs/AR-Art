@@ -1,116 +1,51 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Camera, Sparkles } from "lucide-react";
+import { ArrowUpRight, Camera, Sparkles } from "lucide-react";
 import { notFound } from "next/navigation";
 
-import { HistoryBackButton } from "@/components/molecules/history-back-button";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { EverieArHeader } from "@/components/everie-ar/everie-ar-header";
+import { ArText } from "@/components/everie-ar/ar-text";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
+import { ArtworkArQrCode } from "@/features/artwork/presentation/components/artwork-ar-qr-code";
 import { EditArtworkButton } from "@/features/artwork/presentation/components/edit-artwork-button";
 import { ShareArtworkButton } from "@/features/artwork/presentation/components/share-artwork-button";
+import { ArtworkViewTracker } from "@/features/gallery/presentation/components/artwork-view-tracker";
 
 export const dynamic = "force-dynamic";
 
-export default async function ArtworkPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ArtworkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const { getPublishedArtwork } = createArtworkServices();
   const artwork = await getPublishedArtwork.execute(slug);
-
   if (!artwork) notFound();
+  const arHref = `/ar/${artwork.slug}`;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050507] text-white">
-      <div className="pointer-events-none absolute right-[10%] top-[18%] size-80 rounded-full bg-violet-700/7 blur-[130px]" />
-      <header className="relative mx-auto flex w-full max-w-[94rem] items-center justify-between border-b border-white/12 px-5 py-5 sm:px-8 lg:px-12">
-        <HistoryBackButton
-          fallbackHref="/"
-          variant="ghost"
-          className="h-auto rounded-none p-0 text-xs uppercase tracking-[0.14em] text-white/50 hover:bg-transparent hover:text-white"
-        >
-          <ArrowLeft className="size-3.5" aria-hidden="true" />
-          Gallery
-        </HistoryBackButton>
-        <Link href="/" className="text-lg font-semibold tracking-[-0.045em]">EVERIE</Link>
-        <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">Digital work</span>
-      </header>
-
-      <section className="relative mx-auto grid min-h-[calc(100svh-4.8rem)] w-full max-w-[94rem] gap-12 px-5 py-12 sm:px-8 lg:grid-cols-[1.16fr_0.84fr] lg:items-center lg:px-12 lg:py-16">
-        <div className="relative">
-          <div className="overflow-hidden border border-white/10 bg-[#0a0a0d] p-2 shadow-[0_35px_120px_rgba(0,0,0,0.38)] sm:p-3">
+    <div className="min-h-screen bg-[#0C0C0E] text-white">
+      <ArtworkViewTracker slug={artwork.slug} />
+      <EverieArHeader active="gallery" />
+      <main className="mx-auto grid max-w-[1440px] gap-14 px-5 py-12 md:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:py-20">
+        <div>
+          <div className="overflow-hidden border border-white/10 bg-[#171719] p-3 shadow-2xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={artwork.targetImageUrl}
-              alt={artwork.title}
-              className="mx-auto aspect-[4/5] max-h-[74svh] w-full object-contain"
-            />
+            <img src={artwork.targetImageUrl} alt={artwork.title} className="mx-auto aspect-[4/5] max-h-[72svh] w-full object-contain" />
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-white/12 pt-3 text-[0.62rem] uppercase tracking-[0.15em] text-white/30">
-            <span>Everie archive</span>
-            <span className="text-cyan-100/45">AR enabled</span>
-          </div>
+          <p className="mt-4 flex justify-between text-[10px] uppercase tracking-[0.2em] text-stone-500"><span>EVERIE</span><span className="text-[#C5A880]"><ArText id="ar.art.enabled" /></span></p>
         </div>
-
         <div className="lg:pl-8">
-          <div className="flex items-center justify-between gap-6 border-t border-white/12 pt-3 text-[0.62rem] uppercase tracking-[0.16em] text-white/30">
-            <span>Work / {artwork.slug}</span>
-            <span>2D AR</span>
+          <Link href="/gallery" className="text-[11px] uppercase tracking-widest text-stone-400 transition hover:text-[#C5A880]"><ArText id="ar.art.backGallery" /></Link>
+          <p className="mt-10 text-[11px] uppercase tracking-[0.25em] text-[#C5A880]"><ArText id="ar.art.interactive" /></p>
+          <h1 className="mt-4 font-serif text-6xl leading-[0.95] tracking-tight md:text-7xl">{artwork.title}</h1>
+          <p className="mt-6 text-xs uppercase tracking-[0.18em] text-stone-400">{artwork.artistName}</p>
+          {artwork.description && <p className="mt-8 max-w-xl whitespace-pre-wrap text-sm leading-8 text-stone-300">{artwork.description}</p>}
+          <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-white/10 pt-8">
+            <Link href={arHref} className="inline-flex min-h-12 items-center gap-2 bg-[#C5A880] px-5 text-xs font-semibold uppercase tracking-widest text-[#111113] transition hover:bg-[#E3C89D]"><Camera className="size-4" /> <ArText id="ar.art.experience" /> <ArrowUpRight className="size-3.5" /></Link>
+            <Link href="/collection" className="inline-flex min-h-12 items-center gap-2 border border-white/20 px-5 text-xs uppercase tracking-widest text-stone-300 transition hover:border-[#C5A880]"><Sparkles className="size-4" /> <ArText id="ar.art.collection" /></Link>
+            <EditArtworkButton id={artwork.id} ownerId={artwork.ownerId} title={artwork.title} artistName={artwork.artistName} description={artwork.description} status={artwork.status} />
           </div>
-
-          <h1 className="mt-10 font-serif text-6xl leading-[0.86] tracking-[-0.06em] sm:text-8xl">
-            {artwork.title}
-          </h1>
-          <p className="mt-6 text-xs uppercase tracking-[0.18em] text-violet-100/45">{artwork.artistName}</p>
-
-          {artwork.description ? (
-            <p className="mt-9 max-w-xl whitespace-pre-wrap text-sm leading-7 text-white/48">
-              {artwork.description}
-            </p>
-          ) : null}
-
-          <div className="mt-12 grid grid-cols-2 border-y border-white/12 py-4 text-xs uppercase tracking-[0.12em] text-white/38">
-            <span>AR layer</span>
-            <span className="text-right">Scans save to Collection</span>
-          </div>
-
-          <div className="mt-7 flex flex-wrap items-center gap-2">
-            <Link
-              href={`/ar/${artwork.slug}`}
-              className="inline-flex h-12 items-center gap-2 bg-white px-5 text-xs font-medium uppercase tracking-[0.12em] text-black transition hover:bg-violet-100"
-            >
-              <Camera className="size-4" aria-hidden="true" />
-              Open AR
-              <ArrowUpRight className="size-3.5" aria-hidden="true" />
-            </Link>
-
-            <Link
-              href="/collection"
-              className="inline-flex h-12 items-center gap-2 border border-white/18 px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 transition hover:border-white/45 hover:text-white"
-            >
-              <Sparkles className="size-4" aria-hidden="true" />
-              Collection
-            </Link>
-
-            <EditArtworkButton
-              id={artwork.id}
-              ownerId={artwork.ownerId}
-              title={artwork.title}
-              artistName={artwork.artistName}
-              description={artwork.description}
-              status={artwork.status}
-            />
-          </div>
-
-          <div className="mt-3">
-            <ShareArtworkButton
-              title={artwork.title}
-              text={artwork.description || `Discover ${artwork.title} in Everie.`}
-              imageUrl={artwork.targetImageUrl}
-            />
-          </div>
+          <div className="mt-5"><ShareArtworkButton title={artwork.title} text={artwork.description} imageUrl={artwork.targetImageUrl} /></div>
+          <div className="mt-12 flex justify-start"><ArtworkArQrCode href={arHref} title={artwork.title} /></div>
         </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 }

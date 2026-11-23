@@ -7,8 +7,8 @@ import {
   type ArtworkArAssetType,
   type ArtworkArMode,
 } from "@/features/artwork/domain/artwork";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
-import { getRequestUser } from "@/features/auth/infrastructure/supabase/request-user";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
+import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 
 const imageExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
 const videoExtensions = new Set(["mp4", "webm"]);
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     const targetImageExtension = clean(body.targetImageExtension, 8).toLowerCase();
     const targetAspectRatio = finite(body.targetAspectRatio, 0.2, 5);
     const arMode = clean(body.arMode, 32) as ArtworkArMode;
+    const creationFlow = clean(body.creationFlow, 32);
     const overlayExtension = clean(body.overlayExtension, 8).toLowerCase();
     const overlayAspectRatio = finite(body.overlayAspectRatio, 0.2, 5);
 
@@ -67,6 +68,12 @@ export async function POST(request: Request) {
 
     if (!arModes.has(arMode)) {
       return NextResponse.json({ error: "Unsupported AR experience type." }, { status: 400 });
+    }
+    if (creationFlow && creationFlow !== "image-video") {
+      return NextResponse.json({ error: "Unsupported artwork upload workflow." }, { status: 400 });
+    }
+    if (creationFlow === "image-video" && arMode !== "spatial_layers") {
+      return NextResponse.json({ error: "Image + video publishing requires image tracking." }, { status: 400 });
     }
 
     if (arMode !== "spatial_layers") {
@@ -98,7 +105,11 @@ export async function POST(request: Request) {
       const layer = raw as Record<string, unknown>;
       const extension = clean(layer.extension, 8).toLowerCase();
       const assetType = assetTypeFor(extension);
-      if (!spatialExtensions.has(extension) || !assetType) {
+      const alphaPacking = layer.alphaPacking === "side-by-side" ? "side-by-side" as const : undefined;
+      const fitToTarget = layer.fitToTarget === true;
+      if (!spatialExtensions.has(extension) || !assetType ||
+          (layer.alphaPacking !== undefined && (alphaPacking === undefined || extension !== "mp4")) ||
+          (layer.fitToTarget !== undefined && (layer.fitToTarget !== true || assetType !== "video"))) {
         throw new Error(`Layer ${index + 1} has an unsupported format.`);
       }
 
@@ -129,6 +140,8 @@ export async function POST(request: Request) {
         extension: extension as "jpg" | "jpeg" | "png" | "webp" | "mp4" | "webm" | "glb",
         mimeType: clean(layer.mimeType, 80) || "application/octet-stream",
         assetType,
+        alphaPacking,
+        fitToTarget,
         aspectRatio,
         transform: {
           position: { x, y, z: depth },
@@ -147,6 +160,13 @@ export async function POST(request: Request) {
     if (arMode === "spatial_layers") {
       if (spatialLayers.length === 0) {
         return NextResponse.json({ error: "Add at least one AR layer." }, { status: 400 });
+      }
+      if (creationFlow === "image-video" &&
+          (spatialLayers.length !== 1 || spatialLayers[0]?.assetType !== "video" || !spatialLayers[0]?.fitToTarget)) {
+        return NextResponse.json(
+          { error: "Publish requires one artwork image and one aligned animation video." },
+          { status: 400 },
+        );
       }
       const videoCount = spatialLayers.filter((layer) => layer.assetType === "video").length;
       const modelCount = spatialLayers.filter((layer) => layer.assetType === "model").length;

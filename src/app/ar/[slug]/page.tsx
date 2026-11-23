@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { buildArtworkOverlay } from "@/features/ar-experience/application/build-artwork-overlay";
 import { ArViewer } from "@/features/ar-experience/presentation/components/ar-viewer";
-import { createArtworkServices } from "@/features/artwork/infrastructure/supabase/artwork-services";
+import { createArtworkServices } from "@/features/artwork/infrastructure/local/artwork-services";
 
 export const dynamic = "force-dynamic";
 

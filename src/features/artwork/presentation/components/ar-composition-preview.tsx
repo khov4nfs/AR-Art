@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "@/context/LanguageContext";
 import * as THREE from "three";
 
 import type { ArOverlay, ArSceneLayer } from "@/features/ar-experience/domain/ar-experience";
@@ -8,6 +9,7 @@ import { ThreeArOverlayScene } from "@/features/ar-experience/infrastructure/thr
 import type { ArtworkArMode } from "@/features/artwork/domain/artwork";
 import type { ArtworkCreateFormValues } from "@/features/artwork/domain/artwork-create-form-schema";
 import { readImageAspectRatio } from "@/features/artwork/presentation/lib/read-image-aspect-ratio";
+import { isPackedAlphaVideoName } from "@/features/artwork/domain/original-video";
 import { readVideoAspectRatio } from "@/features/artwork/presentation/lib/read-video-aspect-ratio";
 
 interface ArCompositionPreviewProps {
@@ -37,6 +39,7 @@ export function ArCompositionPreview({
   overlayVideo,
   spatialLayers,
 }: ArCompositionPreviewProps) {
+  const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   const [previewError, setPreviewError] = useState(false);
 
@@ -109,7 +112,7 @@ export function ArCompositionPreview({
           if (isModel(layer.file)) return { ...base, type: "model", url };
           const aspectRatio = (await layerAspectRatio(layer.file)) ?? 1;
           if (isVideo(layer.file)) {
-            return { ...base, type: "video", url, aspectRatio, transparent: true };
+            return { ...base, type: "video", url, aspectRatio, transparent: true, fitToTarget: true, alphaPacking: isPackedAlphaVideoName(layer.file.name) ? "side-by-side" : undefined };
           }
           return { ...base, type: "image", url, aspectRatio };
         }),
@@ -209,7 +212,7 @@ export function ArCompositionPreview({
     <div ref={containerRef} className="absolute inset-0 bg-[#050507]">
       {previewError ? (
         <div className="absolute inset-0 flex items-center justify-center px-8 text-center text-xs leading-5 text-white/35">
-          This asset cannot be previewed here. You can still save it and test it in AR.
+          {t("ar.create.previewError")}
         </div>
       ) : null}
     </div>

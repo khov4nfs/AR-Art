@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, LayoutDashboard, LogIn, Plus, ScanLine } from "lucide-react";
 import * as THREE from "three";
 
-import { getCurrentCollectionUser } from "@/features/collection/infrastructure/supabase/collection-repository";
+import { getCurrentCollectionUser } from "@/features/collection/infrastructure/local/collection-repository";
 
 type ArtworkPalette = {
   a: string;
@@ -144,6 +144,7 @@ function addArtworkFrame(
 export function ImmersiveArtExperience() {
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [canManageAr, setCanManageAr] = useState(false);
   const [authState, setAuthState] = useState<
     "checking" | "authenticated" | "anonymous"
   >("checking");
@@ -163,6 +164,7 @@ export function ImmersiveArtExperience() {
       .then((user) => {
         if (!active) return;
         setAuthState(user ? "authenticated" : "anonymous");
+        setCanManageAr(user?.role === "SUPER_ADMIN" || user?.role === "CONTENT_EDITOR");
       })
       .catch(() => {
         if (active) setAuthState("anonymous");
@@ -644,9 +646,9 @@ export function ImmersiveArtExperience() {
             </Link>
           )}
 
-          {authState === "authenticated" && (
+          {authState === "authenticated" && canManageAr && (
             <Link
-              href="/studio"
+              href="/admin/ar"
               className="group flex h-11 items-center gap-2 rounded-full border border-white/12 bg-black/35 px-4 text-xs font-medium tracking-[0.12em] text-white/80 backdrop-blur-xl transition duration-300 hover:border-white/28 hover:bg-white/[0.08] hover:text-white"
             >
               <LayoutDashboard className="size-4" aria-hidden="true" />

@@ -38,6 +38,8 @@ export type ArSceneLayer =
       url: string;
       aspectRatio: number;
       transparent?: boolean;
+      alphaPacking?: "side-by-side";
+      fitToTarget?: boolean;
     })
   | (ArSceneLayerBase & {
       type: "model";
@@ -78,15 +80,22 @@ export type ArOverlay =
     }
   | { kind: "procedural" };
 
-export interface ArExperienceConfig {
+export interface SingleArExperienceConfig {
   targetUrl: string;
   targetIndex: number;
   overlay: ArOverlay;
 }
 
+export interface MultiArExperienceConfig {
+  targetUrl: string;
+  targets: Array<{ index: number; overlay: ArOverlay }>;
+}
+
+export type ArExperienceConfig = SingleArExperienceConfig | MultiArExperienceConfig;
+
 export interface ArExperienceCallbacks {
   onScanning(): void;
-  onTargetFound(): void;
-  onTargetLost(): void;
+  onTargetFound(targetIndex: number): void;
+  onTargetLost(targetIndex: number): void;
   onError(error: Error): void;
 }

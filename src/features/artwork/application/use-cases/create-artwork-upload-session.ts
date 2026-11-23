@@ -12,6 +12,8 @@ export interface SpatialUploadInput {
   extension: "jpg" | "jpeg" | "png" | "webp" | "mp4" | "webm" | "glb";
   mimeType: string;
   assetType: ArtworkArAssetType;
+  alphaPacking?: "side-by-side";
+  fitToTarget?: boolean;
   aspectRatio?: number;
   transform: {
     position: { x: number; y: number; z: number };
@@ -89,6 +91,8 @@ export class CreateArtworkUploadSession {
               assetPath,
               mimeType: layer.mimeType,
               aspectRatio: layer.aspectRatio,
+              alphaPacking: layer.alphaPacking,
+              fitToTarget: layer.fitToTarget,
               transform: layer.transform,
               animation: layer.animation,
               blendMode: layer.blendMode,
@@ -122,6 +126,8 @@ export class CreateArtworkUploadSession {
           mimeType: layer.mimeType,
           metadata: {
             aspectRatio: layer.aspectRatio ?? null,
+            alphaPacking: layer.alphaPacking ?? null,
+            fitToTarget: layer.fitToTarget ?? null,
             transform: layer.transform,
             animation: layer.animation,
             blendMode: layer.blendMode,
