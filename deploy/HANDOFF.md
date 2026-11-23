@@ -7,7 +7,7 @@ The same Next.js service serves EVERIE commerce, administration and AR at
 uses the existing signed HttpOnly everie_session cookie, its original
 SESSION_SECRET and the existing EVERIE CMS user store. There is no
 separate AR login, user database, or Supabase runtime dependency.
-Legacy /ar-login links redirect to EVERIE /login.
+The legacy /ar-login page has been removed and returns 404; use EVERIE /login.
 
 Fogewise demo and EVERIE production are different hosts with separate
 private data and cookies. Never move Fogewise demo credentials, sessions,
