@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/atoms/button";
+import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
@@ -35,6 +36,7 @@ export function EditArtworkButton({
   description,
   status,
 }: EditArtworkButtonProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const [canEdit, setCanEdit] = useState(false);
   const [open, setOpen] = useState(false);
@@ -105,7 +107,7 @@ export function EditArtworkButton({
         className="h-12 border-white/12 bg-white/[0.025] px-5 text-xs font-medium uppercase tracking-[0.12em] text-white/58 hover:border-white/25 hover:bg-white/[0.045] hover:text-white"
       >
         <Pencil className="size-4" aria-hidden="true" />
-        Edit
+        {t("ar.common.edit")}
       </Button>
 
       <Modal
@@ -121,7 +123,7 @@ export function EditArtworkButton({
               onClick={() => setOpen(false)}
               className="border-white/10 bg-transparent text-white/55 hover:bg-white/[0.06] hover:text-white"
             >
-              Cancel
+              {t("ar.common.cancel")}
             </Button>
             <Button
               type="submit"
@@ -134,14 +136,14 @@ export function EditArtworkButton({
               ) : (
                 <Check className="size-4" />
               )}
-              Save changes
+              {t("ar.manager.save")}
             </Button>
           </div>
         }
       >
         <form id="product-editor-form" onSubmit={submit} className="space-y-5">
           <div className="grid gap-2">
-            <Label htmlFor="edit-product-title" className="text-white/68">Product name</Label>
+            <Label htmlFor="edit-product-title" className="text-white/68">{t("ar.manager.productName")}</Label>
             <Input
               id="edit-product-title"
               className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
@@ -151,7 +153,7 @@ export function EditArtworkButton({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="edit-product-artist" className="text-white/68">Creator</Label>
+            <Label htmlFor="edit-product-artist" className="text-white/68">{t("ar.manager.creator")}</Label>
             <Input
               id="edit-product-artist"
               className="h-12 rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
@@ -161,7 +163,7 @@ export function EditArtworkButton({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="edit-product-description" className="text-white/68">Description</Label>
+            <Label htmlFor="edit-product-description" className="text-white/68">{t("ar.manager.description")}</Label>
             <Textarea
               id="edit-product-description"
               className="rounded-none border-x-0 border-t-0 border-b-white/14 bg-transparent px-0 text-white focus-visible:border-white/42 focus-visible:ring-0"
@@ -171,7 +173,7 @@ export function EditArtworkButton({
           </div>
 
           <div>
-            <Label className="text-white/68">Visibility</Label>
+            <Label className="text-white/68">{t("ar.manager.visibility")}</Label>
             <div className="mt-2 flex gap-6">
               <button
                 type="button"
@@ -182,7 +184,7 @@ export function EditArtworkButton({
                     : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
-                Draft
+                {t("ar.manager.draft")}
               </button>
               <button
                 type="button"
@@ -193,7 +195,7 @@ export function EditArtworkButton({
                     : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
-                Live
+                {t("ar.studio.live")}
               </button>
             </div>
           </div>

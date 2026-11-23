@@ -263,7 +263,7 @@ export default function Header({
                 </div>
               );
             })}
-            <Link href="/ar" title="Trải nghiệm AR" className="hidden xl:inline-flex shrink-0 items-center whitespace-nowrap border border-[#C5A880] px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880] transition hover:bg-[#C5A880] hover:text-black">{mounted && isAuthenticated ? "AR" : "Trải nghiệm AR"}</Link>
+            <Link href="/ar" title={t("ar.nav.experience")} className="hidden xl:inline-flex shrink-0 items-center whitespace-nowrap border border-[#C5A880] px-3 py-2 text-[10px] font-semibold uppercase tracking-widest text-[#8C6D46] dark:text-[#C5A880] transition hover:bg-[#C5A880] hover:text-black">{mounted && isAuthenticated ? "AR" : t("ar.nav.experience")}</Link>
           </nav>
 
           {/* RIGHT SIDE: Smaller horizontal gaps keep lookup clear of the AR CTA at xl. */}

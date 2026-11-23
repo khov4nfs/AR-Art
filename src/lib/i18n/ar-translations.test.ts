@@ -1,0 +1,71 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { test } from "node:test";
+
+import { arTranslations } from "./ar-translations.ts";
+
+const vi = arTranslations.vi;
+const en = arTranslations.en;
+
+test("every AR copy key has nonempty VN and EN variants", () => {
+  assert.deepEqual(Object.keys(vi).sort(), Object.keys(en).sort());
+  for (const key of Object.keys(vi)) {
+    assert.match(key, /^ar\.[a-zA-Z]+\./);
+    assert.ok(vi[key].trim(), key);
+    assert.ok(en[key].trim(), key);
+    const vars = (value: string) => [...value.matchAll(/\{([a-zA-Z]+)\}/g)].map(x => x[1]).sort();
+    assert.deepEqual(vars(vi[key]), vars(en[key]), key + " has mismatched placeholders");
+  }
+});
+
+test("AR main buttons, navigation and scanner react to global language", () => {
+  const keys = [
+    "ar.nav.experience", "ar.nav.scan", "ar.nav.gallery",
+    "ar.gallery.openCamera", "ar.scanner.title", "ar.scanner.openCamera",
+    "ar.collection.headingPrefix", "ar.studio.products", "ar.create.uploadImage",
+  ];
+  for (const key of keys) {
+    assert.ok(vi[key]);
+    assert.ok(en[key]);
+    assert.notEqual(vi[key], en[key], key);
+  }
+  assert.equal(en["ar.scanner.preparing"].replace("{progress}", "42"), "Preparing targets · 42%");
+  assert.equal(vi["ar.scanner.preparing"].replace("{progress}", "42"), "Đang chuẩn bị nhận diện · 42%");
+});
+
+test("all AR translation keys referenced directly by UI are defined", () => {
+  const files = [
+    "src/app/(storefront)/page.tsx",
+    "src/app/gallery/page.tsx",
+    "src/app/art/[slug]/page.tsx",
+    "src/app/collection/page.tsx",
+    "src/app/admin/ar/page.tsx",
+    "src/components/everie-ar/everie-ar-header.tsx",
+    "src/components/everie-ar/ar-language-switcher.tsx",
+    "src/components/hanoia/Header.tsx",
+    "src/components/hanoia/MobileMenu.tsx",
+    "src/components/hanoia/ProductDetailView.tsx",
+    "src/features/ar-experience/presentation/components/universal-ar-viewer.tsx",
+    "src/features/ar-experience/presentation/components/ar-viewer.tsx",
+    "src/features/gallery/presentation/components/gallery-explorer.tsx",
+    "src/features/collection/presentation/components/collection-grid.tsx",
+    "src/features/studio/presentation/components/studio-app.tsx",
+    "src/features/studio/presentation/components/product-manager-modal.tsx",
+    "src/features/artwork/presentation/components/artwork-create-form.tsx",
+    "src/features/artwork/presentation/components/artwork-create-modal.tsx",
+    "src/features/auth/presentation/components/protected-create-page.tsx",
+    "src/features/artwork/presentation/components/artwork-ar-qr-code.tsx",
+    "src/features/artwork/presentation/components/ar-composition-preview.tsx",
+    "src/features/artwork/presentation/components/edit-artwork-button.tsx",
+    "src/features/artwork/presentation/components/share-artwork-button.tsx",
+  ];
+  for (const relative of files) {
+    const source = readFileSync(path.resolve(process.cwd(), relative), "utf8");
+    const keys = source.matchAll(/["'](ar\.[a-zA-Z][a-zA-Z0-9.]*[a-zA-Z0-9])["']/g);
+    for (const [, key] of keys) {
+      assert.ok(key in vi, relative + ": " + key + " missing vi");
+      assert.ok(key in en, relative + ": " + key + " missing en");
+    }
+  }
+});

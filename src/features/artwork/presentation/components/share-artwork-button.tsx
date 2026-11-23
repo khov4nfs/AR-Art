@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, ImageDown, LoaderCircle, Share2, TriangleAlert } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface ShareArtworkButtonProps {
   title: string;
@@ -36,6 +37,8 @@ export function ShareArtworkButton({
   text,
   imageUrl,
 }: ShareArtworkButtonProps) {
+  const { t } = useLanguage();
+  const shareText = text || t("ar.art.shareText", { title });
   const [feedback, setFeedback] = useState<ActionFeedback>(null);
   const [sharingImage, setSharingImage] = useState(false);
   const feedbackTimer = useRef<number | null>(null);
@@ -68,7 +71,7 @@ export function ShareArtworkButton({
     const url = window.location.href;
     try {
       if (navigator.share) {
-        await navigator.share({ title, text, url });
+        await navigator.share({ title, text: shareText, url });
         showFeedback({ action: "page", state: "success" });
         return;
       }
@@ -95,7 +98,7 @@ export function ShareArtworkButton({
       });
 
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ title, text, files: [file] });
+        await navigator.share({ title, text: shareText, files: [file] });
         showFeedback({ action: "image", state: "success" });
         return;
       }
@@ -126,17 +129,17 @@ export function ShareArtworkButton({
     <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
       <button type="button" onClick={() => void copyLink()} className={actionClass}>
         {linkFeedback?.state === "success" ? <Check className="size-3.5" /> : linkFeedback?.state === "error" ? <TriangleAlert className="size-3.5" /> : <Copy className="size-3.5" />}
-        {linkFeedback?.state === "success" ? "Copied" : linkFeedback?.state === "error" ? "Try again" : "Copy link"}
+        {linkFeedback?.state === "success" ? t("ar.create.copied") : linkFeedback?.state === "error" ? t("ar.common.retry") : t("ar.create.copy")}
       </button>
 
       <button type="button" onClick={() => void sharePage()} className={actionClass}>
         {pageFeedback?.state === "success" || pageFeedback?.state === "saved" ? <Check className="size-3.5" /> : pageFeedback?.state === "error" ? <TriangleAlert className="size-3.5" /> : <Share2 className="size-3.5" />}
-        {pageFeedback?.state === "success" ? "Shared" : pageFeedback?.state === "saved" ? "Link copied" : pageFeedback?.state === "error" ? "Try again" : "Share page"}
+        {pageFeedback?.state === "success" ? t("ar.share.shared") : pageFeedback?.state === "saved" ? t("ar.share.linkCopied") : pageFeedback?.state === "error" ? t("ar.common.retry") : t("ar.share.page")}
       </button>
 
       <button type="button" disabled={sharingImage} onClick={() => void shareImage()} className={actionClass}>
         {sharingImage ? <LoaderCircle className="size-3.5 animate-spin" /> : imageFeedback?.state === "success" || imageFeedback?.state === "saved" ? <Check className="size-3.5" /> : imageFeedback?.state === "error" ? <TriangleAlert className="size-3.5" /> : <ImageDown className="size-3.5" />}
-        {sharingImage ? "Preparing…" : imageFeedback?.state === "success" ? "Shared" : imageFeedback?.state === "saved" ? "Image saved" : imageFeedback?.state === "error" ? "Try again" : "Share image"}
+        {sharingImage ? t("ar.share.preparing") : imageFeedback?.state === "success" ? t("ar.share.shared") : imageFeedback?.state === "saved" ? t("ar.share.imageSaved") : imageFeedback?.state === "error" ? t("ar.common.retry") : t("ar.share.image")}
       </button>
     </div>
   );

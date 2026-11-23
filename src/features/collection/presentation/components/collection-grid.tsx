@@ -8,6 +8,7 @@ import { ArrowUpRight, LoaderCircle, LogOut, ScanLine, Trash2 } from "lucide-rea
 import { AmbientDivider } from "@/components/atoms/ambient-divider";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 import {
   getCurrentCollectionUser,
   listCollectedArtworkIds,
@@ -21,6 +22,7 @@ interface CollectionGridProps {
 export function CollectionGrid({ artworks }: CollectionGridProps) {
   const router = useRouter();
   const { logout } = useAuth();
+  const { t } = useLanguage();
   const [collectedArtworkIds, setCollectedArtworkIds] = useState<string[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +48,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
         if (active) setCollectedArtworkIds(artworkIds);
       } catch (cause) {
         if (active) {
-          setError(cause instanceof Error ? cause.message : "Unable to load your collection.");
+          setError(cause instanceof Error ? cause.message : "ar.collection.loadError");
         }
       } finally {
         if (active) setLoading(false);
@@ -80,7 +82,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
       await removeCollectedArtwork(artworkId);
       setCollectedArtworkIds((current) => current.filter((id) => id !== artworkId));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to remove this work.");
+      setError(cause instanceof Error ? cause.message : "ar.collection.removeError");
     } finally {
       setRemovingId(null);
     }
@@ -89,7 +91,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
   if (loading) {
     return (
       <div className="py-10 text-xs uppercase tracking-[0.16em] text-white/30">
-        Loading your collection…
+        {t("ar.collection.loading")}
       </div>
     );
   }
@@ -100,13 +102,13 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
         <div className="max-w-2xl">
           <ScanLine className="size-5 text-white/30" aria-hidden="true" />
           <h2 className="mt-6 font-serif text-5xl leading-[0.95] tracking-[-0.045em] sm:text-6xl">
-            Sign in to keep<br /><span className="text-amber-100 italic">what you discover.</span>
+            {t("ar.collection.signInTitle")}<br /><span className="text-amber-100 italic">{t("ar.collection.signInEmphasis")}</span>
           </h2>
           <Link
             href="/login?next=%2Fcollection"
             className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-amber-100"
           >
-            Sign in <ArrowUpRight className="size-4" />
+            {t("ar.common.signIn")} <ArrowUpRight className="size-4" />
           </Link>
         </div>
       </section>
@@ -117,7 +119,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
     <div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-[5px] bg-white/[0.018] px-4 py-4">
         <div className="flex items-baseline gap-4">
-          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">Signed in</span>
+          <span className="text-[0.62rem] uppercase tracking-[0.18em] text-white/28">{t("ar.collection.signedIn")}</span>
           <span className="text-sm text-white/58">{userEmail}</span>
         </div>
         <button
@@ -125,14 +127,14 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
           onClick={() => void signOut()}
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-white/38 transition hover:text-white"
         >
-          <LogOut className="size-3.5" /> Sign out
+          <LogOut className="size-3.5" /> {t("ar.common.signOut")}
         </button>
       </div>
 
       <AmbientDivider compact className="mb-7" />
 
       {error ? (
-        <div className="mb-8 rounded-[5px] bg-rose-300/[0.035] px-4 py-3 text-sm text-rose-200/80">{error}</div>
+        <div className="mb-8 rounded-[5px] bg-rose-300/[0.035] px-4 py-3 text-sm text-rose-200/80">{error.startsWith("ar.") ? t(error) : error}</div>
       ) : null}
 
       {collectedArtworks.length > 0 ? (
@@ -173,7 +175,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
                 ) : (
                   <Trash2 className="size-3.5" />
                 )}
-                {removingId === artwork.id ? "Removing…" : "Remove from collection"}
+                {t(removingId === artwork.id ? "ar.collection.removing" : "ar.collection.remove")}
               </button>
             </article>
           ))}
@@ -183,9 +185,9 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
           <div className="flex size-14 items-center justify-center rounded-full bg-white/[0.035] text-white/30">
             <ScanLine className="size-6" />
           </div>
-          <h2 className="mt-6 font-serif text-4xl tracking-[-0.035em]">Nothing collected yet.</h2>
+          <h2 className="mt-6 font-serif text-4xl tracking-[-0.035em]">{t("ar.collection.empty")}</h2>
           <p className="mt-3 max-w-md text-sm leading-6 text-white/38">
-            Open a published work in AR and point the camera at the artwork. Everie adds it here only when the target is actually recognized.
+            {t("ar.collection.emptyDesc")}
           </p>
         </section>
       )}

@@ -16,6 +16,7 @@ import { useEffect, useReducer, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/atoms/button";
+import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/atoms/input";
 import { Label } from "@/components/atoms/label";
 import { Textarea } from "@/components/atoms/textarea";
@@ -35,10 +36,10 @@ function deleteReducer(_state: DeleteState, action: DeleteAction): DeleteState {
   return { confirming: false, deleting: false };
 }
 
-function arModeLabel(mode: PublishedArtwork["arMode"]) {
-  if (mode === "transparent_motion") return "Transparent motion";
-  if (mode === "spatial_layers") return "Layered AR";
-  return "Animated artwork";
+function arModeLabel(mode: PublishedArtwork["arMode"], t: (key: string) => string) {
+  if (mode === "transparent_motion") return t("ar.studio.modeTransparent");
+  if (mode === "spatial_layers") return t("ar.studio.modeLayers");
+  return t("ar.studio.modeAnimated");
 }
 
 async function authHeaders() {
@@ -57,6 +58,7 @@ export function ProductManagerModal({
   onSaved: (product: PublishedArtwork) => void;
   onDeleted: (productId: string) => void;
 }) {
+  const { t } = useLanguage();
   const [deleteState, dispatchDelete] = useReducer(deleteReducer, {
     confirming: false,
     deleting: false,
@@ -204,7 +206,7 @@ export function ProductManagerModal({
               ) : (
                 <Trash2 className="size-4" />
               )}
-              {deleteState.confirming ? "Confirm delete" : "Delete"}
+              {t(deleteState.confirming ? "ar.manager.confirm" : "ar.manager.delete")}
             </Button>
             {deleteState.confirming && !deleteState.deleting ? (
               <button
@@ -212,7 +214,7 @@ export function ProductManagerModal({
                 onClick={() => dispatchDelete("cancel")}
                 className="text-xs text-white/40 transition hover:text-white"
               >
-                Cancel
+                {t("ar.common.cancel")}
               </button>
             ) : null}
           </div>
@@ -224,7 +226,7 @@ export function ProductManagerModal({
               onClick={onClose}
               className="px-3 text-white/50 hover:bg-transparent hover:text-white"
             >
-              Close
+              {t("ar.common.close")}
             </Button>
             <Button
               type="submit"
@@ -237,7 +239,7 @@ export function ProductManagerModal({
               ) : (
                 <Check className="size-4" />
               )}
-              Save changes
+              {t("ar.manager.save")}
             </Button>
           </div>
         </div>
@@ -247,7 +249,7 @@ export function ProductManagerModal({
         <form id="studio-product-manager-form" onSubmit={submit} className="space-y-7">
           <div className="grid gap-2">
             <Label htmlFor="manage-product-title" className="text-white/68">
-              Product name
+              {t("ar.manager.productName")}
             </Label>
             <Input
               id="manage-product-title"
@@ -259,7 +261,7 @@ export function ProductManagerModal({
 
           <div className="grid gap-2">
             <Label htmlFor="manage-product-artist" className="text-white/68">
-              Creator
+              {t("ar.manager.creator")}
             </Label>
             <Input
               id="manage-product-artist"
@@ -273,7 +275,7 @@ export function ProductManagerModal({
 
           <div className="grid gap-2">
             <Label htmlFor="manage-product-description" className="text-white/68">
-              Description
+              {t("ar.manager.description")}
             </Label>
             <Textarea
               id="manage-product-description"
@@ -287,7 +289,7 @@ export function ProductManagerModal({
           </div>
 
           <div>
-            <Label className="text-white/68">Visibility</Label>
+            <Label className="text-white/68">{t("ar.manager.visibility")}</Label>
             <div className="mt-2 flex gap-6">
               <button
                 type="button"
@@ -300,7 +302,7 @@ export function ProductManagerModal({
                     : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
-                Draft
+                {t("ar.manager.draft")}
               </button>
               <button
                 type="button"
@@ -313,7 +315,7 @@ export function ProductManagerModal({
                     : "text-white/38 after:scale-x-0 after:bg-white hover:text-white/72"
                 }`}
               >
-                Live
+                {t("ar.studio.live")}
               </button>
             </div>
           </div>
@@ -327,22 +329,22 @@ export function ProductManagerModal({
           <div className="flex items-center justify-between gap-4 pb-2">
             <div>
               <p className="text-[0.62rem] uppercase tracking-[0.16em] text-white/28">
-                Distribution
+                {t("ar.manager.distribution")}
               </p>
               <p className="mt-1 text-sm text-white/58">
-                {product.status === "published" ? "Public QR and AR access" : "Private until published"} · {arModeLabel(product.arMode)}
+                {t(product.status === "published" ? "ar.manager.public" : "ar.manager.private")} · {arModeLabel(product.arMode, t)}
               </p>
             </div>
             <span className={`inline-flex items-center gap-2 text-[0.58rem] uppercase tracking-[0.16em] ${product.status === "published" ? "text-emerald-100/75" : "text-white/42"}`}>
               <span className={`size-1.5 rounded-full ${product.status === "published" ? "bg-emerald-200" : "bg-white/35"}`} />
-              {product.status === "published" ? "Live" : "Draft"}
+              {t(product.status === "published" ? "ar.studio.live" : "ar.manager.draft")}
             </span>
           </div>
 
           {product.status === "published" && publicPath ? (
             <div className="pt-6">
               <p className="mb-6 max-w-md text-xs leading-5 text-white/38">
-                QR opens the AR camera directly. Collection is updated only after the artwork is recognized.
+                {t("ar.manager.qrHelp")}
               </p>
               {qrDataUrl ? (
                 <div className="mx-auto max-w-[13rem] rounded-[5px] bg-white p-3 shadow-[0_24px_70px_rgba(0,0,0,0.35)]">
@@ -360,9 +362,9 @@ export function ProductManagerModal({
               )}
 
               <div className="mt-6 space-y-4 rounded-[5px] bg-white/[0.018] p-4">
-                <p className="text-[0.55rem] uppercase tracking-[0.15em] text-white/24">Public artwork link · view only</p>
+                <p className="text-[0.55rem] uppercase tracking-[0.15em] text-white/24">{t("ar.manager.publicLink")}</p>
                 <p className="mt-1 break-all text-xs leading-5 text-white/42">{publicPath}</p>
-                <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-amber-100/38">QR destination · AR camera</p>
+                <p className="mt-3 text-[0.55rem] uppercase tracking-[0.15em] text-amber-100/38">{t("ar.manager.destination")}</p>
                 <p className="mt-1 break-all text-xs leading-5 text-white/42">{arPath}</p>
               </div>
               <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 pt-1">
@@ -373,7 +375,7 @@ export function ProductManagerModal({
                   className="h-9 px-0 text-xs uppercase tracking-[0.12em] text-white/52 hover:bg-transparent hover:text-white"
                 >
                   {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t("ar.create.copied") : t("ar.create.copy")}
                 </Button>
                 {qrDataUrl ? (
                   <a
@@ -381,7 +383,7 @@ export function ProductManagerModal({
                     download={`everie-${product.slug}-qr.png`}
                     className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                   >
-                    <Download className="size-4" /> Download QR
+                    <Download className="size-4" /> {t("ar.create.downloadQR")}
                   </a>
                 ) : null}
                 <a
@@ -390,7 +392,7 @@ export function ProductManagerModal({
                   rel="noreferrer"
                   className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                 >
-                  <ExternalLink className="size-4" /> Open work
+                  <ExternalLink className="size-4" /> {t("ar.create.openWork")}
                 </a>
                 <a
                   href={`/ar/${product.slug}`}
@@ -398,7 +400,7 @@ export function ProductManagerModal({
                   rel="noreferrer"
                   className="inline-flex h-9 items-center justify-center gap-2 text-xs uppercase tracking-[0.12em] text-white/52 transition hover:text-white"
                 >
-                  <ScanLine className="size-4" /> Open AR
+                  <ScanLine className="size-4" /> {t("ar.manager.openAr")}
                 </a>
               </div>
             </div>
@@ -406,10 +408,10 @@ export function ProductManagerModal({
             <div className="flex min-h-64 flex-col items-center justify-center px-6 text-center">
               <QrCode className="size-6 text-white/22" />
               <p className="mt-4 text-sm font-medium text-white/68">
-                Distribution unlocks when this product is live.
+                {t("ar.manager.distLocked")}
               </p>
               <p className="mt-2 max-w-xs text-xs leading-5 text-white/32">
-                Keep it private while you refine details, then switch Visibility to Live and save.
+                {t("ar.manager.distHelp")}
               </p>
             </div>
           )}

@@ -1,9 +1,11 @@
 import type { Language } from "@/context/LanguageContext";
+import { arTranslations } from "./ar-translations";
 
 export type TranslationDict = Record<string, string>;
 
 export const translations: Record<Language, TranslationDict> = {
   vi: {
+    ...arTranslations.vi,
     "cfg.loading": "Đang dựng mô hình 3D",
     "cfg.badge": "Render 3D · Men bóng",
     "cfg.explore": "Khám phá 360°",
@@ -492,6 +494,7 @@ export const translations: Record<Language, TranslationDict> = {
     "admin.lang": "Ngôn ngữ",
   },
   en: {
+    ...arTranslations.en,
     "cfg.loading": "Preparing 3D model",
     "cfg.badge": "3D Render · Gloss glaze",
     "cfg.explore": "Explore 360°",

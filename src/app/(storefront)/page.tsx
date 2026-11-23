@@ -4,6 +4,7 @@ import { getDatabase } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 import Header from "@/components/hanoia/Header";
+import { ArText } from "@/components/everie-ar/ar-text";
 import HeroSlider from "@/components/hanoia/HeroSlider";
 import BestSellerSection from "@/components/hanoia/BestSellerSection";
 import TopPicksSection from "@/components/hanoia/TopPicksSection";
@@ -111,17 +112,17 @@ export default async function Home() {
           <div className="mx-auto grid max-w-[1440px] gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#8C6D46] dark:text-[#C5A880]">EVERIE · Digital Atelier</p>
-              <h2 id="everie-ar-heading" className="mt-5 max-w-3xl font-serif text-4xl font-normal leading-tight md:text-6xl">Khi vẻ đẹp thủ công <span className="italic text-[#8C6D46] dark:text-[#C5A880]">chuyển động.</span></h2>
-              <p className="mt-6 max-w-xl text-sm leading-8 text-neutral-600 dark:text-neutral-400">Khám phá các tác phẩm EVERIE qua thực tế tăng cường: mở camera, hướng vào hình ảnh và xem lớp chuyển động bám theo tác phẩm ngay trong không gian của bạn.</p>
+              <h2 id="everie-ar-heading" className="mt-5 max-w-3xl font-serif text-4xl font-normal leading-tight md:text-6xl"><ArText id="ar.home.heading1" /> <span className="italic text-[#8C6D46] dark:text-[#C5A880]"><ArText id="ar.home.heading2" /></span></h2>
+              <p className="mt-6 max-w-xl text-sm leading-8 text-neutral-600 dark:text-neutral-400"><ArText id="ar.home.desc" /></p>
               <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/ar" className="inline-flex min-h-12 items-center gap-3 bg-[#111113] px-6 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#8C6D46] dark:bg-[#C5A880] dark:text-black"><ScanLine className="size-4" /> Mở camera AR</Link>
-                <Link href="/gallery" className="inline-flex min-h-12 items-center gap-2 border border-[#8C6D46] px-6 text-xs uppercase tracking-widest text-[#8C6D46] transition hover:bg-[#E8DFD1] dark:border-[#C5A880] dark:text-[#C5A880]">Thư viện AR <ArrowUpRight className="size-4" /></Link>
+                <Link href="/ar" className="inline-flex min-h-12 items-center gap-3 bg-[#111113] px-6 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#8C6D46] dark:bg-[#C5A880] dark:text-black"><ScanLine className="size-4" /> <ArText id="ar.gallery.openCamera" /></Link>
+                <Link href="/gallery" className="inline-flex min-h-12 items-center gap-2 border border-[#8C6D46] px-6 text-xs uppercase tracking-widest text-[#8C6D46] transition hover:bg-[#E8DFD1] dark:border-[#C5A880] dark:text-[#C5A880]"><ArText id="ar.nav.gallery" /> <ArrowUpRight className="size-4" /></Link>
               </div>
             </div>
             <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden border border-[#8C6D46]/30 bg-[#111113] p-12 text-white md:min-h-[400px]">
               <div className="absolute inset-8 border border-[#C5A880]/20" aria-hidden="true" />
               <div className="absolute inset-16 border border-[#C5A880]/10" aria-hidden="true" />
-              <div className="relative text-center"><ScanLine className="mx-auto size-20 text-[#C5A880]" strokeWidth={0.8} aria-hidden="true" /><p className="mt-7 font-serif text-3xl tracking-wide">ART IN MOTION</p><p className="mt-3 text-[10px] uppercase tracking-[0.28em] text-[#C5A880]">SCAN · DISCOVER · EXPERIENCE</p></div>
+              <div className="relative text-center"><ScanLine className="mx-auto size-20 text-[#C5A880]" strokeWidth={0.8} aria-hidden="true" /><p className="mt-7 font-serif text-3xl tracking-wide"><ArText id="ar.home.motion" /></p><p className="mt-3 text-[10px] uppercase tracking-[0.28em] text-[#C5A880]"><ArText id="ar.home.steps" /></p></div>
             </div>
           </div>
         </section>
