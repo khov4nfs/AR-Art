@@ -7,7 +7,7 @@ import { ArrowUpRight, LoaderCircle, LogOut, ScanLine, Trash2 } from "lucide-rea
 
 import { AmbientDivider } from "@/components/atoms/ambient-divider";
 import type { PublishedArtwork } from "@/features/artwork/domain/artwork";
-import { getSupabaseBrowserClient } from "@/features/artwork/infrastructure/supabase/supabase-clients";
+import { useAuth } from "@/context/AuthContext";
 import {
   getCurrentCollectionUser,
   listCollectedArtworkIds,
@@ -20,6 +20,7 @@ interface CollectionGridProps {
 
 export function CollectionGrid({ artworks }: CollectionGridProps) {
   const router = useRouter();
+  const { logout } = useAuth();
   const [collectedArtworkIds, setCollectedArtworkIds] = useState<string[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,9 +68,8 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
     .filter((artwork): artwork is PublishedArtwork => Boolean(artwork));
 
   async function signOut() {
-    const supabase = getSupabaseBrowserClient();
-    await supabase.auth.signOut();
-    router.replace("/ar-login?next=/collection");
+    await logout();
+    router.replace("/login?next=%2Fcollection");
     router.refresh();
   }
 
@@ -103,7 +103,7 @@ export function CollectionGrid({ artworks }: CollectionGridProps) {
             Sign in to keep<br /><span className="text-amber-100 italic">what you discover.</span>
           </h2>
           <Link
-            href="/ar-login?next=/collection"
+            href="/login?next=%2Fcollection"
             className="mt-9 inline-flex items-center gap-3 rounded-[4px] bg-white px-6 py-4 text-xs font-medium uppercase tracking-[0.14em] text-black transition hover:bg-amber-100"
           >
             Sign in <ArrowUpRight className="size-4" />

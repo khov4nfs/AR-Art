@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { AuthCallbackForwarder } from "@/features/auth/presentation/components/auth-callback-forwarder";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider, Language } from "@/context/LanguageContext";
 import { getDatabase } from "@/lib/store";
@@ -128,7 +127,6 @@ export default async function RootLayout({
         <ThemeProvider>
           <LanguageProvider initialLanguage={initialLanguage}>
             <AuthProvider>
-              <AuthCallbackForwarder />
               {children}
             </AuthProvider>
           </LanguageProvider>
