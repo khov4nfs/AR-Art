@@ -101,7 +101,6 @@ ENV HOSTNAME="0.0.0.0"
 
 # Copy production assets
 COPY --from=builder --chown=node:node /app/public ./public
-COPY --from=builder --chown=node:node /app/scripts/import-legacy-ar-backup.mjs ./scripts/import-legacy-ar-backup.mjs
 
 # Set the correct permissions for runtime writes
 RUN mkdir -p .next public/uploads data && chown -R node:node .next public/uploads data

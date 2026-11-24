@@ -78,27 +78,6 @@ serialized queue. Use a **single application writer** as the EVERIE CMS does.
 
 Product linking, storefront CMS and GLB configurator remain unchanged.
 
-### Supabase archives (no runtime dependency)
-
-Supabase SDK, runtime credentials, repository and deployment dependencies have
-been removed. Prior SQL and migrations are preserved under
-docs/legacy/ar-supabase/ only, outside active source.
-
-The existing remote Supabase project is **not deleted**. A backup containing
-one historical published work was written to the developer's private
-data/ar-artworks.bak-supabase-20261123.json, with three media files and SHA-256
-checksums under public/uploads/ar/. These assets are excluded from Git
-and Docker images. They must be copied to the VPS persistent volumes before
-the existing artwork can appear on the deployed site.
-
-After deploying the new image and copying both backup and media into the existing volumes, import in the single EVERIE container with:
-
-    docker exec everievn-web node scripts/import-legacy-ar-backup.mjs data/ar-artworks.bak-supabase-20261123.json
-
-The offline script verifies all SHA-256 checksums, does not overwrite existing
-artworks, and never assigns legacy Supabase Auth ownership to an EVERIE user
-without a separate verified claim process.
-
 ### Ready-to-run production handoff
 
 See [deploy/HANDOFF.md](deploy/HANDOFF.md) for the no-source-edit production
@@ -110,14 +89,12 @@ are preserved. Run ./deploy/production.sh check before deployment.
 
 1. Verify trusted SSH host key and access, then back up
    /opt/everievn/data and /opt/everievn/public/uploads.
-2. Copy the private AR archive and media to the existing VPS volume paths,
-   then run the offline importer, checking file counts and checksums.
-3. Keep the existing SESSION_SECRET and other EVERIE settings in the private
-   deploy/.env. No Supabase variables are necessary.
-4. Run docker compose --env-file deploy/.env -f deploy/docker-compose.vps.yml config --quiet.
-5. Build and deploy the single app container using existing vms_edge network
+2. Keep the existing SESSION_SECRET and other EVERIE settings in the private
+   deploy/.env.
+3. Run docker compose --env-file deploy/.env -f deploy/docker-compose.vps.yml config --quiet.
+4. Build and deploy the single app container using existing vms_edge network
    and original EVERIE volumes.
-6. Smoke-test shop, login/logout, Gallery, create/publish, Studio ownership,
+5. Smoke-test shop, login/logout, Gallery, create/publish, Studio ownership,
    collection/view counters and /uploads/ar/ on HTTP Range. Validate physical
    camera tracking and video sync in Safari iOS and Chrome Android.
 
