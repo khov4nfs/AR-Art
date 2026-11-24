@@ -42,6 +42,8 @@ next-env.d.ts
 # Local temp files
 temp/
 downloaded_drive_files/
+/bin/
+/tools/
 
 # local secrets / data backups
 data/.session-secret
