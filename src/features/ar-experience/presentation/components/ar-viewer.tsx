@@ -110,7 +110,7 @@ export function ArViewer({
   };
 
   return (
-    <main className="fixed inset-0 h-[100dvh] w-full overflow-hidden bg-black text-white">
+    <main className="ar-fullscreen-view fixed inset-0 h-[100dvh] w-full overflow-hidden bg-black text-white">
       <div
         ref={containerRef}
         className="absolute inset-0 isolate overflow-hidden bg-black [&>video]:!max-w-none [&>video]:!max-h-none [&>video]:!z-0 [&>video]:!opacity-100 [&>video]:!visible [&>canvas]:!z-[1] [&>canvas]:pointer-events-none [&>div]:!z-[2] [&>div]:pointer-events-none"

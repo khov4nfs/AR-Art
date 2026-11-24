@@ -35,6 +35,7 @@ export interface CreateUploadSessionInput {
   description: string;
   targetImageExtension: "jpg" | "jpeg" | "png" | "webp";
   targetAspectRatio: number;
+  targetImageHash?: string | null;
   arMode: ArtworkArMode;
   overlayExtension?: "mp4" | "webm";
   overlayAspectRatio?: number;
@@ -59,6 +60,13 @@ export class CreateArtworkUploadSession {
   ) {}
 
   async execute(input: CreateUploadSessionInput): Promise<ArtworkUploadSession> {
+    if (input.targetImageHash) {
+      const duplicate = await this.repository.findDuplicateTargetImage(input.targetImageHash);
+      if (duplicate) {
+        throw new Error("This target image is already used by another AR artwork. Each AR product requires a unique scan image.");
+      }
+    }
+
     const id = crypto.randomUUID();
     const suffix = id.slice(0, 8);
     const baseSlug = slugify(input.title) || "artwork";
@@ -110,6 +118,7 @@ export class CreateArtworkUploadSession {
       description: input.description,
       targetImagePath,
       targetFilePath,
+      targetImageHash: input.targetImageHash ?? null,
       overlayPath,
       overlayAspectRatio: input.overlayAspectRatio ?? null,
       arMode: input.arMode,

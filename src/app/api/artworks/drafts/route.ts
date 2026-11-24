@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     const artistName = clean(body.artistName, 120);
     const description = clean(body.description, 1200);
     const targetImageExtension = clean(body.targetImageExtension, 8).toLowerCase();
+    const targetImageHash = clean(body.targetImageHash, 64).toLowerCase() || null;
     const targetAspectRatio = finite(body.targetAspectRatio, 0.2, 5);
     const arMode = clean(body.arMode, 32) as ArtworkArMode;
     const creationFlow = clean(body.creationFlow, 32);
@@ -185,6 +186,7 @@ export async function POST(request: Request) {
       artistName,
       description,
       targetImageExtension: targetImageExtension as "jpg" | "jpeg" | "png" | "webp",
+      targetImageHash,
       targetAspectRatio,
       arMode,
       ...(arMode !== "spatial_layers"

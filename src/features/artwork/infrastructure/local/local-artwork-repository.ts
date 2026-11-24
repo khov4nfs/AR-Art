@@ -1,6 +1,7 @@
 import type { ArtworkRepository } from "@/features/artwork/application/ports/artwork-repository";
 import type { Artwork, CreateArtworkDraftInput, UpdateArtworkInput } from "@/features/artwork/domain/artwork";
 import { readArData, updateArData, type StoredArtwork } from "./ar-data";
+import { computeArMediaSha256 } from "./target-hash";
 
 export class LocalArtworkRepository implements ArtworkRepository {
   async createDraft(input: CreateArtworkDraftInput): Promise<Artwork> {
@@ -10,6 +11,7 @@ export class LocalArtworkRepository implements ArtworkRepository {
       title: input.title, artistName: input.artistName,
       description: input.description, status: "draft",
       targetImagePath: input.targetImagePath, targetFilePath: input.targetFilePath,
+      targetImageHash: input.targetImageHash ?? null,
       overlayPath: input.overlayPath, overlayType: input.overlayPath ? "video" : null,
       overlayAspectRatio: input.overlayAspectRatio, arMode: input.arMode, arConfig: input.arConfig,
       createdAt: now, publishedAt: null, viewCount: 0,
@@ -30,6 +32,39 @@ export class LocalArtworkRepository implements ArtworkRepository {
   }
   async findPublishedBySlug(slug: string): Promise<Artwork | null> {
     return (await readArData()).artworks.find(x => x.slug === slug && x.status === "published") ?? null;
+  }
+  async findDuplicateTargetImage(targetHash: string, excludeId?: string): Promise<Artwork | null> {
+    const data = await readArData();
+    for (const artwork of data.artworks) {
+      if (excludeId && artwork.id === excludeId) continue;
+      // Compare by stored hash if available
+      if (artwork.targetImageHash && artwork.targetImageHash === targetHash) {
+        return artwork;
+      }
+      // Or compute on the fly from the stored target image file
+      const fileHash = await computeArMediaSha256(artwork.targetImagePath);
+      if (fileHash && fileHash === targetHash) {
+        // Cache the computed hash
+        artwork.targetImageHash = fileHash;
+        return artwork;
+      }
+    }
+    return null;
+  }
+  async findDuplicateTargetForArtwork(artwork: Artwork): Promise<Artwork | null> {
+    let targetHash = artwork.targetImageHash;
+    if (!targetHash) {
+      targetHash = await computeArMediaSha256(artwork.targetImagePath);
+      if (targetHash) {
+        artwork.targetImageHash = targetHash;
+        await updateArData(data => {
+          const item = data.artworks.find(x => x.id === artwork.id);
+          if (item) item.targetImageHash = targetHash;
+        });
+      }
+    }
+    if (!targetHash) return null;
+    return this.findDuplicateTargetImage(targetHash, artwork.id);
   }
   async listPublished(): Promise<Artwork[]> {
     return (await readArData()).artworks.filter(x => x.status === "published")

@@ -1907,7 +1907,7 @@ html.route-entering .route-curtain-line {
   transform: translate(-50%, -50%) scaleX(1.35);
 }
 
-html.route-entering main {
+html.route-entering main:not(.ar-fullscreen-view) {
   animation: route-page-enter 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 

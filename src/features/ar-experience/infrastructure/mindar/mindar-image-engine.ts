@@ -19,7 +19,7 @@ type MindArRuntime = {
   scene: THREE.Scene;
   camera: THREE.Camera;
   video?: HTMLVideoElement;
-  cssRenderer?: { domElement: HTMLElement };
+  cssRenderer?: { domElement: HTMLElement; setSize?: (width: number, height: number) => void };
   addAnchor(index: number): MindArAnchor;
   start(): Promise<void>;
   stop(): Promise<void> | void;
@@ -115,6 +115,25 @@ export class MindArImageEngine implements ArEngine {
       const { renderer, scene, camera } = runtime;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+      // Synchronize container size to the renderer and CSS renderer immediately
+      // before camera start so canvas does not start with default 300x150 dimensions in the top-left corner.
+      if (container.clientWidth > 0 && container.clientHeight > 0) {
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        Object.assign(renderer.domElement.style, {
+          width: `${container.clientWidth}px`,
+          height: `${container.clientHeight}px`,
+        });
+        if (runtime.cssRenderer) {
+          runtime.cssRenderer.setSize?.(container.clientWidth, container.clientHeight);
+          if (runtime.cssRenderer.domElement) {
+            Object.assign(runtime.cssRenderer.domElement.style, {
+              width: `${container.clientWidth}px`,
+              height: `${container.clientHeight}px`,
+            });
+          }
+        }
+      }
+
       const anchors = new Map<number, MindArAnchor>();
       const ensureOverlay = (target: typeof targets[number]) => {
         if (this.runtime !== runtime || this.overlayScenes.has(target.index)) return;
@@ -191,6 +210,8 @@ export class MindArImageEngine implements ArEngine {
       }
 
       this.bindViewportSync(runtime, container);
+      // Execute resize immediately to ensure canvas and video conform to container viewport
+      runtime.resize();
       try {
         await cameraVideo.play();
       } catch {
