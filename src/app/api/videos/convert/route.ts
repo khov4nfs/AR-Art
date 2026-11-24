@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
 import { open, mkdir, readFile, readdir, rm, stat, statfs, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -21,8 +22,25 @@ export const runtime = "nodejs";
 const run = promisify(execFile);
 const root = path.join(tmpdir(), "ar-art-video-conversions");
 const sessionLifetimeMs = 30 * 60 * 1000;
-const ffmpeg = process.env.AR_ART_FFMPEG_PATH || "ffmpeg";
-const ffprobe = process.env.AR_ART_FFPROBE_PATH || "ffprobe";
+
+function resolveBinary(envVar: string | undefined, name: string): string {
+  if (envVar && existsSync(/*turbopackIgnore: true*/ envVar)) return envVar;
+  const exe = process.platform === "win32" ? `${name}.exe` : name;
+  const candidates = [
+    path.join(process.cwd(), "bin", exe),
+    path.join(process.cwd(), "tools", exe),
+    `/srv/apps/ar-art-tools/${name}`,
+    `/usr/local/bin/${name}`,
+    `/usr/bin/${name}`,
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) return candidate;
+  }
+  return envVar || name;
+}
+
+const ffmpeg = resolveBinary(process.env.AR_ART_FFMPEG_PATH, "ffmpeg");
+const ffprobe = resolveBinary(process.env.AR_ART_FFPROBE_PATH, "ffprobe");
 const VIDEO_CONVERTER_UNAVAILABLE = "Video conversion is unavailable on this server. Please try again later.";
 
 async function ensureVideoConverterReady() {
