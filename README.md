@@ -123,3 +123,19 @@ are preserved. Run ./deploy/production.sh check before deployment.
 
 Maintain a rollback image and a private backup. ffmpeg/ffprobe for source MOV
 conversion are included in the Docker runner. Before deployment, run npm run check.
+
+For the **Fogewise standalone systemd demo**, FFmpeg/FFprobe are *not* bundled
+by Next.js standalone output. Install the authenticated Ubuntu `ffmpeg` package
+on the host and verify both commands are reachable by the service account:
+
+```bash
+sudo apt-get update
+sudo apt-get install --no-install-recommends ffmpeg
+sudo -u ar-art-integrated ffprobe -version
+sudo -u ar-art-integrated ffmpeg -encoders | grep libx264
+```
+
+The AR video conversion endpoint now checks both tools **before** uploading the
+original MOV/MP4/WebM; without them it responds with a server-unavailable error
+instead of incorrectly reporting that the video is unreadable. Source limits
+remain 240 MB and 60 seconds; the finished AR MP4 must be at most 6 MB.

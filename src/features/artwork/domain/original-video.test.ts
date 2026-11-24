@@ -10,6 +10,7 @@ import {
   isPackedAlphaVideoName,
   trackingSampleTime,
 } from "./original-video.ts";
+import { isVideoConverterToolUnavailable } from "./video-converter-errors.ts";
 
 function original(name: string, type: string, size: number): File {
   return { name, type, size } as File;
@@ -46,4 +47,13 @@ test("packed alpha naming and settled tracking frame use the finished artwork", 
   assert.ok(trackingSampleTime(11.792) > 8);
   assert.ok(trackingSampleTime(11.792) < 9);
   assert.equal(trackingSampleTime(0), 0);
+});
+
+test("missing FFmpeg/FFprobe is a server dependency failure, not a corrupt MOV/MP4/WebM", () => {
+  assert.equal(isVideoConverterToolUnavailable(Object.assign(new Error("spawn ffprobe ENOENT"), { code: "ENOENT" })), true);
+  assert.equal(isVideoConverterToolUnavailable(Object.assign(new Error("spawn ffmpeg EACCES"), { code: "EACCES" })), true);
+  assert.equal(isVideoConverterToolUnavailable(Object.assign(new Error("spawn ffmpeg EPERM"), { code: "EPERM" })), true);
+  assert.equal(isVideoConverterToolUnavailable(Object.assign(new Error("invalid media"), { code: 1 })), false);
+  assert.equal(isVideoConverterToolUnavailable(new Error("invalid media")), false);
+  assert.equal(isVideoConverterToolUnavailable(null), false);
 });
