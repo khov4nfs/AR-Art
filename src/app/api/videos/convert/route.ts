@@ -13,6 +13,7 @@ import {
   conversionChunkCount,
 } from "@/features/artwork/domain/original-video";
 import { ARTWORK_UPLOAD_MAX_FILE_SIZE } from "@/features/artwork/domain/artwork-create-form-schema";
+import { isVideoConverterToolUnavailable } from "@/features/artwork/domain/video-converter-errors";
 import { getRequestUser } from "@/features/auth/infrastructure/local/request-user";
 
 export const runtime = "nodejs";
@@ -22,6 +23,21 @@ const root = path.join(tmpdir(), "ar-art-video-conversions");
 const sessionLifetimeMs = 30 * 60 * 1000;
 const ffmpeg = process.env.AR_ART_FFMPEG_PATH || "ffmpeg";
 const ffprobe = process.env.AR_ART_FFPROBE_PATH || "ffprobe";
+const VIDEO_CONVERTER_UNAVAILABLE = "Video conversion is unavailable on this server. Please try again later.";
+
+async function ensureVideoConverterReady() {
+  // Check before uploading up to 240 MB. Systemd/standalone deployments
+  // must include both binaries; Docker builds may ship them in the image.
+  try {
+    await Promise.all([
+      run(ffmpeg, ["-version"], { timeout: 5000, maxBuffer: 64 * 1024 }),
+      run(ffprobe, ["-version"], { timeout: 5000, maxBuffer: 64 * 1024 }),
+    ]);
+  } catch (error) {
+    console.error("AR video converter runtime unavailable:", isVideoConverterToolUnavailable(error) ? "binary missing or inaccessible" : "binary failed health check");
+    fail(VIDEO_CONVERTER_UNAVAILABLE, 503);
+  }
+}
 
 type Session = { owner: string; bytes: number; created: number };
 
@@ -129,7 +145,13 @@ async function convert(directory: string, byteCount: number) {
       { timeout: 12000, maxBuffer: 256 * 1024 },
     );
     probe = JSON.parse(result.stdout) as typeof probe;
-  } catch {
+  } catch (error) {
+    if (isVideoConverterToolUnavailable(error)) {
+      console.error("AR video converter ffprobe is missing or inaccessible.");
+      return fail(VIDEO_CONVERTER_UNAVAILABLE, 503);
+    }
+    // An unsupported or damaged source is different from missing FFprobe.
+    console.warn("AR video probe rejected the source:", error instanceof Error ? error.message.slice(0, 400) : "unknown probe error");
     return fail("Cannot read this MOV/MP4/WebM video.", 422);
   }
   const video = probe.streams?.[0];
@@ -163,7 +185,12 @@ async function convert(directory: string, byteCount: number) {
         "-threads", "2", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
         "-f", "mp4", output,
       ], { timeout: remaining, maxBuffer: 256 * 1024, killSignal: "SIGKILL" });
-    } catch {
+    } catch (error) {
+      if (isVideoConverterToolUnavailable(error)) {
+        console.error("AR video converter ffmpeg is missing or inaccessible.");
+        return fail(VIDEO_CONVERTER_UNAVAILABLE, 503);
+      }
+      console.warn("AR video encode rejected the source:", error instanceof Error ? error.message.slice(0, 400) : "unknown encode error");
       return fail("The server could not convert this video. Check the original file.", 422);
     }
     const size = (await stat(output)).size;
@@ -187,6 +214,7 @@ export async function POST(request: Request) {
       if (!Number.isSafeInteger(bytes) || bytes <= 0 || bytes > AR_VIDEO_MAX_SOURCE_SIZE) {
         fail("Original video must be between 1 byte and 240 MB.", 413);
       }
+      await ensureVideoConverterReady();
       await cleanupExpiredSessions();
       const active = (await readdir(root, { withFileTypes: true })).filter((entry) => entry.isDirectory());
       if (active.length >= 1) fail("Video converter is busy. Please try again shortly.", 429);

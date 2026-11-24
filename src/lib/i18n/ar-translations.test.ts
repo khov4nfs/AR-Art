@@ -200,3 +200,12 @@ test("AR create buttons stay in one row on mobile and preserve translations", ()
   assert.match(css, /white-space: normal;/);
   assert.match(css, /max-height: calc\(100dvh - 1rem\)/);
 });
+
+test("server converter outage is localized without blaming the uploaded video", () => {
+  const unavailable = "Video conversion is unavailable on this server. Please try again later.";
+  const viMessage = localizedArFormError(unavailable, "vi", (key) => vi[key], "ar.create.errorVideo");
+  const enMessage = localizedArFormError(unavailable, "en", (key) => en[key], "ar.create.errorVideo");
+  assert.equal(viMessage, vi["ar.create.converterUnavailable"]);
+  assert.equal(enMessage, en["ar.create.converterUnavailable"]);
+  assert.notEqual(viMessage, vi["ar.create.errorVideo"]);
+});
