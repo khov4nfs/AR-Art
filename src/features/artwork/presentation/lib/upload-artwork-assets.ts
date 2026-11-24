@@ -1,6 +1,6 @@
 import type { ArtworkUploadSession, SignedUploadSlot } from "@/features/artwork/domain/artwork";
 
-/** Upload to the same EVERIE VPS as the storefront, not to Supabase Storage. */
+/** Upload directly to EVERIE local storage. */
 async function upload(slot: SignedUploadSlot, body: File | Blob, contentType: string) {
   const response = await fetch("/api/artworks/uploads", {
     method: "POST",

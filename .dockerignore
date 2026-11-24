@@ -38,7 +38,7 @@ CLAUDE.md
 docs
 scripts/*
 !scripts/patch-mindar-three.mjs
-!scripts/import-legacy-ar-backup.mjs
+!scripts/postinstall.mjs
 
 # Docker files themselves (no need to copy into image)
 Dockerfile

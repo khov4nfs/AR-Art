@@ -6,8 +6,7 @@ The same Next.js service serves EVERIE commerce, administration and AR at
 /gallery, /ar, /create, /studio/products and /collection. Authentication
 uses the existing signed HttpOnly everie_session cookie, its original
 SESSION_SECRET and the existing EVERIE CMS user store. There is no
-separate AR login, user database, or Supabase runtime dependency.
-The legacy /ar-login page has been removed and returns 404; use EVERIE /login.
+separate AR login or user database; use EVERIE /login.
 
 Fogewise demo and EVERIE production are different hosts with separate
 private data and cookies. Never move Fogewise demo credentials, sessions,
@@ -95,22 +94,6 @@ To restore the previous application image (without changing CMS/media):
 
 A full data restore must be handled separately, after verifying checksums
 and obtaining approval. Rollback does not automatically replace private data.
-
-## Optional legacy artwork import
-
-The Supabase migration archive and associated media are private files,
-excluded from Git and Docker. To preserve the single historical artwork
-on production, copy data/ar-artworks.bak-supabase-20261123.json into the
-existing production data volume, and its three verified media objects into
-the uploads/ar directory, without overwriting existing data. Then run:
-
-~~~bash
-docker exec everievn-web node scripts/import-legacy-ar-backup.mjs \
-  data/ar-artworks.bak-supabase-20261123.json
-~~~
-
-The importer verifies file checksums and never silently assigns an old
-Supabase user to an unrelated EVERIE account by email.
 
 ## Acceptance checklist
 
