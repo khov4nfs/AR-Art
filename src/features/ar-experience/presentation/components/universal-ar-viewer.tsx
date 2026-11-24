@@ -126,7 +126,7 @@ export function UniversalArViewer({ artworks }: { artworks: ScannerArtwork[] }) 
   };
 
   return (
-    <main className="fixed inset-0 h-[100dvh] w-full overflow-hidden bg-[#050507] text-white">
+    <main className="ar-fullscreen-view fixed inset-0 h-[100dvh] w-full overflow-hidden bg-[#050507] text-white">
       <div ref={containerRef} className="absolute inset-0 isolate overflow-hidden bg-black [&>video]:!max-w-none [&>video]:!max-h-none [&>video]:!z-0 [&>video]:!opacity-100 [&>video]:!visible [&>canvas]:!z-[1] [&>canvas]:pointer-events-none [&>div]:!z-[2] [&>div]:pointer-events-none" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_32%,rgba(0,0,0,0.45))]" />
 

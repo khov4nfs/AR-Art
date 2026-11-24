@@ -10,6 +10,8 @@ export interface ArtworkRepository {
   createArAssets(inputs: ArtworkArAssetInput[]): Promise<void>;
   findById(id: string): Promise<Artwork | null>;
   findPublishedBySlug(slug: string): Promise<Artwork | null>;
+  findDuplicateTargetImage(targetHash: string, excludeId?: string): Promise<Artwork | null>;
+  findDuplicateTargetForArtwork(artwork: Artwork): Promise<Artwork | null>;
   listPublished(): Promise<Artwork[]>;
   listForOwner(ownerId: string): Promise<Artwork[]>;
   listAll(): Promise<Artwork[]>;

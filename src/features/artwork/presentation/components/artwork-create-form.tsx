@@ -35,6 +35,7 @@ import { convertVideoForAr } from "@/features/artwork/presentation/lib/convert-v
 import { ArCompositionPreview } from "@/features/artwork/presentation/components/ar-composition-preview";
 import { compileMindTarget } from "@/features/artwork/presentation/lib/compile-mind-target";
 import { extractImageTarget } from "@/features/artwork/presentation/lib/extract-image-target";
+import { computeBrowserFileSha256, validateTargetImageUniqueness } from "@/features/artwork/presentation/lib/image-hash";
 import { readImageAspectRatio } from "@/features/artwork/presentation/lib/read-image-aspect-ratio";
 import { readVideoAspectRatio } from "@/features/artwork/presentation/lib/read-video-aspect-ratio";
 import { uploadArtworkAssets } from "@/features/artwork/presentation/lib/upload-artwork-assets";
@@ -174,8 +175,16 @@ export function ArtworkCreateForm({
 
     // Tracking comes only from the uploaded artwork image, never from a video frame.
     void extractImageTarget(trackingReference)
-      .then((image) => {
+      .then(async (image) => {
         if (!active) return;
+        const hash = await computeBrowserFileSha256(image);
+        if (!active) return;
+        const validation = await validateTargetImageUniqueness(hash);
+        if (!active) return;
+        if (!validation.unique && validation.error) {
+          setTargetError(validation.error);
+          return;
+        }
         setValue("targetImage", image, { shouldDirty: true, shouldValidate: false });
       })
       .catch((error: unknown) => {
@@ -192,6 +201,7 @@ export function ArtworkCreateForm({
     values: ArtworkCreateFormValues,
     targetAspectRatio: number,
     layerAspectRatios: Array<number | undefined>,
+    targetImageHash?: string | null,
   ) {
     const authHeaders = await getAuthHeaders();
     const response = await fetch("/api/artworks/drafts", {
@@ -202,6 +212,7 @@ export function ArtworkCreateForm({
         artistName: values.artistName,
         description: "",
         targetImageExtension: fileExtension(values.targetImage),
+        targetImageHash,
         targetAspectRatio,
         arMode: "spatial_layers",
         creationFlow: "image-video",
@@ -277,10 +288,12 @@ export function ArtworkCreateForm({
       }
 
       dispatch({ type: "message", message: "ar.create.workflowUploadPrep" });
+      const targetHash = await computeBrowserFileSha256(values.targetImage);
       const session = await createSession(
         values,
         targetAspectRatio,
         layerAspectRatios,
+        targetHash,
       );
 
       dispatch({ type: "message", message: "ar.create.workflowUploading" });

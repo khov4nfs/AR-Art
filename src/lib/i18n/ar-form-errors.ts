@@ -13,6 +13,7 @@ const validationKeys: Record<string, string> = {
   "The animation must be MP4 or WebM (MOV is converted on Save).": "ar.create.validationVideoType",
   "The converted animation must be between 1 byte and 6 MB.": "ar.create.validationVideoSize",
   "Only one animation video is allowed.": "ar.create.validationVideoCount",
+  "This target image is already used by another AR artwork. Each AR product requires a unique scan image.": "ar.create.validationImageDuplicate",
   "Video conversion is unavailable on this server. Please try again later.": "ar.create.converterUnavailable",
 };
 

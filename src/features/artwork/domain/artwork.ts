@@ -52,6 +52,7 @@ export interface Artwork {
   status: ArtworkStatus;
   targetImagePath: string;
   targetFilePath: string;
+  targetImageHash?: string | null;
   overlayPath: string | null;
   overlayType: "video" | null;
   overlayAspectRatio: number | null;
@@ -79,6 +80,7 @@ export interface CreateArtworkDraftInput {
   description: string;
   targetImagePath: string;
   targetFilePath: string;
+  targetImageHash?: string | null;
   overlayPath: string | null;
   overlayAspectRatio: number | null;
   arMode: ArtworkArMode;
