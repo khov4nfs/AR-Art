@@ -44,6 +44,7 @@ temp/
 downloaded_drive_files/
 /bin/
 /tools/
+*.zip
 
 # local secrets / data backups
 data/.session-secret
